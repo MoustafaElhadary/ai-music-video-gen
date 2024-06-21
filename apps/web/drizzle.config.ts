@@ -4,8 +4,8 @@ import { env } from "@web/lib/env.mjs";
 export default {
   schema: "./lib/db/schema",
   out: "./lib/db/migrations",
-  driver: "pg",
+  dialect: "postgresql",
   dbCredentials: {
-    connectionString: env.DATABASE_URL,
+    url: env.DATABASE_URL,
   },
 } satisfies Config;

@@ -30,6 +30,7 @@ export const getUserAuth = async () => {
     return { session: null };
   }
 };
+
 export const checkAuth = async () => {
   const { userId } = auth();
   if (!userId) redirect("/sign-in");

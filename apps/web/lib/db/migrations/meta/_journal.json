@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1718302873487,
+      "tag": "0000_overconfident_famine",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1718303518185,
+      "tag": "0001_fast_thunderbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1718303862632,
+      "tag": "0002_quick_firedrake",
+      "breakpoints": true
+    }
+  ]
+}
