@@ -4,16 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "set NODE_ENV=production & next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx lib/db/migrate.ts",
-    "db:drop": "drizzle-kit drop",
-    "db:pull": "drizzle-kit introspect",
-    "db:studio": "drizzle-kit studio",
-    "db:check": "drizzle-kit check",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
   },
   "dependencies": {

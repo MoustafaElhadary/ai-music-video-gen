@@ -80,7 +80,7 @@ const SidebarLink = ({
         <div
           className={cn(
             "opacity-0 left-0 h-6 w-[4px] absolute rounded-r-lg bg-primary",
-            active ? "opacity-100" : ""
+            active ? "opacity-100" : "",
           )}
         />
         <link.icon className="h-3.5 mr-1" />

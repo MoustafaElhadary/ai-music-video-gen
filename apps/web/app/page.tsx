@@ -59,7 +59,7 @@ export default function LandingPage() {
   );
 }
 
-export function Header() {
+function Header() {
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center bg-neutral-950 z-100">
       <Link className="flex items-center justify-center" href="#">
@@ -88,7 +88,7 @@ export function Header() {
   );
 }
 
-export function WobbleCardDemo() {
+function WobbleCardDemo() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto w-full">
       <WobbleCard
@@ -129,7 +129,7 @@ export function WobbleCardDemo() {
   );
 }
 
-export function MeteorsDemo() {
+function MeteorsDemo() {
   return (
     <div className="">
       <div className=" w-full relative max-w-xs">
