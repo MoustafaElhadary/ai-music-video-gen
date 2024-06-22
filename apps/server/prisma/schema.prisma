@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+generator zod {
+  provider              = "zod-prisma"
+  output                = "./zod"
+  prismaJsonNullability = "true"
+  relationModel         = "true"
+  useDecimalJs          = "true"
+  modelCase             = "camelCase"
+  modelSuffix           = "Schema"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Book {
+  id        String   @id @default(cuid())
+  name      String
+  author    String
+  rating    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
