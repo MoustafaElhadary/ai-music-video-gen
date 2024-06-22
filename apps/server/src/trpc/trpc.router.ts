@@ -2,6 +2,7 @@ import { INestApplication, Injectable } from '@nestjs/common';
 import { BookRouter } from '@server/book/book.router';
 import { TrpcService } from '@server/trpc/trpc.service';
 import * as trpcExpress from '@trpc/server/adapters/express';
+import { createContext } from './context';
 
 @Injectable()
 export class TrpcRouter {
@@ -19,6 +20,7 @@ export class TrpcRouter {
       `/trpc`,
       trpcExpress.createExpressMiddleware({
         router: this.appRouter,
+        createContext,
       }),
     );
   }

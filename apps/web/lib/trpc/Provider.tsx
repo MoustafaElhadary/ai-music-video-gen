@@ -1,13 +1,12 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
+import { loggerLink, httpBatchLink } from "@trpc/client";
 import React, { useState } from "react";
 
 import { trpc } from "./client";
 import { TRPC_URL } from "./utils";
-
-import SuperJSON from "superjson";
+import { useAuth, } from "@clerk/nextjs";
 
 export default function TrpcProvider({
   children,
@@ -16,6 +15,8 @@ export default function TrpcProvider({
   children: React.ReactNode;
   cookies: string;
 }) {
+  const { getToken } = useAuth();
+
   const [queryClient] = useState(() => new QueryClient({}));
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -25,17 +26,30 @@ export default function TrpcProvider({
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        unstable_httpBatchStreamLink({
+        httpBatchLink({
           url: TRPC_URL,
-          headers() {
-            return {
+          headers: async () => {
+            const token = await getToken();
+            const headers: Record<string, string> = {
+              credentials: "include",
+              sameSite: "lax",
+
               cookie: cookies,
+              Cookie: cookies,
               "x-trpc-source": "react",
+              "Content-Type": "application/json",
             };
+
+            if (token) {
+              headers["Authorization"] = `Bearer ${token}`;
+            }
+
+            console.log("Headers being sent:", headers);
+            return headers;
           },
         }),
       ],
-    }),
+    })
   );
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>

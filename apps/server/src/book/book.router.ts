@@ -13,21 +13,21 @@ export class BookRouter {
 
   router = this.trpc.router({
     // queries
-    getAll: this.trpc.procedure
+    getAll: this.trpc.protectedProcedure
       .input(this.bookService.getBooksSchema)
       .query(async ({ input }) => await this.bookService.books(input)),
-    getOne: this.trpc.procedure
+    getOne: this.trpc.protectedProcedure
       .input(this.bookService.getBookSchema)
       .query(async ({ input }) => await this.bookService.book(input)),
 
     // mutations
-    create: this.trpc.procedure
+    create: this.trpc.protectedProcedure
       .input(this.bookService.createBookSchema)
       .mutation(async ({ input }) => await this.bookService.createBook(input)),
-    update: this.trpc.procedure
+    update: this.trpc.protectedProcedure
       .input(this.bookService.updateBookSchema)
       .mutation(async ({ input }) => await this.bookService.updateBook(input)),
-    delete: this.trpc.procedure
+    delete: this.trpc.protectedProcedure
       .input(this.bookService.getBookSchema)
       .mutation(async ({ input }) => await this.bookService.deleteBook(input)),
   });

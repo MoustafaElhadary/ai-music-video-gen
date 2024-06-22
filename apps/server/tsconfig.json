@@ -13,12 +13,12 @@
     // "forceConsistentCasingInFileNames": true,
     // "noFallthroughCasesInSwitch": true
     "module": "commonjs",
-    "declaration": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "strict": true
+    "strict": true,
+    "declaration": false ,
   }
 }

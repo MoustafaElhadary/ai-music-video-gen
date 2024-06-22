@@ -1,11 +1,17 @@
 import { getUserAuth } from "@web/lib/auth/utils";
+import { cookies } from "next/headers";
 
 export async function createTRPCContext(opts: { headers: Headers }) {
   const { session } = await getUserAuth();
 
   return {
-    session: session,
     ...opts,
+    headers: {
+      ...opts.headers,
+      cookie: cookies().toString(),
+      "x-trpc-source": "rsc",
+    },
+    session,
   };
 }
 

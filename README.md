@@ -7,8 +7,8 @@ TODO:
 
 ## Auth
 
-1. add clerk auth to backend
-2. make trpc calls protected
+1. add clerk auth to backend [done]
+2. make trpc calls protected [done]
 
 # Knip
 
