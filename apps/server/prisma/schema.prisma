@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider              = "zod-prisma"
+  output                = "./zod"
+  prismaJsonNullability = "true"
+  relationModel         = "true"
+  useDecimalJs          = "true"
+  modelCase             = "camelCase"
+  modelSuffix           = "Schema"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model orders {
+  id                     String   @id @db.VarChar(191)
+  recipient_name         String
+  recipient_phone_number String
+  user_id                String
+  prompt                 String
+  created_at             DateTime @default(now()) @db.Timestamp(6)
+  updated_at             DateTime @default(now()) @db.Timestamp(6)
+}
+
+model songs {
+  id         String   @id @db.VarChar(191)
+  url        String
+  name       String
+  is_public  Boolean
+  user_id    String   @db.VarChar(256)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model subscriptions {
+  user_id                   String    @unique(map: "subscriptions_user_id_unique") @db.VarChar(255)
+  stripe_customer_id        String    @unique(map: "subscriptions_stripe_customer_id_unique") @db.VarChar(255)
+  stripe_subscription_id    String?   @unique(map: "subscriptions_stripe_subscription_id_unique") @db.VarChar(255)
+  stripe_price_id           String?   @db.VarChar(255)
+  stripe_current_period_end DateTime? @db.Timestamp(6)
+
+  @@id([user_id, stripe_customer_id], map: "subscriptions_user_id_stripe_customer_id_pk")
+}
+
+model Book {
+  id        String   @id @default(cuid())
+  name      String
+  author    String
+  rating    Int?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([userId])
+}

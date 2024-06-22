@@ -34,7 +34,7 @@ const SongForm = ({
   const editing = !!song?.id;
 
   const router = useRouter();
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
 
   const form = useForm<z.infer<typeof insertSongParams>>({
     resolver: zodResolver(insertSongParams),

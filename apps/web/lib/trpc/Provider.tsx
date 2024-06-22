@@ -5,7 +5,7 @@ import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import React, { useState } from "react";
 
 import { trpc } from "./client";
-import { getUrl } from "./utils";
+import { TRPC_URL } from "./utils";
 
 import SuperJSON from "superjson";
 
@@ -19,7 +19,6 @@ export default function TrpcProvider({
   const [queryClient] = useState(() => new QueryClient({}));
   const [trpcClient] = useState(() =>
     trpc.createClient({
-      transformer: SuperJSON,
       links: [
         loggerLink({
           enabled: (op) =>
@@ -27,7 +26,7 @@ export default function TrpcProvider({
             (op.direction === "down" && op.result instanceof Error),
         }),
         unstable_httpBatchStreamLink({
-          url: getUrl(),
+          url: TRPC_URL,
           headers() {
             return {
               cookie: cookies,
