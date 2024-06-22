@@ -37,7 +37,8 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "zod": "^3.23.8",
-    "zod-prisma": "^0.5.4"
+    "zod-prisma": "^0.5.4",
+    "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -60,6 +61,7 @@
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
+    "ts-to-zod": "^3.8.5",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.2",
     "webpack": "^5.0.0"

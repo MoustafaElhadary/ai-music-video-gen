@@ -5,6 +5,7 @@ export default async function Songs() {
   await checkAuth();
   const { songs } = await api.songs.getSongs.query();
   const { greeting } = await api.hello.query({ name: "sofa" });
+  const books = await api.books.getAll.query({});
 
   return (
     <main>
@@ -14,6 +15,7 @@ export default async function Songs() {
       </div>
       {/* <SongList songs={songs} /> */}
       <pre>{JSON.stringify(songs, null, 2)}</pre>
+      <pre>{JSON.stringify(books, null, 2)}</pre>
       <pre>{greeting}</pre>
     </main>
   );

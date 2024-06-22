@@ -2,6 +2,7 @@ import { INestApplication, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { TrpcService } from '@server/trpc/trpc.service';
 import * as trpcExpress from '@trpc/server/adapters/express';
+import { BookRouter } from '@server/book/book.router';
 
 const baseSchema = z.object({
   name: z.string(),
@@ -35,7 +36,10 @@ type Song = z.infer<typeof baseSchema>;
 
 @Injectable()
 export class TrpcRouter {
-  constructor(private readonly trpc: TrpcService) {}
+  constructor(
+    private readonly trpc: TrpcService,
+    private readonly bookRouter: BookRouter,
+  ) {}
 
   appRouter = this.trpc.router({
     hello: this.trpc.procedure
@@ -137,6 +141,7 @@ export class TrpcRouter {
           };
         }),
     }),
+    books: this.bookRouter.router,
   });
 
   async applyMiddleware(app: INestApplication) {

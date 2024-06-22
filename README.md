@@ -2,8 +2,8 @@ TODO:
 
 ## Drizzle
 
-1. add drizzle to backend
-2. remove drizzle from frontend
+1. add prisma to backend [done]
+2. remove prisma from frontend [done]
 
 ## Auth
 1. add clerk auth to backend

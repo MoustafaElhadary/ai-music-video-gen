@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
 }
 
 generator zod {
@@ -18,12 +19,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model subscriptions {
-  user_id                   String    @unique(map: "subscriptions_user_id_unique") @db.VarChar(255)
-  stripe_customer_id        String    @unique(map: "subscriptions_stripe_customer_id_unique") @db.VarChar(255)
-  stripe_subscription_id    String?   @unique(map: "subscriptions_stripe_subscription_id_unique") @db.VarChar(255)
-  stripe_price_id           String?   @db.VarChar(255)
-  stripe_current_period_end DateTime? @db.Timestamp(6)
-
-  @@id([user_id, stripe_customer_id], map: "subscriptions_user_id_stripe_customer_id_pk")
+model Book {
+  id        String   @id @default(cuid())
+  name      String
+  author    String
+  rating    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
