@@ -1,4 +1,4 @@
-import * as z from "zod"
+import * as z from 'zod';
 
 export const subscriptionsSchema = z.object({
   user_id: z.string(),
@@ -6,4 +6,4 @@ export const subscriptionsSchema = z.object({
   stripe_subscription_id: z.string().nullish(),
   stripe_price_id: z.string().nullish(),
   stripe_current_period_end: z.date().nullish(),
-})
+});

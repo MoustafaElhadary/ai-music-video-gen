@@ -1,26 +1,12 @@
 import "server-only";
 
 //  import { getUserAuth } from "@web/lib/auth/utils";
-// import { appRouter } from "@web/lib/server/routers/_app";
 import { env } from "@web/lib/env.mjs";
-import { createTRPCContext } from "./context";
 
 import { createTRPCProxyClient, httpBatchLink, loggerLink } from "@trpc/client";
 
-import { cookies } from "next/headers";
-import { cache } from "react";
-
 import { AppRouter } from "@server/trpc/trpc.router";
 import { TRPC_URL } from "./utils";
-
-const createContext = cache(() => {
-  return createTRPCContext({
-    headers: new Headers({
-      cookie: cookies().toString(),
-      "x-trpc-source": "rsc",
-    }),
-  });
-});
 
 export const api = createTRPCProxyClient<AppRouter>({
   // transformer: SuperJSON,
@@ -45,11 +31,3 @@ export const api = createTRPCProxyClient<AppRouter>({
     }),
   ],
 });
-
-// export const api = createTRPCProxyClient<AppRouter>({
-//   links: [
-//     httpBatchLink({
-//       url: "http://localhost:4000/trpc", // you should update this to use env variables
-//     }),
-//   ],
-// });

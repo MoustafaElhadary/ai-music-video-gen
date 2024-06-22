@@ -1,29 +1,29 @@
 "use client";
-import { trpc } from "@web/lib/trpc/client";
+import { RouterOutput, trpc } from "@web/lib/trpc/client";
 import BookModal from "./BookModal";
-import { z } from "zod";
-import { UseTRPCQueryResult } from "@trpc/react-query/shared";
-import { inferRouterOutputs } from "@trpc/server";
-import { TRPCClientErrorLike } from "@trpc/client";
-import { AppRouter } from "@server/trpc/trpc.router";
 
-// type B = ReturnType<typeof trpc.books.getAll.useQuery>;
-export type GetAllBooks = UseTRPCQueryResult<
-  inferRouterOutputs<AppRouter>["books"]["getAll"],
-  TRPCClientErrorLike<AppRouter>
->["data"];
+export type GetAllBooks = RouterOutput["books"]["getAll"];
 
 export type Book = NonNullable<GetAllBooks>[0];
 
 export default function BookList({ books }: { books: Book[] }) {
-  const { data } = trpc.books.getAll.useQuery({});
+  const { data } = trpc.books.getAll.useQuery(
+    {},
+    {
+      initialData: books,
+    },
+  );
 
-  if (data?.length === 0) {
+  if (data.length === 0) {
     return <EmptyState />;
   }
 
   return (
-    <ul>{data?.map((book) => <BookComponent book={book} key={book.id} />)}</ul>
+    <ul>
+      {data.map((book) => (
+        <BookComponent book={book} key={book.id} />
+      ))}
+    </ul>
   );
 }
 

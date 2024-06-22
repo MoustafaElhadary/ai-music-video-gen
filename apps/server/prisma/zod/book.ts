@@ -1,4 +1,4 @@
-import * as z from "zod"
+import * as z from 'zod';
 
 export const bookSchema = z.object({
   id: z.string(),
@@ -7,4 +7,4 @@ export const bookSchema = z.object({
   rating: z.number().int().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
-})
+});

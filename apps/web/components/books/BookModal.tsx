@@ -9,8 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-// import { Book } from "@server/book/book.service";
-import BookForm from "./bookForm";
+import BookForm from "./BookForm";
 import { Book } from "./BookList";
 
 export default function BookModal({

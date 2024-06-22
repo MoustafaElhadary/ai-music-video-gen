@@ -6,10 +6,12 @@ TODO:
 2. remove prisma from frontend [done]
 
 ## Auth
+
 1. add clerk auth to backend
 2. make trpc calls protected
 
 # Knip
+
 1. add knip to backend
 2. add knip to frontend
 
@@ -22,4 +24,3 @@ TODO:
 
 1. add stripe to backend
 2. add stripe to frontend (generate checkout session)
-
