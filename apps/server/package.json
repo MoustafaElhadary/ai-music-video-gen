@@ -41,6 +41,7 @@
     "lodash": "^4.17.21",
     "nanoid": "^5.0.7",
     "reflect-metadata": "^0.2.0",
+    "replicate": "^0.30.2",
     "rxjs": "^7.8.1",
     "zod": "^3.23.8",
     "zod-prisma": "^0.5.4",

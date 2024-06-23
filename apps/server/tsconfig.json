@@ -13,6 +13,7 @@
     // "forceConsistentCasingInFileNames": true,
     // "noFallthroughCasesInSwitch": true
     "module": "commonjs",
+    "esModuleInterop": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",

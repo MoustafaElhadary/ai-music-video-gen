@@ -40,7 +40,7 @@ const BookForm = ({
 
   const onSuccess = async (
     action: "create" | "update" | "delete",
-    data?: { error?: string },
+    data?: { error?: string }
   ) => {
     if (data?.error) {
       toast.error(data.error);
@@ -55,7 +55,7 @@ const BookForm = ({
 
   const onError = (
     action: "create" | "update" | "delete",
-    data: { error: string },
+    data: { error: string }
   ) => {
     toast.error(data.error);
   };
@@ -82,7 +82,10 @@ const BookForm = ({
     if (editing) {
       updateBook({ where: { id: book.id }, data: values });
     } else {
-      createBook(values);
+      createBook({
+        ...values,
+        rating: parseInt(values?.rating?.toString() ?? "", 0),
+      });
     }
   };
   return (

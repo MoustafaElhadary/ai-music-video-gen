@@ -11,12 +11,9 @@ import { TranscodeConsumer } from './video/transcode.consumer';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         redis: {
-          host: configService.get<string>('UPSTASH_REDIS_HOST'),
-          port: parseInt(
-            configService.get<string>('UPSTASH_REDIS_PORT') ?? '6379',
-            10,
-          ),
-          password: configService.get<string>('UPSTASH_REDIS_PASSWORD'),
+          host: configService.get('UPSTASH_REDIS_HOST'),
+          port: parseInt(configService.get('UPSTASH_REDIS_PORT') ?? '6379', 10),
+          password: configService.get('UPSTASH_REDIS_PASSWORD'),
           tls: {},
         },
       }),
