@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "remotion": "remotion studio src/remotion/index.ts "
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^5.0.12",
@@ -35,8 +36,10 @@
     "@remotion/bundler": "4.0.177",
     "@remotion/cli": "4.0.177",
     "@remotion/eslint-plugin": "4.0.177",
+    "@remotion/gif": "4.0.177",
     "@remotion/media-utils": "4.0.177",
     "@remotion/renderer": "^4.0.177",
+    "@remotion/tailwind": "4.0.177",
     "@remotion/zod-types": "4.0.177",
     "@trpc/server": "^10.37.1",
     "@upstash/redis": "^1.31.6",
@@ -89,6 +92,7 @@
     "typescript": "^5.5.2",
     "webpack": "^5.0.0"
   },
+  "sideEffects": ["*.css"],
   "jest": {
     "moduleFileExtensions": [
       "js",

@@ -20,9 +20,7 @@ import { zColor } from '@remotion/zod-types';
 export const AudioGramSchema = z.object({
   durationInSeconds: z.number().positive(),
   audioOffsetInSeconds: z.number().min(0),
-  subtitlesFileName: z.string().refine((s) => s.endsWith('.srt'), {
-    message: 'Subtitles file must be a .srt file',
-  }),
+  subtitlesFileName: z.string(),
   audioFileName: z.string().refine((s) => s.endsWith('.mp3'), {
     message: 'Audio file must be a .mp3 file',
   }),
