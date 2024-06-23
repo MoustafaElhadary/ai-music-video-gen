@@ -12,6 +12,7 @@
     // "strictBindCallApply": true,
     // "forceConsistentCasingInFileNames": true,
     // "noFallthroughCasesInSwitch": true
+    "jsx": "react",
     "module": "commonjs",
     "esModuleInterop": true,
     "removeComments": true,
