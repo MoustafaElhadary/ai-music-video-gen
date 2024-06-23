@@ -2,7 +2,9 @@
   "cSpell.words": [
     "Authed",
     "clsx",
+    "knip",
     "lucide",
+    "nestjs",
     "nextjs",
     "shadcn",
     "sonner",
@@ -13,16 +15,6 @@
     "trpc",
     "Trpc",
     "tsparticles",
-    "Authed",
-    "clsx",
-    "lucide",
-    "nextjs",
-    "shadcn",
-    "sonner",
-    "supabase",
-    "superjson",
-    "tailwindcss",
-    "trpc",
-    "tsparticles"
+    "upstash"
   ]
 }

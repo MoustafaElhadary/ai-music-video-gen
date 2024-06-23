@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Book as _Book, Prisma } from '@prisma/client';
+import { TRANSCODE_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
+import { Queue } from 'bull';
 import { z } from 'zod';
 
 @Injectable()
 export class BookService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectQueue(TRANSCODE_QUEUE) private readonly transcodeQueue: Queue,
+  ) {}
 
   getBookSchema: z.ZodType<Prisma.BookWhereUniqueInput> = z.any();
 
@@ -41,6 +47,9 @@ export class BookService {
   async createBook(
     data: z.infer<typeof this.createBookSchema>,
   ): Promise<_Book> {
+    await this.transcodeQueue.add({
+      fileName: './file.mp3',
+    });
     return this.prisma.book.create({
       data,
     });
@@ -71,5 +80,4 @@ export class BookService {
   }
 }
 
-export type Book = _Book;
 export type BookCreateInput = Prisma.BookCreateInput;
