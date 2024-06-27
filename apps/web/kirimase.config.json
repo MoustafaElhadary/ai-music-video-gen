@@ -1,6 +1,6 @@
 {
   "hasSrc": false,
-  "packages": ["shadcn-ui", "drizzle", "clerk", "trpc"],
+  "packages": ["shadcn-ui", "clerk", "trpc"],
   "preferredPackageManager": "pnpm",
   "t3": false,
   "alias": "@",
@@ -9,6 +9,5 @@
   "componentLib": "shadcn-ui",
   "driver": "pg",
   "provider": "supabase",
-  "orm": "drizzle",
   "auth": "clerk"
 }
