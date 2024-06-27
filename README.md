@@ -33,3 +33,14 @@ TODO:
 1. get song from sono
 2. get subtitles for video
 3. stitch them together
+
+
+
+## video flow:
+
+1. Typewriter template saying 
+    "Hey XXX, here's a video from YYY and ZZZ, Happy Birthday" (and show confetti)
+2. Start playing the song in the background
+3. create AI images for a combination of every verse or find funny gif, the image could be of the user, or a witty prompt that the AI comes up with ( might end up being 10 or so calls i think)
+4. 
+

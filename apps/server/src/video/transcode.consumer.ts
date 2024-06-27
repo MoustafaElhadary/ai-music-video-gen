@@ -1,14 +1,15 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TRANSCODE_QUEUE } from '@server/core/constants';
-import { Job } from 'bull';
-import Replicate from 'replicate';
-import { Caption, CaptionSchema, convertToSRT } from './srt';
-import { z } from 'zod';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
+import { TRANSCODE_QUEUE } from '@server/core/constants';
+import { randomString } from '@server/core/utils';
+import { createClient } from '@supabase/supabase-js';
+import { Job } from 'bull';
 import path from 'path';
+import Replicate from 'replicate';
+import { Caption, convertToSRT } from './srt';
 
 @Processor(TRANSCODE_QUEUE)
 export class TranscodeConsumer {
@@ -19,6 +20,11 @@ export class TranscodeConsumer {
   replicate = new Replicate({
     auth: this.configService.get('REPLICATE_API_TOKEN'),
   });
+
+  private supabase = createClient(
+    this.configService.get('SUPABASE_URL') ?? '',
+    this.configService.get('SUPABASE_ANON_KEY') ?? '',
+  );
 
   @Process()
   async transcode(job: Job<unknown>) {
@@ -33,6 +39,14 @@ export class TranscodeConsumer {
     }
 
     const videoPath = await this.createVideo(srt, audioUrl);
+    if (!videoPath) {
+      this.logger.error('Failed to create video');
+      return;
+    }
+
+    const videoUrl = await this.uploadVideo(videoPath);
+
+    this.logger.log('Video URL:', videoUrl);
   }
 
   private async getWordByWordSubtitles(audioUrl: string) {
@@ -92,22 +106,29 @@ export class TranscodeConsumer {
 
       // Render the video. Pass the same `inputProps` again
       // if your video is parametrized with data.
-      const renderResult = await renderMedia({
+      const outputLocation = `out/${compositionId}-${randomString(5)}.mp4`;
+      await renderMedia({
         composition,
         serveUrl,
         codec: 'h264',
-        outputLocation: `out/${compositionId}.mp4`,
+        outputLocation,
         inputProps,
       });
 
-      return `${path.resolve(`out/${compositionId}.mp4`)}`;
+      return `${path.resolve(outputLocation)}`;
     } catch (error) {
       this.logger.error(error);
     }
   }
 
-  private async uploadVideo(videoPath: string){
+  private async uploadVideo(videoPath: string) {
     try {
+      const { data, error } = await this.supabase.storage
+        .from('songs')
+        .upload(`public/${videoPath}`, videoPath);
+
+      console.log({ data, error });
+
       // const { url } = await this.replicate.upload(videoPath);
       // return url;
       return videoPath;

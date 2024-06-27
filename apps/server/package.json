@@ -22,9 +22,10 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "remotion": "remotion studio src/remotion/index.ts "
+    "remotion:studio": "remotion studio src/remotion/index.ts "
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.33",
     "@clerk/clerk-sdk-node": "^5.0.12",
     "@nestjs/bull": "^10.1.1",
     "@nestjs/common": "^10.0.0",
@@ -41,8 +42,10 @@
     "@remotion/renderer": "^4.0.177",
     "@remotion/tailwind": "4.0.177",
     "@remotion/zod-types": "4.0.177",
+    "@supabase/supabase-js": "^2.43.5",
     "@trpc/server": "^10.37.1",
     "@upstash/redis": "^1.31.6",
+    "ai": "^3.2.7",
     "bull": "^4.13.1",
     "cookie-parser": "^1.4.6",
     "cookies": "^0.9.1",
@@ -56,13 +59,14 @@
     "remotion": "4.0.177",
     "replicate": "^0.30.2",
     "rxjs": "^7.8.1",
+    "styled-components": "^6.1.11",
     "zod": "^3.23.8",
     "zod-prisma": "^0.5.4",
     "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
-    "@nestjs/schematics": "^10.0.0",
+    "@nestjs/schematics": "^10.1.1",
     "@nestjs/testing": "^10.0.0",
     "@remotion/eslint-config": "4.0.177",
     "@types/cookie-parser": "^1.4.7",
@@ -92,7 +96,9 @@
     "typescript": "^5.5.2",
     "webpack": "^5.0.0"
   },
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "jest": {
     "moduleFileExtensions": [
       "js",
