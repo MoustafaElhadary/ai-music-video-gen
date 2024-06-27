@@ -1,18 +1,19 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@server/*": ["./apps/server/src/*"],
-      "@web/*": ["./apps/web/*"]
-    }
-  }
+	"compilerOptions": {
+		"baseUrl": ".",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"incremental": true,
+		"skipLibCheck": true,
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"strictBindCallApply": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"paths": {
+			"@server/*": ["./apps/server/src/*"],
+			"@web/*": ["./apps/web/*"],
+			"suno-api/*": ["./apps/suno-api/src/*"]
+		}
+	}
 }

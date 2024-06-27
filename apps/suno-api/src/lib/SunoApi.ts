@@ -446,8 +446,6 @@ const newSunoApi = async (cookie: string) => {
 	return await sunoApi.init();
 };
 
-console.log(process.env.SUNO_COOKIE);
-
 if (!process.env.SUNO_COOKIE) {
 	console.log('Environment does not contain SUNO_COOKIE.', process.env);
 }

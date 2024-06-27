@@ -1,20 +1,21 @@
 {
-  "cSpell.words": [
-    "Authed",
-    "clsx",
-    "knip",
-    "lucide",
-    "nestjs",
-    "nextjs",
-    "shadcn",
-    "sonner",
-    "supabase",
-    "superjson",
-    "tabler",
-    "tailwindcss",
-    "trpc",
-    "Trpc",
-    "tsparticles",
-    "upstash"
-  ]
+	"cSpell.words": [
+		"Authed",
+		"clsx",
+		"knip",
+		"lucide",
+		"nestjs",
+		"nextjs",
+		"shadcn",
+		"sonner",
+		"Suno",
+		"supabase",
+		"superjson",
+		"tabler",
+		"tailwindcss",
+		"trpc",
+		"Trpc",
+		"tsparticles",
+		"upstash"
+	]
 }
