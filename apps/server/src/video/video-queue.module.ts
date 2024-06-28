@@ -1,12 +1,11 @@
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TRANSCODE_QUEUE } from './core/constants';
-import { TranscodeConsumer } from './video/transcode.consumer';
+import { VIDEO_QUEUE } from '../core/constants';
+import { VideoQueueConsumer } from './video-queue.consumer';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), // Ensure you have the ConfigModule set up correctly
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -20,10 +19,10 @@ import { TranscodeConsumer } from './video/transcode.consumer';
       inject: [ConfigService],
     }),
     BullModule.registerQueue({
-      name: TRANSCODE_QUEUE,
+      name: VIDEO_QUEUE,
     }),
   ],
   exports: [BullModule],
-  providers: [TranscodeConsumer],
+  providers: [VideoQueueConsumer],
 })
-export class QueueModule {}
+export class VideoQueueModule {}

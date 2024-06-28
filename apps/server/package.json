@@ -27,6 +27,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.33",
     "@clerk/clerk-sdk-node": "^5.0.12",
+    "@nestjs/axios": "^3.0.2",
     "@nestjs/bull": "^10.1.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.2",

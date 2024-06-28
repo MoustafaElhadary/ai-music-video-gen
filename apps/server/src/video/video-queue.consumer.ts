@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
-import { TRANSCODE_QUEUE } from '@server/core/constants';
+import { VIDEO_QUEUE } from '@server/core/constants';
 import { randomString } from '@server/core/utils';
 import { createClient } from '@supabase/supabase-js';
 import { Job } from 'bull';
@@ -11,11 +11,11 @@ import path from 'path';
 import Replicate from 'replicate';
 import { Caption, convertToSRT } from './srt';
 
-@Processor(TRANSCODE_QUEUE)
-export class TranscodeConsumer {
+@Processor(VIDEO_QUEUE)
+export class VideoQueueConsumer {
   constructor(private configService: ConfigService) {}
 
-  private readonly logger = new Logger(TranscodeConsumer.name);
+  private readonly logger = new Logger(VideoQueueConsumer.name);
 
   replicate = new Replicate({
     auth: this.configService.get('REPLICATE_API_TOKEN'),

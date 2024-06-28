@@ -1,1 +1,1 @@
-export const TRANSCODE_QUEUE = 'transcode';
+export const VIDEO_QUEUE = 'video-queue';

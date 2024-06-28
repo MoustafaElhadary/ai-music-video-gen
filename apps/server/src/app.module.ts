@@ -1,22 +1,24 @@
-import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BookService } from './book/book.service';
 import { PrismaService } from './prisma/prisma.service';
+import { SunoApiModule } from './suno-api/suno-api.module';
+import { SunoApiService } from './suno-api/suno-api.service';
 import { TrpcModule } from './trpc/trpc.module';
-import { QueueModule } from './queue.module';
+import { VideoQueueModule } from './video/video-queue.module';
+import { BookModule } from './book/book.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     TrpcModule,
-    QueueModule,
+    VideoQueueModule,
+    SunoApiModule.register(),
+    BookModule,
   ],
   controllers: [AppController],
-  providers: [AppService, BookService, PrismaService],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}

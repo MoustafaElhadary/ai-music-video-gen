@@ -1,8 +1,9 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Book as _Book, Prisma } from '@prisma/client';
-import { TRANSCODE_QUEUE } from '@server/core/constants';
+import { VIDEO_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
+import { SunoApiService } from '@server/suno-api/suno-api.service';
 import { Queue } from 'bull';
 import { z } from 'zod';
 
@@ -10,7 +11,8 @@ import { z } from 'zod';
 export class BookService {
   constructor(
     private prisma: PrismaService,
-    @InjectQueue(TRANSCODE_QUEUE) private readonly transcodeQueue: Queue,
+    @InjectQueue(VIDEO_QUEUE) private readonly transcodeQueue: Queue,
+    private sunoApi: SunoApiService,
   ) {}
 
   getBookSchema: z.ZodType<Prisma.BookWhereUniqueInput> = z.any();
@@ -33,6 +35,8 @@ export class BookService {
 
   async books(params: z.infer<typeof this.getBooksSchema>): Promise<_Book[]> {
     const { skip, take, cursor, where, orderBy } = params;
+    const x = await this.sunoApi.getQuotaInfo();
+    console.log({ x });
     return this.prisma.book.findMany({
       skip,
       take,
