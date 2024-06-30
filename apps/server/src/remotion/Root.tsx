@@ -1,7 +1,11 @@
-import React from 'react';
-import { Composition, staticFile } from 'remotion';
+import { testVideoData } from '../core/constants';
+import React, { useEffect } from 'react';
+import { Composition } from 'remotion';
+import { InferProps } from 'remotion/dist/cjs/props-if-has-props';
+import { z } from 'zod';
 import { AudioGramSchema, AudiogramComposition, fps } from './Composition';
 import { srt } from './constants';
+import { GeneratedVideo, GeneratedVideoSchema } from './GeneratedVideo';
 import { Gradient } from './Gradient';
 import { GradientCircle } from './GradientCircle';
 import { Main } from './Main';
@@ -11,7 +15,22 @@ import { Scene3 } from './Scene3';
 import './style.css';
 import { Wrapped } from './Wrapped';
 
+export const preloadHTMLScript = (src: string) => {
+  if (typeof document === 'undefined') {
+    console.warn('() was called outside the browser. Doing nothing.');
+    return () => undefined;
+  }
+
+  const script = document.createElement('script');
+  script.src = src;
+  document.head.appendChild(script);
+  return script;
+};
+
 export const RemotionRoot: React.FC = () => {
+  useEffect(() => {
+    preloadHTMLScript('https://cdn.tailwindcss.com');
+  }, []);
   return (
     <>
       <Composition
@@ -154,6 +173,27 @@ export const RemotionRoot: React.FC = () => {
             'Alternative R&B',
             'Neo Soul',
           ] as [string, string, string, string, string],
+        }}
+      />
+      <Composition
+        id="GeneratedVideo"
+        component={GeneratedVideo}
+        durationInFrames={60 * 2}
+        fps={fps}
+        height={1920}
+        width={1080}
+        defaultProps={{
+          data: testVideoData,
+        }}
+        schema={GeneratedVideoSchema}
+        calculateMetadata={async ({ props }) => {
+          const durationInSeconds = props.data[0].durationInSeconds ?? 2;
+
+          console.log({ props, durationInSeconds });
+
+          return {
+            durationInFrames: Math.floor(durationInSeconds * 30),
+          };
         }}
       />
     </>

@@ -3,10 +3,15 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
-import { VIDEO_QUEUE } from '@server/core/constants';
+import { testVideoData, VIDEO_QUEUE } from '@server/core/constants';
 import { randomString } from '@server/core/utils';
+import {
+  CompositionId,
+  getCompositionProps,
+} from '@server/remotion/type-utils';
 import { createClient } from '@supabase/supabase-js';
-import { Job } from 'bull';
+import { type Job } from 'bull';
+import * as fs from 'fs';
 import path from 'path';
 import Replicate from 'replicate';
 import { Caption, convertToSRT } from './srt';
@@ -28,6 +33,14 @@ export class VideoQueueConsumer {
 
   @Process()
   async transcode(job: Job<unknown>) {
+    /**
+     * 1. Get audio file from suno api. send prompt of what the user wants
+     * 2. Get word by word subtitles from openai whisper
+     * 3. create prompts for each section in the lyrics that are witty, engaging and funny
+     * 4. Get images from replicate for each section
+     * 5. Grab some gifs from giphy for each section
+     */
+
     this.logger.log('Start transcoding...');
     const audioUrl =
       'https://audio-samples.github.io/samples/mp3/blizzard_unconditional/sample-5.mp3';
@@ -79,7 +92,7 @@ export class VideoQueueConsumer {
 
   private async createVideo(subtitlesFileName: string, audioFileName: string) {
     try {
-      const compositionId = 'Audiogram';
+      const compositionId: CompositionId = 'GeneratedVideo';
 
       // You only have to create a bundle once, and you may reuse it
       // for multiple renders that you can parametrize using input props.
@@ -90,11 +103,35 @@ export class VideoQueueConsumer {
 
       console.log({ serveUrl });
 
-      // Parametrize the video by passing props to your component.
-      const inputProps = {
-        subtitlesFileName,
-        audioFileName,
-      };
+      // const inputProps = getCompositionProps(compositionId, {
+      //   // Audio settings
+      //   audioOffsetInSeconds: 2,
+      //   // Title settings
+      //   audioFileName,
+      //   coverImgFileName:
+      //     'https://github.com/remotion-dev/template-audiogram/blob/main/public/cover.jpg?raw=true',
+      //   titleText: '#234 – Test 123',
+      //   titleColor: 'rgba(186, 186, 186, 0.93)',
+      //   // Subtitles settings
+      //   subtitlesFileName,
+      //   onlyDisplayCurrentSentence: true,
+      //   subtitlesTextColor: 'rgba(255, 255, 255, 0.93)',
+      //   subtitlesLinePerPage: 4,
+      //   subtitlesZoomMeasurerSize: 10,
+      //   subtitlesLineHeight: 98,
+
+      //   // Wave settings
+      //   waveColor: '#a3a5ae',
+      //   waveFreqRangeStartIndex: 7,
+      //   waveLinesToDisplay: 29,
+      //   waveNumberOfSamples: '256', // This is string for Remotion controls and will be converted to a number
+      //   mirrorWave: true,
+      //   durationInSeconds: 29.5,
+      // });
+
+      const inputProps = getCompositionProps(compositionId, {
+        data: testVideoData,
+      });
 
       // Get the composition you want to render. Pass `inputProps` if you
       // want to customize the duration or other metadata.
@@ -115,7 +152,7 @@ export class VideoQueueConsumer {
         inputProps,
       });
 
-      return `${path.resolve(outputLocation)}`;
+      return outputLocation;
     } catch (error) {
       this.logger.error(error);
     }
@@ -123,14 +160,20 @@ export class VideoQueueConsumer {
 
   private async uploadVideo(videoPath: string) {
     try {
+      // Read the file content
+      const fileContent = await fs.promises.readFile(videoPath);
+
+      // Generate a unique filename for the uploaded video
+      const filename = path.basename(videoPath);
+
       const { data, error } = await this.supabase.storage
         .from('songs')
-        .upload(`public/${videoPath}`, videoPath);
+        .upload(`public/${filename}`, fileContent, {
+          contentType: 'video/mp4',
+        });
 
       console.log({ data, error });
 
-      // const { url } = await this.replicate.upload(videoPath);
-      // return url;
       return videoPath;
     } catch (error) {
       this.logger.error(error);
