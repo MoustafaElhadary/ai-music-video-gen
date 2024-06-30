@@ -109,7 +109,6 @@ export const RegularScene: React.FC<SceneData> = ({
           bgStyle ? bgStyle : '',
         )}
         animations={stringToReAnimated(animation || [])}
-        // animations={[]}
       >
         {video && (
           <VideoBlock src={video.url} mediaStyle={mediaStyle} volume={volume} />

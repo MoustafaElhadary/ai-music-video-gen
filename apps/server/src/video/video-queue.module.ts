@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { VIDEO_QUEUE } from '../core/constants';
 import { VideoQueueConsumer } from './video-queue.consumer';
+import { SunoApiModule } from '@server/suno-api/suno-api.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { VideoQueueConsumer } from './video-queue.consumer';
     BullModule.registerQueue({
       name: VIDEO_QUEUE,
     }),
+    SunoApiModule.register(),
   ],
   exports: [BullModule],
   providers: [VideoQueueConsumer],

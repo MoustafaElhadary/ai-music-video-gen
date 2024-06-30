@@ -12,7 +12,6 @@ export class BookService {
   constructor(
     private prisma: PrismaService,
     @InjectQueue(VIDEO_QUEUE) private readonly videoQueue: Queue,
-    private sunoApi: SunoApiService,
   ) {}
 
   getBookSchema: z.ZodType<Prisma.BookWhereUniqueInput> = z.any();
@@ -35,8 +34,6 @@ export class BookService {
 
   async books(params: z.infer<typeof this.getBooksSchema>): Promise<_Book[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    const x = await this.sunoApi.getQuotaInfo();
-    console.log({ x });
     return this.prisma.book.findMany({
       skip,
       take,

@@ -7,11 +7,17 @@ export const testVideoData = [
     startFrom: 0,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/qv7xUK3OrwjBLA6wNwGNYA/Hqi1wAdwL07PqbAIlAS6Bqbqr7CFyRUadilT6Agsv9Fd8Ez-IvEpFaStQ3MQBFHE27Yc7VXP3cYQalqWfUPvD8XqfV4ltBcHBWXhbkEdIBATP8xZTcX83uNYhNBQHFbc9cBLyjDSSD0WlTC9w3tJB9X0zpIEr8rbA5GEJLj9M-s/zjEgWHEx8ada38vImtkDybKi0o14EOPySlekqLvrAdQ',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/imdbp1uQIzH-9u2faC84nQ/RibT7l0BKzL3GcWTPOIrTBTjcLCiMn2dKV0IdYs6WN64j1p6JiXsuRG9GsYkDKkhX0uCnySbz-0sjK3s7ou6OhWlojzvrC9BW6KfBdHj-yNY0OW6ZltITFVi5KDvZWePj5Qaw_jkCIocx2193IVVdL7RpXBBg6oPp8WR2yNQM2Q/mBAxeOOWM_vrCSay3JAi1D7o-0FGcEEExS5yIyExlJA',
         type: 'audio/mpeg',
       },
     ],
     name: 'Bg music',
+  },
+  {
+    durationInSeconds: 46,
+    startFrom: 0,
+    name: 'BG white',
+    bgStyle: 'bg-white',
   },
   {
     durationInSeconds: 10,
@@ -44,7 +50,7 @@ export const testVideoData = [
     startFrom: 0,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/l2WofsvySZEvP_Y0wPhQOA/OSHOy3xRVHSOmGotC-roi40pXcuPgCL2Q3RDmKjLFcD2qwyC4N7BAkntwHBkM86dWmPKs4ROuzPLz2nTVhg78mOLL5dGAzVAnkq42V73gYOmWpli6fTHj_KbLQSYY6cTx52TutpENKdO0b5B1Bhsxw/xWWN1ztCW6qc9OXEhInTXgQWtDH0C3bkt1J0afRpjag',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/l2CwOSKK3uDBBw27L8jtsA/VUZvQGHxAkth3vy1J_Sr3xYuUKrAghfPXWnJx302QvMV1TENDfFZzwo2j3MykScG4mO2tcXu2Zl1Lqe63WXBWDLZqIe46STVtrK_5x0At4cv1kpdK476mn8KcZh39Hov_nmZ4yib4JE2WP5sfKaYfw/Czpmgo5cV21nrFzIORydUL6KEZRR9y8x5dFqMkCC634',
         type: 'image/svg+xml',
       },
     ],
@@ -80,7 +86,7 @@ export const testVideoData = [
     startFrom: 6,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/ZtsMlLUrBn7zc-nms_0s6w/y4lmmSV1FnM92JKtaqbYHMI7fOsM-scwJm9UwmdbwdhVx05itv6O13BWWxEZRDC6TtUv-2MN88-_KxxLYugmBRE9C97kEm31XZpZdUPcC0K4-DnIT60IgpaxUZND-SMwyKSzbDJK7RAhz1sSHRp-1W6dif-nW_XdlIiJXL2mYUA/kaqoDVzRiJ3wNvR2Z6AjHK2fsGr7eKEIEcoSvLQ4BwU',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/tdpVl5Fi67czcH74VvwuzQ/4AzMga5KJ7-FL6q4lSXkzKTFoOzdUdtfJfaPOH6IIVPeDCrgbEgRcmhgOxnI61h3ZLB3dbIL4vXbAnDp8585a56k8kpvohEeyLLGJSs3k12tK0u-js0QUnRK1aH2qBlt_GT_W45hz6nQsMJSMmkzRuBuWW5KHXOAJYt5KQLgnrM/cInPtYAMUXy8lIyVDBLUL-hIDN_g0XGKkuoxcsSFEwA',
         type: 'image/png',
       },
     ],
@@ -99,7 +105,7 @@ export const testVideoData = [
     startFrom: 7,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/bgLB2irqE_XH70lFPwLEdQ/D9YCSHqTyVTRkeOVziasFgesyfNEMet5dI-cHWgVu_bbLNSZRdb7Gdzio1F5x1wLgAcdVoTJHG4WuYtvkQs8OkAvIkLStPFyStlaPyDaqdyhxl8mXIwrS6BrSbEt5bXBXLXANtH-IgYH4_Sx1pbj42LVrcYpgQa27rI0geoCkdc/qzQgqld3iTx85-5GOcRqExd5ox1Oxwt679Ck2msV2kM',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/nRA9xy7QqKfqvqh_sj2nCA/T1VDyyXQSA4CUnEumo1CGcyhGhN-g6GcCIYuVQ7VK4m_zqaimLLhUWuc9OABaat1Cs6uABcvNpNZlYN2_fVP2Y8e2Br_PpYADi17i-1bsGxBgFOymYRrHsEE6_ypjKbdWvyTp0szooSyo3IUeHpVJWahDzTesC_X87P1Nl-ZT70/FvvvnvpWqD0k30EG6SNPOD1QV_XK3gRKWBnQO3zGolI',
         type: 'image/png',
       },
     ],
@@ -118,7 +124,7 @@ export const testVideoData = [
     startFrom: 8,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/Z2yEtUG098TeP_jTBY567Q/9qCr2wHvhA5iBbGdAJ1HsWjxZIsk4wktaO-SFdSVEEDyW1DwPGkPSmD3ukJDJajCbjNwqYGNFsdx9_Qt0vOkRIjLnB1ctDdzQiHkH-JVPe0UOq8VzlpB0sFn5BnJG0HDjdvHo3Q5IcCZFMsYFk-ugHTDzAJKuBSgm7xJzLCiTrc/KYaTE5YQte5MNUJZU6Ct4pYt1O8e2I5t0OXKSMymCJM',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/6pQzvW_g7kEgetu1C0WJ9A/PPFApf4dQi6j-keJSnHuVpa8WJQq5y758yrdtxVlltMrlH6FnkqMHrkgP2QDJRJTMwaF4HAjEFqzjagaF5BRPX72jBqAGoyvVFiazSAEq1GUVV5GTLcogLB6lm5607DegXJg6jXqQxZJQl8i9iajCTG2Vl0qBSQeyYqhZ2KT7kE/F1Y8Wy855xeBKUALigKmJ4_8ZGfSqTR5RAN0mAFadD0',
         type: 'image/png',
       },
     ],
@@ -137,7 +143,7 @@ export const testVideoData = [
     startFrom: 9,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/L5i6ISEgFbL8_3qhJ0oC9g/iGXc7wISB0rz5u3kNLK7RKslFnJEhmGiifc2Oljw8nicKsXSFKFRmWLJH0zRwJA5C_F95YeWjjdkrAkH4B1zFqc-ynnR05F3Sh9yZ7HShuxl65qZ_LYtzvNGar1lvDXSpxaW4erQgNS24kDEA94X3xtdfbvpkla6kTEfkeM5Kzw/wOQpSanLmt0mCtt5N7I9aK105mlBMTLQtOfMekWlpl8',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/5CZn_jfAQkRxzhvZz2P58w/LmAVE2eNJtGrR14dfkrrdeNBZWKJFys7Yuyu3-lhYbzCKpKv8zcRfqoRht476moWIfo2aCSBCrrVZOP3dLG7k6E_v_I3uTtdSod7OWbgQG6DZAokGL-DmWZzZNBUuqN8GPKKLQNWPAL6ar-NTPpNlt2QT3RnAeRnO1Uk8WAL56I/vAhVp0jT3mzzGYHycDAZC2VPjuOkqTIwDyQqse9KohY',
         type: 'image/png',
       },
     ],
@@ -160,7 +166,7 @@ export const testVideoData = [
     startFrom: 11,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/YWo_giOJvjVY_FeVVTEdeA/qLvR0rgvZ14itmHIoSDZByP8kIGnqolBp3HaStTaSqGn4NMJkfbPlTXy7UjI48RZXjYHSswu8xhYYRSSj20bVA_1qHWFfWrZKDzVBVokicvMwHznCeL1i9RnSHKpq1HjXPgq7X3mtAHsrXjhD36IFQ/sYh4tnR4pBg5rPqy1a0OzqqtsNHaI5ETyrUYlfNIgZw',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/9c3ZKYHVGur1h82uk432bg/WivSGv-fGq7nkCUliLY2FsCZM4MP3ZceslYzvg82Iqf_1d1HGph7g6sDBKS4TU0yz6BZNQCN7d3L8Djw4vcOqncPMv6XWo_edBFi6xa6wUncpQD4EJHd4Dv3J7uz3sNI-0K8xTkK0UPW1Jb-gVbTQg/X_ddRN27CiEP8AIa-jy6tcB7tITVrg597Cv_8Og1J94',
         type: 'video/mp4',
       },
     ],
@@ -179,7 +185,7 @@ export const testVideoData = [
     startFrom: 12,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/q2sElxQ2FHCAZE8DFTZTPw/GmRNc6PCKhwJvvQBxad7a4nWfxY-UQxfJY6HiGcLWa8grPx1801AEjWlCtZMVs_tjn0yz2geh06SvE1muneAtkWuDavPFkl0AvhmS5PfR3wvJTX9dUctHgG6ixMvPwl1i4T8ZocgAmx75ze7pt_DfMb_xVeX7BgFTZQD_wx3Otc/4oEDpD-gN60pPlEl6iveK33yHWWHTb1YqOQ0UU12daA',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/ZU3whwAvWnuzECimnjNRgw/AgSzok8NOHPnutMxFRUKfZ-gitKuGZ8WFcD3g7iCxaJf-1VtcnKuF1vQaBz0HPYigB3qMgnzPghM6JyULjmwYIbwAorLw9YY_ikMpPYLwsQWjgmzi8QEhQYcux8XST4SnU11HKsDuRfmn-lk10R1F1JdOxhCXziE7b_OJuINc_M/5MBSsYU6hfOv-jf9fojVeOXX_BE23Xxzx1TqmKFju84',
         type: 'video/mp4',
       },
     ],
@@ -198,7 +204,7 @@ export const testVideoData = [
     startFrom: 13,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/QP4u3QCONHHakcEsWJTX3A/SUrJf45aNdFCk7oXYql2Gx5BZTUanYBu5nxsgJBSazCAbAQKsCqFBcUWcJf_sYU61qBt3kupgJxV6vCu7N9jH29O4iKsw-j0Bt8i_J9tA5JPz5_TedY-MMS4ThC8LjX_4PT6oPUw5lTZwVPKN1m0BO8vBdriiQ0LtAQLgHy-bXQ/Dx-Pjy4AgREFGfjgFwYcy7fAPWdejKAbZUUnmoswci4',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/ReyZgT0S-3-451O1oA-EdA/noJ66INUaIGWyw-BT8ZffjErNfM6N6gTjro-WZDsIGWPdShjoybxy72QQTsF2qHWyUoJH7rUgumepvHzbE_z8MgAP3OVL-J9gjHdzJqlhQ9Cuy309iyUF3bm8EOxtij0kUVhE2Q7nuqL6Y4HJrnkw9sVQdah3Hga5Z3M_Le20WY/--7TrcmigebuP5uuzaFRE1b4bEVCPoF7PskbXoucc4M',
         type: 'video/mp4',
       },
     ],
@@ -217,7 +223,7 @@ export const testVideoData = [
     startFrom: 14,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/0yEx10H1p5xOGVUVzF3-yg/nncSMPYuAjXa656B2SO6zWODmlKG8O-xBsxZgI6sYQu83bBqaoUKm_8osFgfXWz4TqGEOCY71Qgrci-jb7MEyEarRqG-NKBFawaC1tBA-QPfHTGKaLkn2yNklziH3M7bPrboK4hm97r6rFDYkoJStZcMjNkCP1XRydbgS_jGrqc/rMKmau_5ZHGCjQYJ142qxtbLez_j-jz3-634hZ9HdCw',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/tMlvvSQ7X5ffNMx_mR0hRg/QKf1MmaT-HmnQuUcALzDezYBoAqSk9UkXh3i52mub0qwFrUkI2nIDiU21gNMzMZsZemVDOAUMDBln3So-YJ-C1yytjChd1Bk8wU9wt3tnVVb80SCKCK0Yc5TCWBYi2tFpmr74NllFjaTKSDN0ZrvClQLzpIoqF7fjCK8wOjYS2o/G0cQeqYq4SZNHWkDHSvUOoRRZKG1P6xdgg-caxj2k5g',
         type: 'video/mp4',
       },
     ],
@@ -294,7 +300,7 @@ export const testVideoData = [
     startFrom: 19,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/4n1oHaEh1BPsN3fLuNyPiQ/qorXjpsYkP45Ym8FrohTaQuLhnJlNvHXGVYRj4BLs6Hx1hbgZtNW6voW49IW0lAPUxcKxguV4a2Qa52Nl_8svAhmbmfkCzLiVz11PRbODkYJs-gcR2rCcprdzgOppowyl7HAM1RhmVdU7naJxtOGLZCP_xummrDDGabwsRPNAQc/bCyTuppAIYLQ0mL_0Cdb1wbAwTDWI-nil60Mgea73c8',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/XuvL9fL5KtamSD1_A6OONA/BKgob14vaXfVwOCvZ3IdAstAd71X2Gp5RGPmbtn9mcap3kZL72DzrdOtEHnXMOigeQXxSf79o8idyAAZuc_sps5kGZpyR4LBBIY-HKYXpurARIIk0zgt1nMBUZk5xvrb-l9-A4z4KCzZ0od-x_2Y02qAM9v3ILwHPB4s4u9StSY/8yaOFAGwDe5T84esbNgKnViEtujTx8DO4JZ7VKXduAs',
         type: 'video/mp4',
       },
     ],
@@ -331,7 +337,7 @@ export const testVideoData = [
     startFrom: 37,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/Wt6mzrRnTGHX-uvGyTMrhg/QMnOY7hHFoHabK2yyIv5ETPni208_jfcy9S2-g7pWDwHb5Zm6cEFZMJbFgaavEp7qtGeDB8ThVFfaygYq2UbV9Sy7Qlpr34HxBR2XhdRumkCHkR_C844QNJReAp9bRChBWVSYz3wCRkK9v3ixBIM0w/3Neuh7C4lRAHnW-9lpHWH-N8TK1kr3qYYb8CYwVpK_E',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/4YcfXSHMosxknhNrKyL1gA/vqFfmZPfuvQHkkF4czDgCTER7PquGNCiZ_-Mcmd-QiQPg9AC2HeJAitZBXdGfxKrFZcf2p99ARTYx6HdRL2-XfIDhl9k2HvAX5YCUVMWACV2ZV1oxYzTR_VTT56E7eKfBnkGow_v6gbj9Z9CHAd_WQ/1xs0M5Ng-OJ9l3OAWpNSRAwtl16Ta0OUufdv7QbjDPM',
         type: 'video/mp4',
       },
     ],
@@ -352,7 +358,7 @@ export const testVideoData = [
     startFrom: 41,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719705600000/l2WofsvySZEvP_Y0wPhQOA/OSHOy3xRVHSOmGotC-roi40pXcuPgCL2Q3RDmKjLFcD2qwyC4N7BAkntwHBkM86dWmPKs4ROuzPLz2nTVhg78mOLL5dGAzVAnkq42V73gYOmWpli6fTHj_KbLQSYY6cTx52TutpENKdO0b5B1Bhsxw/xWWN1ztCW6qc9OXEhInTXgQWtDH0C3bkt1J0afRpjag',
+        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/l2CwOSKK3uDBBw27L8jtsA/VUZvQGHxAkth3vy1J_Sr3xYuUKrAghfPXWnJx302QvMV1TENDfFZzwo2j3MykScG4mO2tcXu2Zl1Lqe63WXBWDLZqIe46STVtrK_5x0At4cv1kpdK476mn8KcZh39Hov_nmZ4yib4JE2WP5sfKaYfw/Czpmgo5cV21nrFzIORydUL6KEZRR9y8x5dFqMkCC634',
         type: 'image/svg+xml',
       },
     ],

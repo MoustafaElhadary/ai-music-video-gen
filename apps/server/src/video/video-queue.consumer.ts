@@ -15,10 +15,14 @@ import * as fs from 'fs';
 import path from 'path';
 import Replicate from 'replicate';
 import { Caption, convertToSRT } from './srt';
+import { SunoApiService } from '@server/suno-api/suno-api.service';
 
 @Processor(VIDEO_QUEUE)
 export class VideoQueueConsumer {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private sunoApi: SunoApiService,
+  ) {}
 
   private readonly logger = new Logger(VideoQueueConsumer.name);
 
@@ -31,27 +35,40 @@ export class VideoQueueConsumer {
     this.configService.get('SUPABASE_ANON_KEY') ?? '',
   );
 
+  /**
+   * 1. Get audio file from suno api. send prompt of what the user wants
+   * 2. Get word by word subtitles from openai whisper
+   * 3. create prompts for each section in the lyrics that are witty, engaging and funny
+   * 4. Get images from replicate for each section
+   * 5. Grab some gifs from giphy for each section
+   */
+
   @Process()
   async transcode(job: Job<unknown>) {
-    /**
-     * 1. Get audio file from suno api. send prompt of what the user wants
-     * 2. Get word by word subtitles from openai whisper
-     * 3. create prompts for each section in the lyrics that are witty, engaging and funny
-     * 4. Get images from replicate for each section
-     * 5. Grab some gifs from giphy for each section
-     */
-
     this.logger.log('Start transcoding...');
-    const audioUrl =
-      'https://audio-samples.github.io/samples/mp3/blizzard_unconditional/sample-5.mp3';
-    const srt = await this.getWordByWordSubtitles(audioUrl);
 
-    if (!srt) {
+    const song = (
+      await this.sunoApi.getAudioInfo('3d781725-b005-48c7-9af9-4b75325e0719')
+    )[0];
+
+    const { duration, audio_url } = song;
+    console.log({ song });
+
+    if (!audio_url || !duration) {
+      this.logger.error('Failed to get audio');
+      return;
+    }
+
+    const subtitles = await this.getWordByWordSubtitles(audio_url);
+
+    console.log({ subtitles });
+
+    if (!subtitles) {
       this.logger.error('Failed to get subtitles');
       return;
     }
 
-    const videoPath = await this.createVideo(srt, audioUrl);
+    const videoPath = await this.createVideo(subtitles, audio_url);
     if (!videoPath) {
       this.logger.error('Failed to create video');
       return;

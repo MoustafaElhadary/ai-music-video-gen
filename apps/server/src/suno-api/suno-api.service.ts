@@ -29,7 +29,9 @@ export class SunoApiService {
     return data;
   }
 
-  async customGenerateAudio(input: CustomGenerateAudioDto): Promise<AudioInfo[]> {
+  async customGenerateAudio(
+    input: CustomGenerateAudioDto,
+  ): Promise<AudioInfo[]> {
     const { data } = await firstValueFrom(
       this.httpService.post(`${this.baseUrl}/api/custom_generate`, input),
     );
@@ -49,6 +51,7 @@ export class SunoApiService {
     const { data } = await firstValueFrom(
       this.httpService.post(`${this.baseUrl}/api/generate_lyrics`, input),
     );
+    console.log({ data });
     return data;
   }
 

@@ -17,7 +17,7 @@ export const GeneratedVideoSchema = z.object({
 type GeneratedVideoProps = z.infer<typeof GeneratedVideoSchema>;
 
 export const GeneratedVideo: React.FC<GeneratedVideoProps> = ({ data }) => {
-  const { fps, width, height } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
   return (
     <>
