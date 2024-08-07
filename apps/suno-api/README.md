@@ -16,6 +16,8 @@
   <a href="https://www.producthunt.com/products/gcui-art-suno-api-open-source-sunoai-api/reviews?utm_source=badge-product_review&utm_medium=badge&utm_souce=badge-gcui&#0045;art&#0045;suno&#0045;api&#0045;open&#0045;source&#0045;sunoai&#0045;api" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=577408&theme=light" alt="gcui&#0045;art&#0047;suno&#0045;api&#0058;Open&#0045;source&#0032;SunoAI&#0032;API - Use&#0032;API&#0032;to&#0032;call&#0032;the&#0032;music&#0032;generation&#0032;AI&#0032;of&#0032;suno&#0046;ai&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
 
+> 🔥 Check out our new open-source project: [Album AI - Chat with your gallery using plain language!](https://github.com/gcui-art/album-ai)
+
 ![suno-api banner](https://github.com/gcui-art/suno-api/blob/main/public/suno-banner.png)
 
 ## Introduction
@@ -97,10 +99,10 @@ SUNO_COOKIE=<your-cookie>
 
 ```json
 {
-	"credits_left": 50,
-	"period": "day",
-	"monthly_limit": 50,
-	"monthly_usage": 50
+  "credits_left": 50,
+  "period": "day",
+  "monthly_limit": 50,
+  "monthly_usage": 50
 }
 ```
 
@@ -207,74 +209,74 @@ if __name__ == '__main__':
 ### Js
 
 ```js
-const axios = require('axios');
+const axios = require("axios");
 
 // replace your vercel domain
-const baseUrl = 'http://localhost:3000';
+const baseUrl = "http://localhost:3000";
 
 async function customGenerateAudio(payload) {
-	const url = `${baseUrl}/api/custom_generate`;
-	const response = await axios.post(url, payload, {
-		headers: {'Content-Type': 'application/json'},
-	});
-	return response.data;
+  const url = `${baseUrl}/api/custom_generate`;
+  const response = await axios.post(url, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data;
 }
 
 async function generateAudioByPrompt(payload) {
-	const url = `${baseUrl}/api/generate`;
-	const response = await axios.post(url, payload, {
-		headers: {'Content-Type': 'application/json'},
-	});
-	return response.data;
+  const url = `${baseUrl}/api/generate`;
+  const response = await axios.post(url, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data;
 }
 
 async function extendAudio(payload) {
-	const url = `${baseUrl}/api/extend_audio`;
-	const response = await axios.post(url, payload, {
-		headers: {'Content-Type': 'application/json'},
-	});
-	return response.data;
+  const url = `${baseUrl}/api/extend_audio`;
+  const response = await axios.post(url, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data;
 }
 
 async function getAudioInformation(audioIds) {
-	const url = `${baseUrl}/api/get?ids=${audioIds}`;
-	const response = await axios.get(url);
-	return response.data;
+  const url = `${baseUrl}/api/get?ids=${audioIds}`;
+  const response = await axios.get(url);
+  return response.data;
 }
 
 async function getQuotaInformation() {
-	const url = `${baseUrl}/api/get_limit`;
-	const response = await axios.get(url);
-	return response.data;
+  const url = `${baseUrl}/api/get_limit`;
+  const response = await axios.get(url);
+  return response.data;
 }
 
 async function getClipInformation(clipId) {
-	const url = `${baseUrl}/api/clip?id=${clipId}`;
-	const response = await axios.get(url);
-	return response.data;
+  const url = `${baseUrl}/api/clip?id=${clipId}`;
+  const response = await axios.get(url);
+  return response.data;
 }
 
 async function main() {
-	const data = await generateAudioByPrompt({
-		prompt:
-			'A popular heavy metal song about war, sung by a deep-voiced male singer, slowly and melodiously. The lyrics depict the sorrow of people after the war.',
-		make_instrumental: false,
-		wait_audio: false,
-	});
+  const data = await generateAudioByPrompt({
+    prompt:
+      "A popular heavy metal song about war, sung by a deep-voiced male singer, slowly and melodiously. The lyrics depict the sorrow of people after the war.",
+    make_instrumental: false,
+    wait_audio: false,
+  });
 
-	const ids = `${data[0].id},${data[1].id}`;
-	console.log(`ids: ${ids}`);
+  const ids = `${data[0].id},${data[1].id}`;
+  console.log(`ids: ${ids}`);
 
-	for (let i = 0; i < 60; i++) {
-		const data = await getAudioInformation(ids);
-		if (data[0].status === 'streaming') {
-			console.log(`${data[0].id} ==> ${data[0].audio_url}`);
-			console.log(`${data[1].id} ==> ${data[1].audio_url}`);
-			break;
-		}
-		// sleep 5s
-		await new Promise((resolve) => setTimeout(resolve, 5000));
-	}
+  for (let i = 0; i < 60; i++) {
+    const data = await getAudioInformation(ids);
+    if (data[0].status === "streaming") {
+      console.log(`${data[0].id} ==> ${data[0].audio_url}`);
+      console.log(`${data[1].id} ==> ${data[1].audio_url}`);
+      break;
+    }
+    // sleep 5s
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
 }
 
 main();
@@ -318,6 +320,7 @@ LGPL-3.0 or later
 - Project repository: [github.com/gcui-art/suno-api](https://github.com/gcui-art/suno-api)
 - Suno.ai official website: [suno.ai](https://suno.ai)
 - Demo: [suno.gcui.ai](https://suno.gcui.ai)
+- Album AI: [Auto generate image metadata and chat with the album. RAG + Album.](https://github.com/gcui-art/album-ai)
 
 ## Statement
 

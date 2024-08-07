@@ -1,17 +1,20 @@
 import React from 'react';
 import Swagger from '../components/Swagger';
-import spec from './swagger-suno-api.json';
+import spec from './swagger-suno-api.json'; // 直接导入JSON文件
 import Section from '../components/Section';
 import Markdown from 'react-markdown';
 
+
 export default function Docs() {
-	return (
-		<>
-			<Section className="my-10">
-				<article className="prose lg:prose-lg max-w-3xl pt-10">
-					<h1 className=" text-center text-indigo-900">API Docs</h1>
-					<Markdown>
-						{`                     
+    return (
+        <>
+            <Section className="my-10">
+                <article className="prose lg:prose-lg max-w-3xl pt-10">
+                    <h1 className=' text-center text-indigo-900'>
+                        API Docs
+                    </h1>
+                    <Markdown>
+                        {`                     
 ---
 \`gcui-art/suno-api\` currently mainly implements the following APIs:
 
@@ -32,24 +35,25 @@ export default function Docs() {
 
 Feel free to explore the detailed API parameters and conduct tests on this page.
                         `}
-					</Markdown>
-				</article>
-			</Section>
-			<Section className="my-10">
-				<article className="prose lg:prose-lg max-w-3xl py-10">
-					<h2 className="text-center">
-						Details of the API and testing it online
-					</h2>
-					<p className="text-red-800 italic">
-						This is just a demo, bound to a test account. Please do not use it
-						frequently, so that more people can test online.
-					</p>
-				</article>
+                    </Markdown>
+                </article>
+            </Section>
+            <Section className="my-10">
+                <article className='prose lg:prose-lg max-w-3xl py-10'>
+                    <h2 className='text-center'>
+                        Details of the API and testing it online
+                    </h2>
+                    <p className='text-red-800 italic'>
+                        This is just a demo, bound to a test account. Please do not use it frequently, so that more people can test online.
+                    </p>
+                </article>
 
-				<div className=" border p-4 rounded-2xl shadow-xl hover:shadow-none duration-200">
-					<Swagger spec={spec} />
-				</div>
-			</Section>
-		</>
-	);
+                <div className=' border p-4 rounded-2xl shadow-xl hover:shadow-none duration-200'>
+                    <Swagger spec={spec} />
+                </div>
+
+            </Section>
+        </>
+
+    );
 }

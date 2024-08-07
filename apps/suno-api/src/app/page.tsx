@@ -1,8 +1,10 @@
-import Section from './components/Section';
+import Section from "./components/Section";
 import Markdown from 'react-markdown';
 
+
 export default function Home() {
-	const markdown = `
+
+  const markdown = `
 
 ---
 ## 👋 Introduction
@@ -36,7 +38,8 @@ We update quickly, please star us on Github:  [github.com/gcui-art/suno-api](htt
 7. Locate the \`Cookie\` section, hover your mouse over it, and copy the value of the Cookie.
 `;
 
-	const markdown_part2 = `
+
+  const markdown_part2 = `
 ### 2. Clone and deploy this project
 
 You can choose your preferred deployment method:
@@ -111,41 +114,41 @@ For more detailed documentation, please check out the demo site:
 👉 [suno.gcui.ai/docs](https://suno.gcui.ai/docs)
 
 `;
-	return (
-		<>
-			<Section className="">
-				<div
-					className="flex flex-col m-auto py-20 text-center items-center justify-center gap-4 my-8
+  return (
+    <>
+      <Section className="">
+        <div className="flex flex-col m-auto py-20 text-center items-center justify-center gap-4 my-8
         lg:px-20 px-4
-        bg-indigo-900/90 rounded-2xl border shadow-2xl hover:shadow-none duration-200"
-				>
-					<span
-						className=" px-5 py-1 text-xs font-light border rounded-full 
-          border-white/20 uppercase text-white/50"
-					>
-						Unofficial
-					</span>
-					<h1 className="font-bold text-7xl flex text-white/90">Suno AI API</h1>
-					<p className="text-white/80 text-lg">
-						`Suno-api` is an open-source project that enables you to set up your
-						own Suno AI API.
-					</p>
-				</div>
-			</Section>
-			<Section className="my-10">
-				<article className="prose lg:prose-lg max-w-3xl">
-					<Markdown>{markdown}</Markdown>
-					<video
-						controls
-						width="1024"
-						className="w-full border rounded-lg shadow-xl"
-					>
-						<source src="/get-cookie-demo.mp4" type="video/mp4" />
-						Your browser does not support frames.
-					</video>
-					<Markdown>{markdown_part2}</Markdown>
-				</article>
-			</Section>
-		</>
-	);
+        bg-indigo-900/90 rounded-2xl border shadow-2xl hover:shadow-none duration-200">
+          <span className=" px-5 py-1 text-xs font-light border rounded-full 
+          border-white/20 uppercase text-white/50">
+            Unofficial
+          </span>
+          <h1 className="font-bold text-7xl flex text-white/90">
+            Suno AI API
+          </h1>
+          <p className="text-white/80 text-lg">
+            `Suno-api` is an open-source project that enables you to set up your own Suno AI API.
+          </p>
+        </div>
+
+      </Section>
+      <Section className="my-10">
+        <article className="prose lg:prose-lg max-w-3xl">
+          <Markdown>
+            {markdown}
+          </Markdown>
+          <video controls width="1024" className="w-full border rounded-lg shadow-xl">
+            <source src="/get-cookie-demo.mp4" type="video/mp4" />
+            Your browser does not support frames.
+          </video>
+          <Markdown>
+            {markdown_part2}
+          </Markdown>
+        </article>
+      </Section>
+
+
+    </>
+  );
 }
