@@ -4,9 +4,16 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev": "pnpm run --parallel dev"
+		"dev": "pnpm run --parallel dev",
+		"turbo:dev": "turbo dev"
 	},
+	"packageManager": "pnpm@8.15.6",
 	"keywords": [],
 	"author": "",
-	"license": "ISC"
+	"license": "ISC",
+	"devDependencies": {
+		"prettier": "^3.2.5",
+		"turbo": "^2.0.6",
+		"typescript": "^5.4.5"
+	}
 }

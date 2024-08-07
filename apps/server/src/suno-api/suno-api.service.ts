@@ -51,7 +51,6 @@ export class SunoApiService {
     const { data } = await firstValueFrom(
       this.httpService.post(`${this.baseUrl}/api/generate_lyrics`, input),
     );
-    console.log({ data });
     return data;
   }
 
@@ -78,6 +77,7 @@ export class SunoApiService {
 
   async concatAudio(clipId: string): Promise<AudioInfo> {
     const { data } = await firstValueFrom(
+      // eslint-disable-next-line camelcase
       this.httpService.post(`${this.baseUrl}/api/concat`, { clip_id: clipId }),
     );
     return data;

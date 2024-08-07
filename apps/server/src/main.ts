@@ -9,6 +9,6 @@ async function bootstrap() {
   app.use(cookieParser());
   const trpc = app.get(TrpcRouter);
   trpc.applyMiddleware(app);
-  await app.listen(process.env.PORT ? parseInt(process.env.PORT) : 4000);
+  await app.listen(process.env.PORT ? parseInt(process.env.PORT, 10) : 4000);
 }
 bootstrap();

@@ -1,9 +1,9 @@
+/* eslint-disable no-useless-constructor */
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Book as _Book, Prisma } from '@prisma/client';
 import { VIDEO_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
-import { SunoApiService } from '@server/suno-api/suno-api.service';
 import { type Queue } from 'bull';
 import { z } from 'zod';
 

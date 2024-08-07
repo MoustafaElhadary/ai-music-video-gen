@@ -4,7 +4,6 @@
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
 'use client';
-import {Meteors} from '@web/components/ui/meteors';
 import {
 	ClerkProvider,
 	SignedIn,
@@ -12,17 +11,14 @@ import {
 	SignInButton,
 	UserButton,
 } from '@clerk/nextjs';
+import { Meteors } from '@web/components/ui/meteors';
+import { WobbleCard } from '@web/components/ui/wobble-card';
+import { VideoRequest } from '@web/components/VideoRequest';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { SVGProps } from 'react';
 import AskAnything from './AskAnything';
-import {BackgroundBeams} from '@web/components/ui/background-beams';
-import {SparklesCore} from '@web/components/ui/sparkles';
-import {SVGProps} from 'react';
-import {VideoRequest} from '@web/components/VideoRequest';
-import Image from 'next/image';
-import React from 'react';
-import {Noise, WobbleCard} from '@web/components/ui/wobble-card';
-import {motion} from 'framer-motion';
-import {HeroHighlight, Highlight} from '@web/components/ui/hero-highlight';
+// import {HeroHighlight, Highlight} from '@web/components/ui/hero-highlight';
 
 export default function LandingPage() {
 	return (
@@ -46,9 +42,9 @@ export default function LandingPage() {
 			>
 				With insomnia, nothing&apos;s real. Everything is far away. Everything
 				is a{' '}
-				<Highlight className="text-black dark:text-white">
+				{/* <Highlight className="text-black dark:text-white">
 					copy, of a copy, of a copy.
-				</Highlight>
+				</Highlight> */}
 			</motion.h1>
 			<AskAnything />
 			{/* <BackgroundBeams /> */}

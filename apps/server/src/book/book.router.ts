@@ -1,34 +1,33 @@
+/* eslint-disable no-useless-constructor */
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { TrpcService } from '@server/trpc/trpc.service';
-import { z } from 'zod';
 import { BookService } from './book.service';
 
 @Injectable()
 export class BookRouter {
   constructor(
-    private readonly trpc: TrpcService,
-    private readonly bookService: BookService,
+    private trpc: TrpcService,
+    private bookService: BookService,
   ) {}
 
   router = this.trpc.router({
-    // queries
+    // Queries
     getAll: this.trpc.protectedProcedure
       .input(this.bookService.getBooksSchema)
-      .query(async ({ input }) => await this.bookService.books(input)),
+      .query(({ input }) => this.bookService.books(input)),
     getOne: this.trpc.protectedProcedure
       .input(this.bookService.getBookSchema)
-      .query(async ({ input }) => await this.bookService.book(input)),
+      .query(({ input }) => this.bookService.book(input)),
 
-    // mutations
+    // Mutations
     create: this.trpc.protectedProcedure
       .input(this.bookService.createBookSchema)
-      .mutation(async ({ input }) => await this.bookService.createBook(input)),
+      .mutation(async ({ input }) => this.bookService.createBook(input)),
     update: this.trpc.protectedProcedure
       .input(this.bookService.updateBookSchema)
-      .mutation(async ({ input }) => await this.bookService.updateBook(input)),
+      .mutation(async ({ input }) => this.bookService.updateBook(input)),
     delete: this.trpc.protectedProcedure
       .input(this.bookService.getBookSchema)
-      .mutation(async ({ input }) => await this.bookService.deleteBook(input)),
+      .mutation(async ({ input }) => this.bookService.deleteBook(input)),
   });
 }

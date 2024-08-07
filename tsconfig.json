@@ -13,7 +13,7 @@
 		"paths": {
 			"@server/*": ["./apps/server/src/*"],
 			"@web/*": ["./apps/web/*"],
-			"suno-api/*": ["./apps/suno-api/src/*"]
+			"@suno-api/*": ["./apps/suno-api/src/*"]
 		}
 	}
 }
