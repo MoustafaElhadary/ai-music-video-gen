@@ -1,9 +1,3 @@
-node_modules
-dist
-build
-out
-.env
-
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -42,6 +36,3 @@ yarn-error.log*
 next-env.d.ts
 
 .env
-
-/.turbo
-/.next
