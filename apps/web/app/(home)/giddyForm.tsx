@@ -1,31 +1,10 @@
-import React, {useState, useEffect} from 'react';
-import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {z} from 'zod';
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-} from '@web/components/ui/form';
+import {Combobox, ComboboxOption} from '@web/components/ui/combobox';
+import {Form} from '@web/components/ui/form';
 import {Input} from '@web/components/ui/input';
-import {Button} from '@web/components/ui/button';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@web/components/ui/popover';
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from '@web/components/ui/command';
-import {Check, ChevronsUpDown} from 'lucide-react';
-import cn from 'clsx';
+import React, {useEffect, useState} from 'react';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
 
 const MAX_CHARS = 200;
 const PLACEHOLDER_INTERVAL = 3000;
@@ -38,21 +17,8 @@ const placeholders = [
 	'🎉 Squad goals celebration mix',
 ];
 
-const occasions = [
-	'Birthday',
-	'Graduation',
-	'Wedding',
-	'Anniversary',
-	'New Job',
-	'Retirement',
-	'Holiday',
-	'Just Because',
-];
-
 const FormSchema = z.object({
-	occasion: z.string({
-		required_error: 'Please select an occasion.',
-	}),
+	occasion: z.string().optional(),
 });
 
 const GiddyForm: React.FC = () => {
@@ -60,11 +26,24 @@ const GiddyForm: React.FC = () => {
 	const [placeholderIndex, setPlaceholderIndex] = useState(0);
 	const [charCount, setCharCount] = useState(0);
 	const [recipientName, setRecipientName] = useState('');
-	const [occasion, setOccasion] = useState('');
-	const [occasionInput, setOccasionInput] = useState('');
+
+	const [occasion, setOccasion] = useState<string | undefined>(undefined);
+	const [occasions, setOccasions] = useState<ComboboxOption[]>([
+		{value: 'Birthday', label: 'Birthday'},
+		{value: 'Graduation', label: 'Graduation'},
+		{value: 'Wedding', label: 'Wedding'},
+		{value: 'Anniversary', label: 'Anniversary'},
+		{value: 'New Job', label: 'New Job'},
+		{value: 'Retirement', label: 'Retirement'},
+		{value: 'Holiday', label: 'Holiday'},
+		{value: 'Just Because', label: 'Just Because'},
+	]);
 
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
+		defaultValues: {
+			occasion: undefined,
+		},
 	});
 
 	useEffect(() => {
@@ -86,7 +65,7 @@ const GiddyForm: React.FC = () => {
 		e.preventDefault();
 		console.log('Submitted prompt:', prompt);
 		console.log('Recipient Name:', recipientName);
-		console.log('Occasion:', occasion);
+
 		// Add your submission logic here
 	};
 
@@ -95,6 +74,22 @@ const GiddyForm: React.FC = () => {
 			<form onSubmit={handleSubmit} className="space-y-4">
 				<div className="flex space-x-4">
 					<div className="flex-1">
+						<Combobox
+							mode="single"
+							options={occasions}
+							placeholder="Select occasion..."
+							selected={occasion || ''}
+							onChange={(value) => {
+								setOccasion(value as string);
+								form.setValue('occasion', value as string);
+							}}
+							onCreate={(value) => {
+								const newOption = {value, label: value};
+								setOccasions([...occasions, newOption]);
+								setOccasion(value);
+								form.setValue('occasion', value);
+							}}
+						/>
 						<label
 							htmlFor="recipientName"
 							className="block text-sm font-medium text-gray-700 mb-1"
@@ -108,80 +103,6 @@ const GiddyForm: React.FC = () => {
 							onChange={(e) => setRecipientName(e.target.value)}
 							className="w-full"
 							required
-						/>
-					</div>
-					<div className="flex-1">
-						<FormField
-							control={form.control}
-							name="occasion"
-							render={({field}) => (
-								<FormItem className="flex flex-col">
-									<FormLabel>Occasion</FormLabel>
-									<Popover>
-										<PopoverTrigger asChild>
-											<FormControl>
-												<Button
-													variant="outline"
-													role="combobox"
-													className={cn(
-														'w-full justify-between',
-														!field.value && 'text-muted-foreground',
-													)}
-												>
-													{field.value || 'Select an occasion'}
-													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-												</Button>
-											</FormControl>
-										</PopoverTrigger>
-										<PopoverContent className="w-full p-0">
-											<Command>
-												<CommandInput
-													placeholder="Search occasion..."
-													value={occasionInput}
-													onValueChange={setOccasionInput}
-												/>
-												<CommandList>
-													<CommandEmpty>
-														{occasionInput && (
-															<CommandItem
-																onSelect={() => {
-																	form.setValue('occasion', occasionInput);
-																	setOccasion(occasionInput);
-																}}
-															>
-																Create &ldquo;{occasionInput}&rdquo;
-															</CommandItem>
-														)}
-														{!occasionInput && 'No occasion found.'}
-													</CommandEmpty>
-													<CommandGroup>
-														{occasions.map((occ) => (
-															<CommandItem
-																value={occ}
-																key={occ}
-																onSelect={() => {
-																	form.setValue('occasion', occ);
-																	setOccasion(occ);
-																}}
-															>
-																<Check
-																	className={cn(
-																		'mr-2 h-4 w-4',
-																		occ === field.value
-																			? 'opacity-100'
-																			: 'opacity-0',
-																	)}
-																/>
-																{occ}
-															</CommandItem>
-														))}
-													</CommandGroup>
-												</CommandList>
-											</Command>
-										</PopoverContent>
-									</Popover>
-								</FormItem>
-							)}
 						/>
 					</div>
 				</div>
