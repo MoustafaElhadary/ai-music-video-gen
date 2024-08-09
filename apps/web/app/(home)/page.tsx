@@ -5,7 +5,7 @@ import {SignedIn, SignedOut, SignInButton, UserButton} from '@clerk/nextjs';
 import {FlipWords} from '@web/components/ui/flip-words';
 import React, {useRef} from 'react';
 import {FAQ} from './faq';
-import GiddyForm from './giddyForm';
+import GiddyForm from './form/giddyForm';
 import {WhyGetGiddy} from './whyGetGiddy';
 
 const Page: React.FC = () => {
@@ -69,7 +69,7 @@ const Page: React.FC = () => {
 						<div className="mx-auto max-w-md">
 							<GiddyForm textboxRef={textboxRef} />
 							<p className="mt-4 text-center text-lg">
-								<span className="line-through font-bold">$37.00</span>
+								<span className="line-through font-bold">$37.00</span>{' '}
 								<span className="font-bold text-green-600">$19.99</span> for
 								early access!
 							</p>
