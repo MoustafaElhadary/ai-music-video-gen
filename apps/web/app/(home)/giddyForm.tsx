@@ -1,34 +1,75 @@
-import {zodResolver} from '@hookform/resolvers/zod';
-import {Combobox, ComboboxOption} from '@web/components/ui/combobox';
-import {Form} from '@web/components/ui/form';
-import {Input} from '@web/components/ui/input';
-import React, {useEffect, useState} from 'react';
+/* eslint-disable react/no-unescaped-entities */
 import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
+import {trpc} from '@web/lib/trpc/client';
+import {useRouter} from 'next/navigation';
+import {toast} from 'sonner';
+import {Button} from '@web/components/ui/button';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@web/components/ui/form';
+import {Input} from '@web/components/ui/input';
+import {Textarea} from '@web/components/ui/textarea';
+import {Combobox} from '@web/components/ui/combobox';
 
 const MAX_CHARS = 200;
-const PLACEHOLDER_INTERVAL = 3000;
-
-const placeholders = [
-	"🎵 Bestie's birthday bash vibes",
-	"💖 Parents' anniversary feels",
-	"🎓 Grad's epic journey remix",
-	'🌟 Crush-worthy confession track',
-	'🎉 Squad goals celebration mix',
-];
 
 const FormSchema = z.object({
-	occasion: z.string().optional(),
+	occasion: z.string().min(1, 'Occasion is required'),
+	recipientName: z.string().min(1, "Recipient's name is required"),
+	prompt: z
+		.string()
+		.min(1, 'Prompt is required')
+		.max(MAX_CHARS, `Prompt must be ${MAX_CHARS} characters or less`),
 });
 
-const GiddyForm: React.FC = () => {
-	const [prompt, setPrompt] = useState('');
-	const [placeholderIndex, setPlaceholderIndex] = useState(0);
-	const [charCount, setCharCount] = useState(0);
-	const [recipientName, setRecipientName] = useState('');
+type FormValues = z.infer<typeof FormSchema>;
 
-	const [occasion, setOccasion] = useState<string | undefined>(undefined);
-	const [occasions, setOccasions] = useState<ComboboxOption[]>([
+const GiddyForm = () => {
+	const router = useRouter();
+	const utils = trpc.useUtils();
+
+	const form = useForm<FormValues>({
+		resolver: zodResolver(FormSchema),
+		defaultValues: {
+			occasion: '',
+			recipientName: '',
+			prompt: '',
+		},
+	});
+
+	const onSuccess = async (data?: {error?: string}) => {
+		if (data?.error) {
+			toast.error(data.error);
+			return;
+		}
+
+		await utils.generationRequests.getAll.invalidate();
+		router.refresh();
+		toast.success('Giddy video created successfully!');
+	};
+
+	const onError = (data: {error: string}) => {
+		toast.error(data.error);
+	};
+
+	const {mutate: createGenerationRequest, isLoading: isCreating} =
+		trpc.generationRequests.create.useMutation({
+			onSuccess: () => onSuccess(),
+			onError: (err) => onError({error: err.message}),
+		});
+
+	const handleSubmit = (values: FormValues) => {
+		createGenerationRequest(values);
+	};
+
+	const occasions = [
 		{value: 'Birthday', label: 'Birthday'},
 		{value: 'Graduation', label: 'Graduation'},
 		{value: 'Wedding', label: 'Wedding'},
@@ -37,100 +78,74 @@ const GiddyForm: React.FC = () => {
 		{value: 'Retirement', label: 'Retirement'},
 		{value: 'Holiday', label: 'Holiday'},
 		{value: 'Just Because', label: 'Just Because'},
-	]);
-
-	const form = useForm<z.infer<typeof FormSchema>>({
-		resolver: zodResolver(FormSchema),
-		defaultValues: {
-			occasion: undefined,
-		},
-	});
-
-	useEffect(() => {
-		const intervalId = setInterval(() => {
-			setPlaceholderIndex((prevIndex) => (prevIndex + 1) % placeholders.length);
-		}, PLACEHOLDER_INTERVAL);
-		return () => clearInterval(intervalId);
-	}, []);
-
-	const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		const input = e.target.value;
-		if (input.length <= MAX_CHARS) {
-			setPrompt(input);
-			setCharCount(input.length);
-		}
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		console.log('Submitted prompt:', prompt);
-		console.log('Recipient Name:', recipientName);
-
-		// Add your submission logic here
-	};
+	];
 
 	return (
 		<Form {...form}>
-			<form onSubmit={handleSubmit} className="space-y-4">
-				<div className="flex space-x-4">
-					<div className="flex-1">
-						<Combobox
-							mode="single"
-							options={occasions}
-							placeholder="Select occasion..."
-							selected={occasion || ''}
-							onChange={(value) => {
-								setOccasion(value as string);
-								form.setValue('occasion', value as string);
-							}}
-							onCreate={(value) => {
-								const newOption = {value, label: value};
-								setOccasions([...occasions, newOption]);
-								setOccasion(value);
-								form.setValue('occasion', value);
-							}}
-						/>
-						<label
-							htmlFor="recipientName"
-							className="block text-sm font-medium text-gray-700 mb-1"
-						>
-							Recipient&apos;s First Name
-						</label>
-						<Input
-							type="text"
-							id="recipientName"
-							value={recipientName}
-							onChange={(e) => setRecipientName(e.target.value)}
-							className="w-full"
-							required
-						/>
-					</div>
-				</div>
-				<div className="relative">
-					<label
-						htmlFor="prompt"
-						className="block text-sm font-medium text-gray-700 mb-1"
-					>
-						What should the song be about?
-					</label>
-					<textarea
-						id="prompt"
-						placeholder={placeholders[placeholderIndex]}
-						value={prompt}
-						onChange={handlePromptChange}
-						className="w-full h-32 rounded-lg border border-blue-700 bg-white px-4 py-3 text-blue-900 focus:border-blue-500 focus:outline-none text-base resize-none"
-						required
-					/>
-					<div className="absolute bottom-2 right-2 text-sm text-gray-500">
-						{charCount}/{MAX_CHARS}
-					</div>
-				</div>
-				<button
+			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="occasion"
+					render={({field}) => (
+						<FormItem>
+							<FormLabel>Occasion</FormLabel>
+							<FormControl>
+								<Combobox
+									selected={field.value}
+									options={occasions}
+									placeholder="Select an occasion"
+									mode="single"
+									{...field}
+									onChange={(value) => field.onChange(value as string)}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="recipientName"
+					render={({field}) => (
+						<FormItem>
+							<FormLabel>Recipient's First Name</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="prompt"
+					render={({field}) => (
+						<FormItem>
+							<FormLabel>What should the song be about?</FormLabel>
+							<FormControl>
+								<Textarea
+									{...field}
+									className="h-32 resize-none"
+									maxLength={MAX_CHARS}
+								/>
+							</FormControl>
+							<div className="text-sm text-muted-foreground text-right">
+								{field.value.length}/{MAX_CHARS}
+							</div>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<Button
 					type="submit"
-					className="w-full rounded-lg bg-blue-700 px-6 py-3 font-bold text-white hover:bg-blue-600 text-lg transition-all duration-300 transform hover:scale-105"
+					className="w-full bg-blue-700"
+					disabled={isCreating}
 				>
-					Create My Giddy Video! 🎬
-				</button>
+					{isCreating ? 'Creating...' : 'Create My Giddy Video! 🎬'}
+				</Button>
 			</form>
 		</Form>
 	);

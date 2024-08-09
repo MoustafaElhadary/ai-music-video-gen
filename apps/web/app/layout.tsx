@@ -1,7 +1,10 @@
+import {ClerkProvider} from '@clerk/nextjs';
+import {ThemeProvider} from '@web/components/ThemeProvider';
+import TrpcProvider from '@web/lib/trpc/Provider';
 import type {Metadata} from 'next';
 import {Inter} from 'next/font/google';
+import {cookies} from 'next/headers';
 import './globals.css';
-import {ThemeProvider} from '@web/components/ThemeProvider';
 
 const inter = Inter({subsets: ['latin']});
 
@@ -23,7 +26,11 @@ export default function RootLayout({
 					defaultTheme="light"
 					disableTransitionOnChange
 				>
-					{children}
+					<ClerkProvider>
+						<TrpcProvider cookies={cookies().toString()}>
+							{children}
+						</TrpcProvider>
+					</ClerkProvider>
 				</ThemeProvider>
 			</body>
 		</html>

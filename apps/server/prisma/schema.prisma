@@ -1,17 +1,17 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../../../node_modules/.prisma/client"
+  // output   = "../../../node_modules/.prisma/client"
 }
 
-generator zod {
-  provider              = "zod-prisma"
-  output                = "./zod"
-  prismaJsonNullability = "true"
-  relationModel         = "true"
-  useDecimalJs          = "true"
-  modelCase             = "camelCase"
-  modelSuffix           = "Schema"
-}
+// generator zod {
+//   provider              = "zod-prisma"
+//   output                = "./zod"
+//   prismaJsonNullability = "true"
+//   relationModel         = "true"
+//   useDecimalJs          = "true"
+//   modelCase             = "camelCase"
+//   modelSuffix           = "Schema"
+// }
 
 datasource db {
   provider  = "postgresql"
@@ -26,4 +26,21 @@ model Book {
   rating    Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GenerationRequest {
+  id            String        @id @default(cuid())
+  occasion      String
+  recipientName String
+  prompt        String
+  status        RequestStatus @default(SUBMITTED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+enum RequestStatus {
+  SUBMITTED
+  PROCESSING
+  COMPLETED
+  FAILED
 }

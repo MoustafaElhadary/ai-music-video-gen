@@ -17,6 +17,7 @@ export class TrpcService {
       };
     },
   });
+
   router = this.trpc.router;
   mergeRouters = this.trpc.mergeRouters;
 

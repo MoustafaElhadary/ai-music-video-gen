@@ -91,7 +91,7 @@ export function Combobox({
 						// shouldFilter={true}
 					>
 						<CommandInput
-							placeholder={placeholder ?? 'Cari Item...'}
+							placeholder={placeholder ?? '...'}
 							value={query}
 							onValueChange={(value: string) => setQuery(value)}
 						/>
