@@ -1,6 +1,5 @@
 import 'server-only';
 
-//  import { getUserAuth } from "@web/lib/auth/utils";
 import {env} from '@web/lib/env.mjs';
 
 import {createTRPCProxyClient, httpBatchLink, loggerLink} from '@trpc/client';

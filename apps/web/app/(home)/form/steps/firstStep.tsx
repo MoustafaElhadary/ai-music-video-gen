@@ -43,12 +43,13 @@ export const FirstStep = ({
 				setCurrentGenerationId(data.id);
 				setCurrentStep(1);
 			},
-			onError: (err) => toast.error(err.message),
+			onError: (err) => toast.error(JSON.stringify(err)),
 		});
 
 	const {mutate: updateGenerationRequest, isLoading: isUpdating} =
 		trpc.generationRequests.update.useMutation({
-			onError: (err) => toast.error(err.message),
+			onSuccess: () => setCurrentStep(1),
+			onError: (err) => toast.error(JSON.stringify(err)),
 		});
 
 	const handleSubmit = async (values: FormValues) => {
@@ -67,9 +68,15 @@ export const FirstStep = ({
 			createGenerationRequest(values);
 		}
 	};
+
+	console.log('Form errors:', form.formState.errors);
+
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+			<form
+				onSubmit={(e) => form.handleSubmit(handleSubmit)(e)}
+				className="space-y-4"
+			>
 				<FormField
 					control={form.control}
 					name="occasion"
@@ -78,7 +85,7 @@ export const FirstStep = ({
 							<FormLabel>Occasion</FormLabel>
 							<FormControl>
 								<Combobox
-									selected={field.value}
+									selected={field.value || ''}
 									options={occasions}
 									placeholder="Select an occasion"
 									mode="single"
@@ -130,6 +137,7 @@ export const FirstStep = ({
 					type="submit"
 					className="w-full bg-blue-700"
 					disabled={isCreating || isUpdating}
+					onClick={() => console.log('Button clicked')}
 				>
 					{isCreating || isUpdating
 						? 'Processing...'

@@ -3,9 +3,11 @@
 import {useUser} from '@clerk/nextjs';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Button} from '@web/components/ui/button';
+import {useCallback, useState} from 'react';
 
+import {FileUploader} from '@web/components/FileUploader';
 import useLocalStorage from '@web/lib/useLocalStorage';
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {FirstStep} from './steps/firstStep';
 import {FormSchema, FormValues} from './utils';
@@ -44,21 +46,23 @@ const giddyStepsData = [
 	},
 ];
 
-const GiddyForm = ({
-	textboxRef,
-}: {
-	textboxRef: React.RefObject<HTMLHeadingElement>;
-}) => {
-	const {isLoaded} = useUser();
+const VideoGenerationForm = () => {
 	const [storedFormData, setStoredFormData] = useLocalStorage<FormValues>(
-		'giddyFormData',
-		{occasion: '', recipientName: '', prompt: ''},
+		'video-generation-form',
+		{
+			occasion: '',
+			recipientName: '',
+			prompt: '',
+			senderName: '',
+			senderPhoneNumber: '',
+		},
 	);
 	const [giddySteps] = useLocalStorage('giddySteps', giddyStepsData);
 	const [currentStep, setCurrentStep] = useState(0);
 	const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(
 		null,
 	);
+	const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -73,14 +77,14 @@ const GiddyForm = ({
 	}, [form, setStoredFormData]);
 
 	const occasions = [
-		{value: 'Birthday', label: 'Birthday'},
-		{value: 'Graduation', label: 'Graduation'},
-		{value: 'Wedding', label: 'Wedding'},
-		{value: 'Anniversary', label: 'Anniversary'},
-		{value: 'New Job', label: 'New Job'},
-		{value: 'Retirement', label: 'Retirement'},
-		{value: 'Holiday', label: 'Holiday'},
-		{value: 'Just Because', label: 'Just Because'},
+		'Birthday',
+		'Graduation',
+		'Wedding',
+		'Anniversary',
+		'New Job',
+		'Retirement',
+		'Holiday',
+		'Just Because',
 	];
 
 	const getStepHeaderText = (step: number) => {
@@ -94,7 +98,12 @@ const GiddyForm = ({
 		return headers[step] || giddySteps[step]?.text || '';
 	};
 
-	if (!isLoaded) return <div>Loading...</div>;
+	const handleFileChange = useCallback(
+		(files: File[]) => {
+			setUploadedFiles(files);
+		},
+		[setUploadedFiles],
+	);
 
 	return (
 		<>
@@ -114,14 +123,17 @@ const GiddyForm = ({
 					</li>
 				))}
 			</ol>
-			<h2 className="mb-6 text-center text-2xl font-bold" ref={textboxRef}>
+			<h2 className="mb-6 text-center text-2xl font-bold">
 				{getStepHeaderText(currentStep)}
 			</h2>
 
 			{currentStep === 0 && (
 				<FirstStep
 					form={form}
-					occasions={occasions}
+					occasions={occasions.map((_occasion) => ({
+						value: _occasion,
+						label: _occasion,
+					}))}
 					currentGenerationId={currentGenerationId}
 					setCurrentGenerationId={setCurrentGenerationId}
 					setCurrentStep={setCurrentStep}
@@ -131,6 +143,10 @@ const GiddyForm = ({
 			{currentStep === 1 && (
 				<div>
 					<p>Upload your favorite photos or video clips here.</p>
+					<FileUploader
+						onChange={handleFileChange}
+						initialFiles={uploadedFiles}
+					/>
 				</div>
 			)}
 
@@ -158,4 +174,4 @@ const GiddyForm = ({
 	);
 };
 
-export default GiddyForm;
+export default VideoGenerationForm;

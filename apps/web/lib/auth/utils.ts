@@ -12,7 +12,6 @@ export type AuthSession = {
 };
 
 export const getUserAuth = async () => {
-	// find out more about setting up 'sessionClaims' (custom sessions) here: https://clerk.com/docs/backend-requests/making/custom-session-token
 	const {userId} = auth();
 	const user = await currentUser();
 

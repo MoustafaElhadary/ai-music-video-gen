@@ -36,6 +36,7 @@ model GenerationRequest {
   status        RequestStatus @default(SUBMITTED)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  //TODO: add clerk user id
 }
 
 enum RequestStatus {

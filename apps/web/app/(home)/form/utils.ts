@@ -9,5 +9,7 @@ export const FormSchema = z.object({
 		.string()
 		.min(1, 'Prompt is required')
 		.max(MAX_CHARS, `Prompt must be ${MAX_CHARS} characters or less`),
+	senderName: z.string(),
+	senderPhoneNumber: z.string(),
 });
 export type FormValues = z.infer<typeof FormSchema>;
