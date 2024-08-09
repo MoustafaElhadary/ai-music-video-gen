@@ -58,7 +58,6 @@ export class GenerationRequestService {
       occasion: z.string(),
       recipientName: z.string(),
       prompt: z.string(),
-      status: z.string().optional(),
     });
 
   async createGenerationRequest(
@@ -78,7 +77,6 @@ export class GenerationRequestService {
       occasion: z.string().optional(),
       recipientName: z.string().optional(),
       prompt: z.string().optional(),
-      status: z.string().optional(),
     }),
   });
 

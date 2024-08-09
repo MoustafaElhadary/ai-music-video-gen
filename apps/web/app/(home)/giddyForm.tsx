@@ -17,6 +17,9 @@ import {
 import {Input} from '@web/components/ui/input';
 import {Textarea} from '@web/components/ui/textarea';
 import {Combobox} from '@web/components/ui/combobox';
+import {useUser, useSignIn, useClerk} from '@clerk/nextjs';
+import useLocalStorage from '@web/lib/useLocalStorage';
+import {useEffect} from 'react';
 
 const MAX_CHARS = 200;
 
@@ -34,15 +37,28 @@ type FormValues = z.infer<typeof FormSchema>;
 const GiddyForm = () => {
 	const router = useRouter();
 	const utils = trpc.useUtils();
-
-	const form = useForm<FormValues>({
-		resolver: zodResolver(FormSchema),
-		defaultValues: {
+	const {isLoaded, isSignedIn} = useUser();
+	const {openSignIn} = useClerk();
+	const [storedFormData, setStoredFormData] = useLocalStorage<FormValues>(
+		'giddyFormData',
+		{
 			occasion: '',
 			recipientName: '',
 			prompt: '',
 		},
+	);
+
+	const form = useForm<FormValues>({
+		resolver: zodResolver(FormSchema),
+		defaultValues: storedFormData,
 	});
+
+	useEffect(() => {
+		const subscription = form.watch((value) => {
+			setStoredFormData(value as FormValues);
+		});
+		return () => subscription.unsubscribe();
+	}, [form, setStoredFormData]);
 
 	const onSuccess = async (data?: {error?: string}) => {
 		if (data?.error) {
@@ -53,6 +69,7 @@ const GiddyForm = () => {
 		await utils.generationRequests.getAll.invalidate();
 		router.refresh();
 		toast.success('Giddy video created successfully!');
+		setStoredFormData({occasion: '', recipientName: '', prompt: ''});
 	};
 
 	const onError = (data: {error: string}) => {
@@ -65,7 +82,15 @@ const GiddyForm = () => {
 			onError: (err) => onError({error: err.message}),
 		});
 
-	const handleSubmit = (values: FormValues) => {
+	const handleSubmit = async (values: FormValues) => {
+		if (!isLoaded) return;
+
+		if (!isSignedIn) {
+			toast.error('Please sign in or create an account to create a Giddy video');
+			openSignIn();
+			return;
+		}
+
 		createGenerationRequest(values);
 	};
 
@@ -79,6 +104,10 @@ const GiddyForm = () => {
 		{value: 'Holiday', label: 'Holiday'},
 		{value: 'Just Because', label: 'Just Because'},
 	];
+
+	if (!isLoaded) {
+		return <div>Loading...</div>;
+	}
 
 	return (
 		<Form {...form}>
@@ -144,7 +173,11 @@ const GiddyForm = () => {
 					className="w-full bg-blue-700"
 					disabled={isCreating}
 				>
-					{isCreating ? 'Creating...' : 'Create My Giddy Video! 🎬'}
+					{isCreating
+						? 'Creating...'
+						: isSignedIn
+							? 'Create My Giddy Video! 🎬'
+							: 'Sign In to Create'}
 				</Button>
 			</form>
 		</Form>
