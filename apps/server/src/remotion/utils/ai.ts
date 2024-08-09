@@ -40,13 +40,7 @@ export const messages: CoreMessage[] = [
   { role: 'user', content: userPrompt },
 ];
 
-export const fetchAIScenes = async ({
-  apiKey,
-  baseId,
-  table,
-  view,
-  fieldNames,
-}: ScenesRequestParams) => {
+export const fetchAIScenes = async ({ fieldNames }: ScenesRequestParams) => {
   const result = await generateObject({
     model: openai('gpt-4o-2024-05-13'),
     schema: z.object({
@@ -63,6 +57,7 @@ export const fetchAIScenes = async ({
     .map((record) => ({
       durationInSeconds: record.durationInSeconds,
       startFrom: record.startFrom,
+      // TODO: remove
       // media: record.media?.map(
       // 	({url, type}: {url: string; type: string}) => ({url, type}),
       // ),
@@ -83,7 +78,7 @@ export const fetchAIScenes = async ({
     const dataWithStartTimes = data.map((scene: SceneData) => {
       const startFrom = scene.startFrom ?? timePointer;
       timePointer = startFrom + scene.durationInSeconds;
-      // this logic was putting pointer behind the latest time
+      // This logic was putting pointer behind the latest time
       // timePointer =
       //   startFrom + scene.durationInSeconds > timePointer
       //     ? startFrom + scene.durationInSeconds

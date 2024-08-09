@@ -6,8 +6,6 @@ import {FlipWords} from '@web/components/ui/flip-words';
 import React, {useRef} from 'react';
 import {FAQ} from './faq';
 import GiddyForm from './giddyForm';
-import {GiddySteps} from './giddySteps';
-import {VideoShowcase} from './videoShowcase';
 import {WhyGetGiddy} from './whyGetGiddy';
 
 const Page: React.FC = () => {
@@ -62,23 +60,16 @@ const Page: React.FC = () => {
 						>
 							GIDDY UP!
 						</button>
-						<p className="mx-auto mb-8 max-w-2xl text-center text-lg">
+						{/* <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
 							Giddy&apos;s got your back! We&apos;re the AI wizards turning your
 							wildest ideas into mind-blowing music videos. Perfect for
 							surprising your squad, serenading your crush, or just flexing your
 							creative muscles. 🚀🎶
-						</p>
+						</p> */}
 						<div className="mx-auto max-w-md">
-							<GiddySteps />
-							<h2
-								className="mb-6 text-center text-2xl font-bold"
-								ref={textboxRef}
-							>
-								Ready to Get Giddy?
-							</h2>
-							<GiddyForm />
+							<GiddyForm textboxRef={textboxRef} />
 							<p className="mt-4 text-center text-lg">
-								<span className="line-through font-bold">$37.00</span>{' '}
+								<span className="line-through font-bold">$37.00</span>
 								<span className="font-bold text-green-600">$19.99</span> for
 								early access!
 							</p>

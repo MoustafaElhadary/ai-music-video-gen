@@ -1,11 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
-import {useForm} from 'react-hook-form';
+import {useClerk, useUser} from '@clerk/nextjs';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {z} from 'zod';
-import {trpc} from '@web/lib/trpc/client';
-import {useRouter} from 'next/navigation';
-import {toast} from 'sonner';
 import {Button} from '@web/components/ui/button';
+import {Combobox} from '@web/components/ui/combobox';
 import {
 	Form,
 	FormControl,
@@ -16,10 +13,13 @@ import {
 } from '@web/components/ui/form';
 import {Input} from '@web/components/ui/input';
 import {Textarea} from '@web/components/ui/textarea';
-import {Combobox} from '@web/components/ui/combobox';
-import {useUser, useSignIn, useClerk} from '@clerk/nextjs';
+import {trpc} from '@web/lib/trpc/client';
 import useLocalStorage from '@web/lib/useLocalStorage';
+import {useRouter} from 'next/navigation';
 import {useEffect} from 'react';
+import {useForm} from 'react-hook-form';
+import {toast} from 'sonner';
+import {z} from 'zod';
 
 const MAX_CHARS = 200;
 
@@ -34,7 +34,19 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-const GiddyForm = () => {
+type GiddyStep = {
+	stepNumber: number;
+	stepId: string;
+	icon: string;
+	text: string;
+	finished: boolean;
+};
+
+const GiddyForm = ({
+	textboxRef,
+}: {
+	textboxRef: React.RefObject<HTMLHeadingElement>;
+}) => {
 	const router = useRouter();
 	const utils = trpc.useUtils();
 	const {isLoaded, isSignedIn} = useUser();
@@ -46,6 +58,46 @@ const GiddyForm = () => {
 			recipientName: '',
 			prompt: '',
 		},
+	);
+	const [giddySteps, setGiddySteps] = useLocalStorage<GiddyStep[]>(
+		'giddySteps',
+		[
+			{
+				stepNumber: 1,
+				stepId: 'write_prompt',
+				icon: '✍️',
+				text: 'Write a creative prompt describing your dream music video',
+				finished: false,
+			},
+			{
+				stepNumber: 2,
+				stepId: 'upload_media',
+				icon: '📸',
+				text: 'Upload your favorite photos or video clips',
+				finished: false,
+			},
+			{
+				stepNumber: 3,
+				stepId: 'ai_magic',
+				icon: '🤖',
+				text: 'Let our AI work its magic to create your unique music video',
+				finished: false,
+			},
+			{
+				stepNumber: 4,
+				stepId: 'add_phone',
+				icon: '📱',
+				text: "Add the recipient's phone number",
+				finished: false,
+			},
+			{
+				stepNumber: 5,
+				stepId: 'share_creation',
+				icon: '🚀',
+				text: 'Share your Giddy creation instantly!',
+				finished: false,
+			},
+		],
 	);
 
 	const form = useForm<FormValues>({
@@ -86,7 +138,9 @@ const GiddyForm = () => {
 		if (!isLoaded) return;
 
 		if (!isSignedIn) {
-			toast.error('Please sign in or create an account to create a Giddy video');
+			toast.error(
+				'Please sign in or create an account to create a Giddy video',
+			);
 			openSignIn();
 			return;
 		}
@@ -110,77 +164,98 @@ const GiddyForm = () => {
 	}
 
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-				<FormField
-					control={form.control}
-					name="occasion"
-					render={({field}) => (
-						<FormItem>
-							<FormLabel>Occasion</FormLabel>
-							<FormControl>
-								<Combobox
-									selected={field.value}
-									options={occasions}
-									placeholder="Select an occasion"
-									mode="single"
-									{...field}
-									onChange={(value) => field.onChange(value as string)}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+		<>
+			<>
+				<h2 className="mb-6 text-center text-2xl font-bold">
+					The Giddy Magic in 5 Steps
+				</h2>
+				<ol className="list-none space-y-4 mb-8 text-base">
+					{giddySteps.map((step, index) => (
+						<li key={index} className="flex items-center">
+							<span className="mr-4 text-2xl">{step.icon}</span>
+							<span>
+								{step.stepNumber}. {step.text}
+							</span>
+						</li>
+					))}
+				</ol>
+			</>
+			<h2 className="mb-6 text-center text-2xl font-bold" ref={textboxRef}>
+				Ready to Get Giddy?
+			</h2>
 
-				<FormField
-					control={form.control}
-					name="recipientName"
-					render={({field}) => (
-						<FormItem>
-							<FormLabel>Recipient's First Name</FormLabel>
-							<FormControl>
-								<Input {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+					<FormField
+						control={form.control}
+						name="occasion"
+						render={({field}) => (
+							<FormItem>
+								<FormLabel>Occasion</FormLabel>
+								<FormControl>
+									<Combobox
+										selected={field.value}
+										options={occasions}
+										placeholder="Select an occasion"
+										mode="single"
+										{...field}
+										onChange={(value) => field.onChange(value as string)}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-				<FormField
-					control={form.control}
-					name="prompt"
-					render={({field}) => (
-						<FormItem>
-							<FormLabel>What should the song be about?</FormLabel>
-							<FormControl>
-								<Textarea
-									{...field}
-									className="h-32 resize-none"
-									maxLength={MAX_CHARS}
-								/>
-							</FormControl>
-							<div className="text-sm text-muted-foreground text-right">
-								{field.value.length}/{MAX_CHARS}
-							</div>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+					<FormField
+						control={form.control}
+						name="recipientName"
+						render={({field}) => (
+							<FormItem>
+								<FormLabel>Recipient's First Name</FormLabel>
+								<FormControl>
+									<Input {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-				<Button
-					type="submit"
-					className="w-full bg-blue-700"
-					disabled={isCreating}
-				>
-					{isCreating
-						? 'Creating...'
-						: isSignedIn
-							? 'Create My Giddy Video! 🎬'
-							: 'Sign In to Create'}
-				</Button>
-			</form>
-		</Form>
+					<FormField
+						control={form.control}
+						name="prompt"
+						render={({field}) => (
+							<FormItem>
+								<FormLabel>What should the song be about?</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										className="h-32 resize-none"
+										maxLength={MAX_CHARS}
+									/>
+								</FormControl>
+								<div className="text-sm text-muted-foreground text-right">
+									{field.value.length}/{MAX_CHARS}
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<Button
+						type="submit"
+						className="w-full bg-blue-700"
+						disabled={isCreating}
+					>
+						{isCreating
+							? 'Creating...'
+							: isSignedIn
+								? 'Create My Giddy Video! 🎬'
+								: 'Sign In to Create'}
+					</Button>
+				</form>
+			</Form>
+		</>
 	);
 };
 
