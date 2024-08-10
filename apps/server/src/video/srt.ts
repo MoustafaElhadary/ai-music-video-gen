@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { z } from 'zod';
 export const CaptionSchema = z.object({
   id: z.number(),
@@ -6,9 +7,6 @@ export const CaptionSchema = z.object({
   text: z.string(),
   start: z.number(),
   tokens: z.array(z.number()),
-  avg_logprob: z.number(),
-  temperature: z.number(),
-  no_speech_prob: z.number(),
   compression_ratio: z.number(),
 });
 

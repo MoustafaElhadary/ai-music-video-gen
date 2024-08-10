@@ -1,5 +1,3 @@
-/* eslint-disable no-useless-constructor */
-
 import { Injectable } from '@nestjs/common';
 import { TrpcService } from '@server/trpc/trpc.service';
 import { GenerationRequestService } from './generation-request.service';
@@ -40,5 +38,8 @@ export class GenerationRequestRouter {
       .mutation(async ({ input }) =>
         this.generationRequestService.deleteGenerationRequest(input),
       ),
+    getQueueStatus: this.trpc.protectedProcedure.query(async () =>
+      this.generationRequestService.getQueueStatus(),
+    ),
   });
 }

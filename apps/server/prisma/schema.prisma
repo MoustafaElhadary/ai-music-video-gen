@@ -29,15 +29,27 @@ model Book {
 }
 
 model GenerationRequest {
-  id            String        @id @default(cuid())
-  userId        String // Added this line
-  occasion      String
-  recipientName String
-  prompt        String
-  senderName    String
-  status        RequestStatus @default(STARTED)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  userId         String
+  occasion       String
+  recipientName  String
+  prompt         String
+  senderName     String
+  status         RequestStatus @default(STARTED)
+  sunoSongId     String?
+  finalVideoPath String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  videoImages    VideoImage[]
+}
+
+model VideoImage {
+  id                  String            @id @default(cuid())
+  photoId             String
+  generationRequest   GenerationRequest @relation(fields: [generationRequestId], references: [id])
+  generationRequestId String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 }
 
 enum RequestStatus {

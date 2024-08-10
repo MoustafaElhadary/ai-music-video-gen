@@ -80,7 +80,7 @@ const AudioViz: React.FC<{
     fps,
     frame,
     audioData,
-    numberOfSamples, // Use more samples to get a nicer visualisation
+    numberOfSamples, // Use more samples to get a nicer visualization
   });
 
   // Pick the low values because they look nicer than high values

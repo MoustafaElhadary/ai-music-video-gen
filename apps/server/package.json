@@ -22,7 +22,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "remotion:studio": "remotion studio src/remotion/index.ts ",
+    "remotion:studio": "remotion studio src/remotion/index.ts --port 3002",
     "stripe:listen": "stripe listen --forward-to localhost:4000/api/stripe/webhook"
 
   },

@@ -1,8 +1,8 @@
 import { Controller, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '@server/prisma/prisma.service';
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
+import { StripeService } from './stripe.service';
 
 @Controller('stripe')
 export class StripeController {
@@ -10,7 +10,7 @@ export class StripeController {
 
   constructor(
     private configService: ConfigService,
-    private prisma: PrismaService,
+    private stripeService: StripeService,
   ) {
     this.stripe = new Stripe(
       this.configService.get<string>('STRIPE_SECRET_KEY')!,
@@ -49,10 +49,7 @@ export class StripeController {
 
     console.log({ generationRequestId, metadata: session.metadata });
     if (generationRequestId) {
-      await this.prisma.generationRequest.update({
-        where: { id: generationRequestId },
-        data: { status: 'PAID' },
-      });
+      await this.stripeService.handleSuccessfulPayment(session);
     }
   }
 }

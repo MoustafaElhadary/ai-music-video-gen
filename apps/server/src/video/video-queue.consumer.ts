@@ -1,27 +1,37 @@
+/* eslint-disable camelcase */
+
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GenerationRequest } from '@prisma/client';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
-import { testVideoData, VIDEO_QUEUE } from '@server/core/constants';
+import { VIDEO_QUEUE } from '@server/core/constants';
 import { randomString } from '@server/core/utils';
+import { PrismaService } from '@server/prisma/prisma.service';
+import { AudioGramSchema } from '@server/remotion/Composition';
 import {
   CompositionId,
   getCompositionProps,
 } from '@server/remotion/type-utils';
+import { SunoApiService } from '@server/suno-api/suno-api.service';
 import { createClient } from '@supabase/supabase-js';
 import { type Job } from 'bull';
 import * as fs from 'fs';
 import path from 'path';
 import Replicate from 'replicate';
+import { z } from 'zod';
 import { Caption, convertToSRT } from './srt';
-import { SunoApiService } from '@server/suno-api/suno-api.service';
+import { GenerationRequestService } from '@server/generation-request/generation-request.service';
+import { AudioInfo } from '@server/suno-api/types';
 
 @Processor(VIDEO_QUEUE)
 export class VideoQueueConsumer {
   constructor(
     private configService: ConfigService,
     private sunoApi: SunoApiService,
+    private generationRequestService: GenerationRequestService,
+    private prisma: PrismaService,
   ) {}
 
   private readonly logger = new Logger(VideoQueueConsumer.name);
@@ -35,48 +45,155 @@ export class VideoQueueConsumer {
     this.configService.get('SUPABASE_ANON_KEY') ?? '',
   );
 
-  /**
-   * 1. Get audio file from suno api. send prompt of what the user wants
-   * 2. Get word by word subtitles from openai whisper
-   * 3. create prompts for each section in the lyrics that are witty, engaging and funny
-   * 4. Get images from replicate for each section
-   * 5. Grab some gifs from giphy for each section
-   */
-
   @Process()
-  async transcode(job: Job<unknown>) {
-    this.logger.log('Start transcoding...');
+  async transcode(job: Job<GenerationRequest>) {
+    this.logger.log(`Starting to process job ${job.id}`);
+    const { id, prompt, recipientName } = job.data;
 
-    const song = (
-      await this.sunoApi.getAudioInfo('3d781725-b005-48c7-9af9-4b75325e0719')
-    )[0];
+    try {
+      // 1. Generate audio using Suno API
+      const [audioInfo] = await this.sunoApi.generateAudio({
+        prompt,
+        make_instrumental: false,
+        wait_audio: false,
+      });
 
-    const { duration, audio_url } = song;
-    console.log({ song });
+      if (!audioInfo || !audioInfo.id) {
+        throw new Error('Failed to generate audio');
+      }
 
-    if (!audio_url || !duration) {
-      this.logger.error('Failed to get audio');
-      return;
+      // Update GenerationRequest with Suno song ID
+      await this.generationRequestService.updateGenerationRequest({
+        where: { id },
+        data: { sunoSongId: audioInfo.id, status: 'PROCESSING' },
+      });
+
+      // Poll for audio completion
+      let completedAudioInfo: AudioInfo | null = null;
+      const startTime = Date.now();
+      while (Date.now() - startTime < 300000) {
+        // 5 minutes timeout
+        const [polledAudioInfo] = await this.sunoApi.getAudioInfo(audioInfo.id);
+        if (
+          polledAudioInfo.status === 'complete' &&
+          polledAudioInfo.audio_url &&
+          polledAudioInfo.duration
+        ) {
+          completedAudioInfo = polledAudioInfo;
+          break;
+        }
+        await new Promise((resolve) =>
+          setTimeout(resolve, 5000 + Math.random() * 5000),
+        ); // Wait 5-10 seconds
+      }
+
+      if (!completedAudioInfo || !completedAudioInfo.audio_url) {
+        throw new Error('Audio generation timed out');
+      }
+
+      console.log('audioInfo', completedAudioInfo);
+
+      // 2. Get word-by-word subtitles
+      const subtitles = await this.getWordByWordSubtitles(
+        completedAudioInfo.audio_url,
+      );
+      if (!subtitles) {
+        throw new Error('Failed to get subtitles');
+      }
+      console.log('subtitles length', subtitles.length);
+      console.log('subtitles first 100 characters', subtitles.slice(0, 100));
+
+      // 3. Create video
+      const videoProps: z.infer<typeof AudioGramSchema> = {
+        durationInSeconds: Number(completedAudioInfo.duration),
+        audioOffsetInSeconds: 0,
+        subtitlesFileName: subtitles,
+        audioFileName: completedAudioInfo.audio_url,
+        coverImgFileName:
+          'https://github.com/remotion-dev/template-audiogram/blob/main/public/cover.jpg?raw=true', // TODO:Replace with actual cover image
+        titleText: `A song for ${recipientName}`,
+        titleColor: 'rgba(255, 255, 255, 0.9)',
+        waveColor: '#a3a5ae',
+        subtitlesTextColor: 'rgba(255, 255, 255, 0.93)',
+        subtitlesLinePerPage: 2,
+        subtitlesLineHeight: 60,
+        subtitlesZoomMeasurerSize: 10,
+        onlyDisplayCurrentSentence: true,
+        mirrorWave: true,
+        waveLinesToDisplay: 20,
+        waveFreqRangeStartIndex: 4,
+        waveNumberOfSamples: '256',
+      };
+
+      const videoPath = await this.createVideo(videoProps);
+      if (!videoPath) {
+        throw new Error('Failed to create video');
+      }
+      console.log('videoPath', videoPath);
+
+      // 4. Upload video to Supabase storage
+      const videoUrl = await this.uploadVideo(videoPath);
+      if (!videoUrl) {
+        throw new Error('Failed to upload video');
+      }
+
+      this.logger.log('Video URL:', videoUrl);
+
+      // 5. Update the generation request with the video URL
+      await this.generationRequestService.updateGenerationRequest({
+        where: { id },
+        data: {
+          status: 'COMPLETED',
+          finalVideoPath: videoUrl,
+        },
+      });
+
+      this.logger.log(`Successfully processed job ${job.id}`);
+      return videoUrl;
+    } catch (error) {
+      this.logger.error(`Error processing job ${job.id}:`, error);
+      await this.generationRequestService.updateGenerationRequest({
+        where: { id },
+        data: { status: 'FAILED' },
+      });
+      throw error;
     }
+  }
 
-    const subtitles = await this.getWordByWordSubtitles(audio_url);
+  // Helper method to update the generation request
 
-    console.log({ subtitles });
+  // Update the createVideo method to accept AudioGramSchema props
+  private async createVideo(props: z.infer<typeof AudioGramSchema>) {
+    try {
+      const compositionId: CompositionId = 'Audiogram';
 
-    if (!subtitles) {
-      this.logger.error('Failed to get subtitles');
-      return;
+      const serveUrl = await bundle({
+        entryPoint: path.resolve('./src/remotion/index.ts'),
+        webpackOverride: (config) => config,
+      });
+
+      const inputProps = getCompositionProps(compositionId, props);
+
+      const composition = await selectComposition({
+        serveUrl,
+        id: compositionId,
+        inputProps,
+      });
+
+      const outputLocation = `out/${compositionId}-${randomString(5)}.mp4`;
+      await renderMedia({
+        composition,
+        serveUrl,
+        codec: 'h264',
+        outputLocation,
+        inputProps,
+      });
+
+      return outputLocation;
+    } catch (error) {
+      this.logger.error('Error creating video:', error);
+      throw error;
     }
-
-    const videoPath = await this.createVideo(subtitles, audio_url);
-    if (!videoPath) {
-      this.logger.error('Failed to create video');
-      return;
-    }
-
-    const videoUrl = await this.uploadVideo(videoPath);
-
-    this.logger.log('Video URL:', videoUrl);
   }
 
   private async getWordByWordSubtitles(audioUrl: string) {
@@ -104,74 +221,6 @@ export class VideoQueueConsumer {
       return convertToSRT((output as { segments: Caption[] }).segments);
     } catch (error) {
       this.logger.log('error', error);
-    }
-  }
-
-  private async createVideo(subtitlesFileName: string, audioFileName: string) {
-    try {
-      const compositionId: CompositionId = 'GeneratedVideo';
-
-      // You only have to create a bundle once, and you may reuse it
-      // for multiple renders that you can parametrize using input props.
-      const serveUrl = await bundle({
-        entryPoint: path.resolve('./src/remotion/index.ts'),
-        webpackOverride: (config) => config,
-      });
-
-      console.log({ serveUrl });
-
-      // const inputProps = getCompositionProps(compositionId, {
-      //   // Audio settings
-      //   audioOffsetInSeconds: 2,
-      //   // Title settings
-      //   audioFileName,
-      //   coverImgFileName:
-      //     'https://github.com/remotion-dev/template-audiogram/blob/main/public/cover.jpg?raw=true',
-      //   titleText: '#234 – Test 123',
-      //   titleColor: 'rgba(186, 186, 186, 0.93)',
-      //   // Subtitles settings
-      //   subtitlesFileName,
-      //   onlyDisplayCurrentSentence: true,
-      //   subtitlesTextColor: 'rgba(255, 255, 255, 0.93)',
-      //   subtitlesLinePerPage: 4,
-      //   subtitlesZoomMeasurerSize: 10,
-      //   subtitlesLineHeight: 98,
-
-      //   // Wave settings
-      //   waveColor: '#a3a5ae',
-      //   waveFreqRangeStartIndex: 7,
-      //   waveLinesToDisplay: 29,
-      //   waveNumberOfSamples: '256', // This is string for Remotion controls and will be converted to a number
-      //   mirrorWave: true,
-      //   durationInSeconds: 29.5,
-      // });
-
-      const inputProps = getCompositionProps(compositionId, {
-        data: testVideoData,
-      });
-
-      // Get the composition you want to render. Pass `inputProps` if you
-      // want to customize the duration or other metadata.
-      const composition = await selectComposition({
-        serveUrl,
-        id: compositionId,
-        inputProps,
-      });
-
-      // Render the video. Pass the same `inputProps` again
-      // if your video is parametrized with data.
-      const outputLocation = `out/${compositionId}-${randomString(5)}.mp4`;
-      await renderMedia({
-        composition,
-        serveUrl,
-        codec: 'h264',
-        outputLocation,
-        inputProps,
-      });
-
-      return outputLocation;
-    } catch (error) {
-      this.logger.error(error);
     }
   }
 

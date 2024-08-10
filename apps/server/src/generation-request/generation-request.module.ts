@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { GenerationRequestRouter } from './generation-request.router';
-import { GenerationRequestService } from './generation-request.service';
 import { PrismaService } from '@server/prisma/prisma.service';
 import { TrpcService } from '@server/trpc/trpc.service';
+import { VideoQueueModule } from '@server/video/video-queue.module';
+import { GenerationRequestRouter } from './generation-request.router';
+import { GenerationRequestService } from './generation-request.service';
 
 @Module({
+  imports: [VideoQueueModule],
   providers: [
     GenerationRequestService,
     GenerationRequestRouter,

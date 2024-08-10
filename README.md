@@ -25,8 +25,8 @@ TODO:
 
 ## Stripe
 
-1. add stripe to backend
-2. add stripe to frontend (generate checkout session)
+1. add stripe to backend [done]
+2. add stripe to frontend (generate checkout session) [done]
 
 ## video
 

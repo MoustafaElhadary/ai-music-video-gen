@@ -79,7 +79,7 @@ export function getCompositionProps<T extends CompositionId>(
   return validatedProps;
 }
 
-// example call
+// Example call
 
 // getCompositionProps('Main', {
 //   artists: ['Artist 1', 'Artist 2', 'Artist 3', 'Artist 4'],

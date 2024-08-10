@@ -1,9 +1,11 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PrismaService } from '@server/prisma/prisma.service';
+import { SunoApiModule } from '@server/suno-api/suno-api.module';
 import { VIDEO_QUEUE } from '../core/constants';
 import { VideoQueueConsumer } from './video-queue.consumer';
-import { SunoApiModule } from '@server/suno-api/suno-api.module';
+import { GenerationRequestService } from '@server/generation-request/generation-request.service';
 
 @Module({
   imports: [
@@ -25,6 +27,6 @@ import { SunoApiModule } from '@server/suno-api/suno-api.module';
     SunoApiModule.register(),
   ],
   exports: [BullModule],
-  providers: [VideoQueueConsumer],
+  providers: [VideoQueueConsumer, PrismaService, GenerationRequestService],
 })
 export class VideoQueueModule {}

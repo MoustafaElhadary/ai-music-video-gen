@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { Injectable } from '@nestjs/common';
 import { TrpcService } from '@server/trpc/trpc.service';
 import { StripeService } from './stripe.service';

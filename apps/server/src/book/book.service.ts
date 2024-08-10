@@ -1,18 +1,11 @@
-/* eslint-disable no-useless-constructor */
-import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Book as _Book, Prisma } from '@prisma/client';
-import { VIDEO_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
-import { type Queue } from 'bull';
 import { z } from 'zod';
 
 @Injectable()
 export class BookService {
-  constructor(
-    private prisma: PrismaService,
-    @InjectQueue(VIDEO_QUEUE) private readonly videoQueue: Queue,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   getBookSchema: z.ZodType<Prisma.BookWhereUniqueInput> = z.any();
 
@@ -48,9 +41,6 @@ export class BookService {
   async createBook(
     data: z.infer<typeof this.createBookSchema>,
   ): Promise<_Book> {
-    await this.videoQueue.add({
-      fileName: './file.mp3',
-    });
     return this.prisma.book.create({
       data,
     });

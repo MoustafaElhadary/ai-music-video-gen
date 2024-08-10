@@ -1,15 +1,20 @@
 /* eslint-disable camelcase */
+
 import { Injectable } from '@nestjs/common';
-import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { TRPCError } from '@trpc/server';
+import Stripe from 'stripe';
 import { z } from 'zod';
+import { GenerationRequestService } from '../generation-request/generation-request.service';
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private generationRequestService: GenerationRequestService,
+  ) {
     this.stripe = new Stripe(
       this.configService.get<string>('STRIPE_SECRET_KEY')!,
       {
@@ -90,6 +95,17 @@ export class StripeService {
           message: 'An unknown error occurred',
         });
       }
+    }
+  }
+
+  async handleSuccessfulPayment(session: Stripe.Checkout.Session) {
+    const generationRequestId = session.metadata?.generationRequestId;
+
+    if (generationRequestId) {
+      await this.generationRequestService.updateGenerationRequestStatusAndQueue(
+        generationRequestId,
+        'PAID',
+      );
     }
   }
 }

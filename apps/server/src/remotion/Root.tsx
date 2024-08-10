@@ -1,8 +1,6 @@
-import { testVideoData } from '../core/constants';
 import React, { useEffect } from 'react';
 import { Composition } from 'remotion';
-import { InferProps } from 'remotion/dist/cjs/props-if-has-props';
-import { z } from 'zod';
+import { testVideoData } from '../core/constants';
 import { AudioGramSchema, AudiogramComposition, fps } from './Composition';
 import { srt } from './constants';
 import { GeneratedVideo, GeneratedVideoSchema } from './GeneratedVideo';

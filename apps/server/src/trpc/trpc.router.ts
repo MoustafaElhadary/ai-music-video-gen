@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor */
 import { INestApplication, Injectable } from '@nestjs/common';
 import { BookRouter } from '@server/book/book.router';
 import { GenerationRequestRouter } from '@server/generation-request/generation-request.router';

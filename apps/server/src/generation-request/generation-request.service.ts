@@ -1,15 +1,25 @@
-/* eslint-disable no-useless-constructor */
 import { Injectable } from '@nestjs/common';
 import {
   GenerationRequest as _GenerationRequest,
   Prisma,
+  RequestStatus,
+  VideoImage,
 } from '@prisma/client';
 import { PrismaService } from '@server/prisma/prisma.service';
 import { z } from 'zod';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { VIDEO_QUEUE } from '@server/core/constants';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class GenerationRequestService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(GenerationRequestService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    @InjectQueue(VIDEO_QUEUE) private readonly videoQueue: Queue,
+  ) {}
 
   getGenerationRequestSchema: z.ZodType<Prisma.GenerationRequestWhereUniqueInput> =
     z.object({
@@ -85,6 +95,8 @@ export class GenerationRequestService {
       occasion: z.string().optional(),
       recipientName: z.string().optional(),
       prompt: z.string().optional(),
+      sunoSongId: z.string().optional(),
+      finalVideoPath: z.string().optional(),
     }),
   });
 
@@ -110,8 +122,56 @@ export class GenerationRequestService {
       where,
     });
   }
-}
 
-export type GenerationRequestCreateInput = z.infer<
-  typeof GenerationRequestService.prototype.createGenerationRequestSchema
->;
+  async updateGenerationRequestStatusAndQueue(
+    generationRequestId: string,
+    status: RequestStatus,
+  ): Promise<_GenerationRequest> {
+    this.logger.log(`Updating and queueing request ${generationRequestId}`);
+    const updatedRequest = await this.prisma.generationRequest.update({
+      where: { id: generationRequestId },
+      data: { status },
+    });
+
+    this.logger.log(`Queueing job for request ${generationRequestId}`);
+    const job = await this.videoQueue.add(updatedRequest, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 3000,
+      },
+    });
+    this.logger.log(
+      `Job ${job.id} added to queue for request ${generationRequestId}`,
+    );
+
+    return updatedRequest;
+  }
+
+  // Add a method to check the queue status
+  async getQueueStatus(): Promise<any> {
+    const jobCounts = await this.videoQueue.getJobCounts();
+    this.logger.log(`Current queue status: ${JSON.stringify(jobCounts)}`);
+    return jobCounts;
+  }
+
+  async addVideoImage(
+    generationRequestId: string,
+    photoId: string,
+  ): Promise<VideoImage> {
+    return this.prisma.videoImage.create({
+      data: {
+        photoId,
+        generationRequestId,
+      },
+    });
+  }
+
+  async getVideoImages(generationRequestId: string): Promise<VideoImage[]> {
+    return this.prisma.videoImage.findMany({
+      where: {
+        generationRequestId,
+      },
+    });
+  }
+}

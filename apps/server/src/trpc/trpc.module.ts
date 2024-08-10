@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { BookModule } from '@server/book/book.module';
 import { PrismaService } from '@server/prisma/prisma.service';
-import { SunoApiModule } from '@server/suno-api/suno-api.module';
 import { TrpcService } from '@server/trpc/trpc.service';
-import { VideoQueueModule } from '@server/video/video-queue.module';
 import { TrpcRouter } from './trpc.router';
+import { GenerationRequestModule } from '@server/generation-request/generation-request.module';
+import { StripeModule } from '@server/stripe/stripe.module';
 
 @Module({
-  imports: [VideoQueueModule, SunoApiModule.register(), BookModule],
+  imports: [BookModule, GenerationRequestModule, StripeModule],
   providers: [TrpcService, TrpcRouter, PrismaService],
+  exports: [TrpcService],
 })
 export class TrpcModule {}
