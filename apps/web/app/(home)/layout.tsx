@@ -2,6 +2,7 @@
 'use client';
 
 import {SignedIn, SignedOut, SignInButton, UserButton} from '@clerk/nextjs';
+import Link from 'next/link';
 import React, {useEffect, useState} from 'react';
 
 export default function RootLayout({
@@ -35,12 +36,13 @@ export default function RootLayout({
 				>
 					<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 						<div className="flex items-center justify-between py-4">
-							<h1
+							<Link
+								href="/"
 								className="text-3xl font-bold text-blue-700 sm:text-4xl"
 								style={{lineHeight: 1, letterSpacing: '-1px'}}
 							>
 								Get Giddy
-							</h1>
+							</Link>
 							<nav>
 								<SignedOut>
 									<SignInButton mode="modal">

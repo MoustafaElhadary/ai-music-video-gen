@@ -53,8 +53,7 @@ export const FirstStep = ({
 		});
 
 	const handleSubmit = async (values: FormValues) => {
-		if (!isLoaded) return;
-		if (!isSignedIn) {
+		if (!isLoaded || !isSignedIn) {
 			toast.error(
 				'Please sign in or create an account to create a Giddy video',
 			);
@@ -63,13 +62,14 @@ export const FirstStep = ({
 		}
 
 		if (currentGenerationId) {
-			updateGenerationRequest({where: {id: currentGenerationId}, data: values});
+			updateGenerationRequest({
+				where: {id: currentGenerationId},
+				data: values,
+			});
 		} else {
 			createGenerationRequest(values);
 		}
 	};
-
-	console.log('Form errors:', form.formState.errors);
 
 	return (
 		<Form {...form}>
@@ -133,11 +133,24 @@ export const FirstStep = ({
 					)}
 				/>
 
+				<FormField
+					control={form.control}
+					name="senderName"
+					render={({field}) => (
+						<FormItem>
+							<FormLabel>Your Name</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
 				<Button
 					type="submit"
 					className="w-full bg-blue-700"
 					disabled={isCreating || isUpdating}
-					onClick={() => console.log('Button clicked')}
 				>
 					{isCreating || isUpdating
 						? 'Processing...'

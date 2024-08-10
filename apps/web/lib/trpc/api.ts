@@ -1,6 +1,5 @@
 import 'server-only';
 
-import {env} from '@web/lib/env.mjs';
 
 import {createTRPCProxyClient, httpBatchLink, loggerLink} from '@trpc/client';
 
@@ -13,7 +12,7 @@ export const api = createTRPCProxyClient<AppRouter>({
 	links: [
 		loggerLink({
 			enabled: (op) =>
-				env.NODE_ENV === 'development' ||
+				process.env.NODE_ENV === 'development' ||
 				(op.direction === 'down' && op.result instanceof Error),
 		}),
 		httpBatchLink({

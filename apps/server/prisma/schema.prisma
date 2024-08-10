@@ -30,17 +30,20 @@ model Book {
 
 model GenerationRequest {
   id            String        @id @default(cuid())
+  userId        String // Added this line
   occasion      String
   recipientName String
   prompt        String
-  status        RequestStatus @default(SUBMITTED)
+  senderName    String
+  status        RequestStatus @default(STARTED)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  //TODO: add clerk user id
 }
 
 enum RequestStatus {
-  SUBMITTED
+  STARTED
+  FILLED
+  PAID
   PROCESSING
   COMPLETED
   FAILED

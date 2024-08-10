@@ -14,8 +14,8 @@ export class GenerationRequestRouter {
   router = this.trpc.router({
     getAll: this.trpc.protectedProcedure
       .input(this.generationRequestService.getGenerationRequestsSchema)
-      .query(({ input }) =>
-        this.generationRequestService.generationRequests(input),
+      .query(({ input, ctx }) =>
+        this.generationRequestService.generationRequests(input, ctx.user.id),
       ),
     getOne: this.trpc.protectedProcedure
       .input(this.generationRequestService.getGenerationRequestSchema)
@@ -24,8 +24,11 @@ export class GenerationRequestRouter {
       ),
     create: this.trpc.protectedProcedure
       .input(this.generationRequestService.createGenerationRequestSchema)
-      .mutation(async ({ input }) =>
-        this.generationRequestService.createGenerationRequest(input),
+      .mutation(async ({ input, ctx }) =>
+        this.generationRequestService.createGenerationRequest(
+          input,
+          ctx.user.id,
+        ),
       ),
     update: this.trpc.protectedProcedure
       .input(this.generationRequestService.updateGenerationRequestSchema)

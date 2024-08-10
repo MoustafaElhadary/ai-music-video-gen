@@ -2,13 +2,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BookService } from './book/book.service';
+import { BookModule } from './book/book.module';
 import { PrismaService } from './prisma/prisma.service';
+import { StripeModule } from './stripe/stripe.module';
 import { SunoApiModule } from './suno-api/suno-api.module';
-import { SunoApiService } from './suno-api/suno-api.service';
 import { TrpcModule } from './trpc/trpc.module';
 import { VideoQueueModule } from './video/video-queue.module';
-import { BookModule } from './book/book.module';
+import { GenerationRequestModule } from './generation-request/generation-request.module';
+import { StripeController } from './stripe/stripe.controller';
 
 @Module({
   imports: [
@@ -17,8 +18,10 @@ import { BookModule } from './book/book.module';
     VideoQueueModule,
     SunoApiModule.register(),
     BookModule,
+    GenerationRequestModule,
+    StripeModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, StripeController],
   providers: [AppService, PrismaService],
 })
 export class AppModule {}

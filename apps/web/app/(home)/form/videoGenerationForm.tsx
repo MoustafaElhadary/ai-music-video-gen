@@ -1,6 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
-import {useUser} from '@clerk/nextjs';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Button} from '@web/components/ui/button';
 import {useCallback, useState} from 'react';
@@ -10,6 +9,7 @@ import useLocalStorage from '@web/lib/useLocalStorage';
 import {useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {FirstStep} from './steps/firstStep';
+import {ReviewStep} from './steps/reviewStep';
 import {FormSchema, FormValues} from './utils';
 
 // Giddy steps data
@@ -28,18 +28,24 @@ const giddyStepsData = [
 	},
 	{
 		stepNumber: 3,
+		stepId: 'review_pay',
+		icon: '📊',
+		text: 'Review and Pay',
+	},
+	{
+		stepNumber: 4,
 		stepId: 'ai_magic',
 		icon: '🤖',
 		text: 'Let our AI work its magic to create your unique music video',
 	},
 	{
-		stepNumber: 4,
+		stepNumber: 5,
 		stepId: 'add_phone',
 		icon: '📱',
 		text: "Add the recipient's phone number",
 	},
 	{
-		stepNumber: 5,
+		stepNumber: 6,
 		stepId: 'share_creation',
 		icon: '🚀',
 		text: 'Share your Giddy creation instantly!',
@@ -54,7 +60,6 @@ const VideoGenerationForm = () => {
 			recipientName: '',
 			prompt: '',
 			senderName: '',
-			senderPhoneNumber: '',
 		},
 	);
 	const [giddySteps] = useLocalStorage('giddySteps', giddyStepsData);
@@ -76,24 +81,14 @@ const VideoGenerationForm = () => {
 		return () => subscription.unsubscribe();
 	}, [form, setStoredFormData]);
 
-	const occasions = [
-		'Birthday',
-		'Graduation',
-		'Wedding',
-		'Anniversary',
-		'New Job',
-		'Retirement',
-		'Holiday',
-		'Just Because',
-	];
-
 	const getStepHeaderText = (step: number) => {
 		const headers = [
 			'Ready to Get Giddy?',
 			'2. Upload Your Media (optional)',
-			'3. AI Magic in Progress',
-			"4. Add Recipient's Contact",
-			'5. Share Your Creation',
+			'3. Review and Pay',
+			'4. AI Magic in Progress',
+			"5. Add Recipient's Contact",
+			'6. Share Your Creation',
 		];
 		return headers[step] || giddySteps[step]?.text || '';
 	};
@@ -103,6 +98,27 @@ const VideoGenerationForm = () => {
 			setUploadedFiles(files);
 		},
 		[setUploadedFiles],
+	);
+
+	const BottomNavigation = () => (
+		<div className="flex justify-between mt-4">
+			<Button
+				onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+				disabled={currentStep === 0}
+				className="bg-gray-500"
+			>
+				Back
+			</Button>
+			<Button
+				onClick={() =>
+					setCurrentStep((prev) => Math.min(prev + 1, giddySteps.length - 1))
+				}
+				disabled={currentStep === giddySteps.length - 1}
+				className="bg-blue-700"
+			>
+				Next
+			</Button>
+		</div>
 	);
 
 	return (
@@ -130,7 +146,16 @@ const VideoGenerationForm = () => {
 			{currentStep === 0 && (
 				<FirstStep
 					form={form}
-					occasions={occasions.map((_occasion) => ({
+					occasions={[
+						'Birthday',
+						'Graduation',
+						'Wedding',
+						'Anniversary',
+						'New Job',
+						'Retirement',
+						'Holiday',
+						'Just Because',
+					].map((_occasion) => ({
 						value: _occasion,
 						label: _occasion,
 					}))}
@@ -150,26 +175,15 @@ const VideoGenerationForm = () => {
 				</div>
 			)}
 
-			{currentStep > 0 && (
-				<div className="flex justify-between mt-4">
-					<Button
-						onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
-						disabled={currentStep === 0}
-					>
-						Back
-					</Button>
-					<Button
-						onClick={() =>
-							setCurrentStep((prev) =>
-								Math.min(prev + 1, giddySteps.length - 1),
-							)
-						}
-						disabled={currentStep === giddySteps.length - 1}
-					>
-						Next
-					</Button>
-				</div>
+			{currentStep === 2 && (
+				<ReviewStep
+					form={form}
+					onEdit={() => setCurrentStep(0)}
+					currentGenerationId={currentGenerationId}
+				/>
 			)}
+
+			{currentStep > 0 && <BottomNavigation />}
 		</>
 	);
 };

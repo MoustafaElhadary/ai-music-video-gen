@@ -7,8 +7,7 @@
 		"build": "set NODE_ENV=production & next build",
 		"start": "next start",
 		"lint": "next lint",
-		"lint:fix": "next lint --fix",
-		"stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
+		"lint:fix": "next lint --fix"
 	},
 	"dependencies": {
 		"@clerk/nextjs": "^5.1.5",
@@ -25,6 +24,7 @@
 		"@radix-ui/react-select": "^2.0.0",
 		"@radix-ui/react-slot": "^1.0.2",
 		"@radix-ui/react-toast": "^1.2.1",
+		"@stripe/react-stripe-js": "^2.7.3",
 		"@stripe/stripe-js": "^3.5.0",
 		"@swc/helpers": "^0.5.11",
 		"@t3-oss/env-nextjs": "^0.10.1",

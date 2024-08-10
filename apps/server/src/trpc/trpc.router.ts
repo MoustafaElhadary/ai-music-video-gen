@@ -2,6 +2,7 @@
 import { INestApplication, Injectable } from '@nestjs/common';
 import { BookRouter } from '@server/book/book.router';
 import { GenerationRequestRouter } from '@server/generation-request/generation-request.router';
+import { StripeRouter } from '@server/stripe/stripe.router';
 import { TrpcService } from '@server/trpc/trpc.service';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { createContext } from './context';
@@ -12,11 +13,13 @@ export class TrpcRouter {
     private readonly trpc: TrpcService,
     private readonly bookRouter: BookRouter,
     private readonly generationRequestRouter: GenerationRequestRouter,
+    private readonly stripeRouter: StripeRouter,
   ) {}
 
   appRouter = this.trpc.router({
     books: this.bookRouter.router,
     generationRequests: this.generationRequestRouter.router,
+    stripe: this.stripeRouter.router,
   });
 
   async applyMiddleware(app: INestApplication) {

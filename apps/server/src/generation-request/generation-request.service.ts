@@ -42,29 +42,37 @@ export class GenerationRequestService {
 
   async generationRequests(
     params: z.infer<typeof this.getGenerationRequestsSchema>,
+    userId: string,
   ): Promise<_GenerationRequest[]> {
     const { skip, take, cursor, where, orderBy } = params;
     return this.prisma.generationRequest.findMany({
       skip,
       take,
       cursor,
-      where,
+      where: {
+        ...where,
+        userId,
+      },
       orderBy,
     });
   }
 
-  createGenerationRequestSchema: z.ZodType<Prisma.GenerationRequestCreateInput> =
-    z.object({
-      occasion: z.string(),
-      recipientName: z.string(),
-      prompt: z.string(),
-    });
+  createGenerationRequestSchema = z.object({
+    occasion: z.string(),
+    recipientName: z.string(),
+    prompt: z.string(),
+    senderName: z.string(),
+  });
 
   async createGenerationRequest(
     data: z.infer<typeof this.createGenerationRequestSchema>,
+    userId: string,
   ): Promise<_GenerationRequest> {
     return this.prisma.generationRequest.create({
-      data,
+      data: {
+        ...data,
+        userId,
+      },
     });
   }
 

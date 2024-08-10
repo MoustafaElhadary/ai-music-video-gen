@@ -22,7 +22,9 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "remotion:studio": "remotion studio src/remotion/index.ts "
+    "remotion:studio": "remotion studio src/remotion/index.ts ",
+    "stripe:listen": "stripe listen --forward-to localhost:4000/api/stripe/webhook"
+
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.33",
@@ -43,6 +45,7 @@
     "@remotion/renderer": "^4.0.177",
     "@remotion/tailwind": "4.0.177",
     "@remotion/zod-types": "4.0.177",
+    "@stripe/stripe-js": "^3.5.0",
     "@supabase/supabase-js": "^2.43.5",
     "@trpc/server": "^10.37.1",
     "@upstash/redis": "^1.31.6",
@@ -62,6 +65,7 @@
     "remotion": "4.0.177",
     "replicate": "^0.30.2",
     "rxjs": "^7.8.1",
+    "stripe": "^15.12.0",
     "styled-components": "^6.1.11",
     "zod": "^3.23.8"
   },

@@ -44,7 +44,6 @@ export default function TrpcProvider({
 							headers['Authorization'] = `Bearer ${token}`;
 						}
 
-						console.log('Headers being sent:', headers);
 						return headers;
 					},
 				}),
