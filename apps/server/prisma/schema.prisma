@@ -37,6 +37,11 @@ model GenerationRequest {
   senderName     String
   status         RequestStatus @default(STARTED)
   sunoSongId     String?
+  sunoAudioUrl       String?
+  srt      String?
+  duration       Int?
+  sunoLyrics         String?
+  localVideoPath String?
   finalVideoPath String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

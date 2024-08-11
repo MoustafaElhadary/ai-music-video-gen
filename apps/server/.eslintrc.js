@@ -24,5 +24,6 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'no-warning-comments': 'off',
     'no-useless-constructor': 'off',
+    'capitalized-comments': 'off',
   },
 };

@@ -1,16 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   GenerationRequest as _GenerationRequest,
   Prisma,
   RequestStatus,
   VideoImage,
 } from '@prisma/client';
-import { PrismaService } from '@server/prisma/prisma.service';
-import { z } from 'zod';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
 import { VIDEO_QUEUE } from '@server/core/constants';
-import { Logger } from '@nestjs/common';
+import { PrismaService } from '@server/prisma/prisma.service';
+import { Queue } from 'bull';
 
 @Injectable()
 export class GenerationRequestService {
@@ -21,106 +19,34 @@ export class GenerationRequestService {
     @InjectQueue(VIDEO_QUEUE) private readonly videoQueue: Queue,
   ) {}
 
-  getGenerationRequestSchema: z.ZodType<Prisma.GenerationRequestWhereUniqueInput> =
-    z.object({
-      id: z.string(),
-    });
-
-  async generationRequest(
-    generationRequestWhereUniqueInput: z.infer<
-      typeof this.getGenerationRequestSchema
-    >,
-  ): Promise<_GenerationRequest | null> {
-    return this.prisma.generationRequest.findUnique({
-      where: generationRequestWhereUniqueInput,
-    });
+  async generationRequest(input: Prisma.GenerationRequestFindUniqueArgs) {
+    return this.prisma.generationRequest.findUnique(input);
   }
-
-  getGenerationRequestsSchema: z.ZodType<{
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.GenerationRequestWhereUniqueInput;
-    where?: Prisma.GenerationRequestWhereInput;
-    orderBy?: Prisma.GenerationRequestOrderByWithRelationInput;
-  }> = z.object({
-    skip: z.number().optional(),
-    take: z.number().optional(),
-    cursor: z.object({ id: z.string() }).optional(),
-    where: z.any().optional(),
-    orderBy: z.any().optional(),
-  });
 
   async generationRequests(
-    params: z.infer<typeof this.getGenerationRequestsSchema>,
-    userId: string,
+    params: Prisma.GenerationRequestFindManyArgs,
   ): Promise<_GenerationRequest[]> {
-    const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.generationRequest.findMany({
-      skip,
-      take,
-      cursor,
-      where: {
-        ...where,
-        userId,
-      },
-      orderBy,
-    });
+    return this.prisma.generationRequest.findMany(params);
   }
-
-  createGenerationRequestSchema = z.object({
-    occasion: z.string(),
-    recipientName: z.string(),
-    prompt: z.string(),
-    senderName: z.string(),
-  });
 
   async createGenerationRequest(
-    data: z.infer<typeof this.createGenerationRequestSchema>,
-    userId: string,
+    data: Prisma.GenerationRequestCreateInput,
   ): Promise<_GenerationRequest> {
     return this.prisma.generationRequest.create({
-      data: {
-        ...data,
-        userId,
-      },
+      data,
     });
   }
-
-  updateGenerationRequestSchema: z.ZodType<{
-    where: Prisma.GenerationRequestWhereUniqueInput;
-    data: Prisma.GenerationRequestUpdateInput;
-  }> = z.object({
-    where: z.object({ id: z.string() }),
-    data: z.object({
-      occasion: z.string().optional(),
-      recipientName: z.string().optional(),
-      prompt: z.string().optional(),
-      sunoSongId: z.string().optional(),
-      finalVideoPath: z.string().optional(),
-    }),
-  });
 
   async updateGenerationRequest(
-    params: z.infer<typeof this.updateGenerationRequestSchema>,
+    params: Prisma.GenerationRequestUpdateArgs,
   ): Promise<_GenerationRequest> {
-    const { data, where } = params;
-    return this.prisma.generationRequest.update({
-      data,
-      where,
-    });
+    return this.prisma.generationRequest.update(params);
   }
 
-  deleteGenerationRequestSchema: z.ZodType<Prisma.GenerationRequestWhereUniqueInput> =
-    z.object({
-      id: z.string(),
-    });
-
   async deleteGenerationRequest(
-    where: z.infer<typeof this.deleteGenerationRequestSchema>,
+    params: Prisma.GenerationRequestDeleteArgs,
   ): Promise<_GenerationRequest> {
-    return this.prisma.generationRequest.delete({
-      where,
-    });
+    return this.prisma.generationRequest.delete(params);
   }
 
   async updateGenerationRequestStatusAndQueue(

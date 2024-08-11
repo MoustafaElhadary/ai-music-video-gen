@@ -24,18 +24,17 @@ export const AudioGramSchema = z.object({
   audioFileName: z.string().refine((s) => s.endsWith('.mp3'), {
     message: 'Audio file must be a .mp3 file',
   }),
-  coverImgFileName: z
-    .string()
-    .refine(
-      (s) =>
-        s.endsWith('.jpg') ||
-        s.endsWith('.jpeg') ||
-        s.endsWith('.png') ||
-        s.endsWith('.bmp'),
-      {
-        message: 'Image file must be a .jpg / .jpeg / .png / .bmp file',
-      },
-    ),
+  coverImgFileName: z.string(),
+  // .refine(
+  //   (s) =>
+  //     s.endsWith('.jpg') ||
+  //     s.endsWith('.jpeg') ||
+  //     s.endsWith('.png') ||
+  //     s.endsWith('.bmp'),
+  //   {
+  //     message: 'Image file must be a .jpg / .jpeg / .png / .bmp file',
+  //   },
+  // )
   titleText: z.string(),
   titleColor: zColor(),
   waveColor: zColor(),

@@ -42,7 +42,7 @@ export const messages: CoreMessage[] = [
 
 export const fetchAIScenes = async ({ fieldNames }: ScenesRequestParams) => {
   const result = await generateObject({
-    model: openai('gpt-4o-2024-05-13'),
+    model: openai('gpt-4-turbo'),
     schema: z.object({
       records: SceneDataArraySchema,
     }),
