@@ -4,10 +4,11 @@ import React from 'react';
 import { SubtitleItem } from 'parse-srt';
 
 export const Word: React.FC<{
-  item: SubtitleItem;
-  frame: number;
-  transcriptionColor: string;
-}> = ({ item, frame, transcriptionColor }) => {
+  readonly item: SubtitleItem;
+  readonly frame: number;
+  readonly transcriptionColor: string;
+  readonly isRTL: boolean;
+}> = ({ item, frame, transcriptionColor, isRTL }) => {
   const opacity = interpolate(frame, [item.start, item.start + 15], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -31,6 +32,8 @@ export const Word: React.FC<{
         opacity,
         translate: `0 ${translateY}em`,
         color: transcriptionColor,
+        direction: isRTL ? 'rtl' : 'ltr',
+        unicodeBidi: 'embed',
       }}
     >
       {item.text}

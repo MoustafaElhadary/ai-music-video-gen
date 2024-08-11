@@ -37,15 +37,18 @@ model GenerationRequest {
   senderName     String
   status         RequestStatus @default(STARTED)
   sunoSongId     String?
-  sunoAudioUrl       String?
-  srt      String?
+  sunoAudioUrl   String?
+  srt            String?
+  isRTL          Boolean?
+  language       String?
   duration       Int?
-  sunoLyrics         String?
+  sunoLyrics     String?
   localVideoPath String?
   finalVideoPath String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   videoImages    VideoImage[]
+
 }
 
 model VideoImage {
@@ -61,7 +64,25 @@ enum RequestStatus {
   STARTED
   FILLED
   PAID
-  PROCESSING
+  AUDIO_PROCESSING
+  AUDIO_PROCESSED
+
+  SUBTITLE_PROCESSING
+  SUBTITLE_PROCESSED
+  SUBTITLE_FAILED
+
+  IMAGE_PROCESSING
+  IMAGE_PROCESSED
+  IMAGE_FAILED
+
+  VIDEO_PROCESSING
+  VIDEO_PROCESSED
+  VIDEO_FAILED
+
+  UPLOADING
+  UPLOADED
+  UPLOAD_FAILED
+
   COMPLETED
   FAILED
 }

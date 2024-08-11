@@ -16,9 +16,8 @@ export class AppController {
 
   @Get('paid-event')
   async test() {
-    await this.generationRequestService.updateGenerationRequestStatusAndQueue(
-      'clzop40j6000098slrpdvb2ns',
-      'PAID',
+    await this.generationRequestService.handleSuccessfulPayment(
+      'clzop40j6000098slrpdvb2ns', // TODO: remove hardcoded id
     );
     return 'test';
   }

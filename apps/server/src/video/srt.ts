@@ -14,7 +14,7 @@ export type Caption = z.infer<typeof CaptionSchema>;
 
 export function convertToSRT(captions: Caption[]): string {
   let result = '';
-  let wordIndex = 1;
+  let captionIndex = 1;
 
   function formatTime(seconds: number): string {
     const date = new Date(0);
@@ -24,14 +24,7 @@ export function convertToSRT(captions: Caption[]): string {
 
   captions.forEach((caption) => {
     const { start, end, text } = caption;
-    const words = text.trim().split(' ');
-    const duration = (end - start) / words.length;
-
-    words.forEach((word, idx) => {
-      const wordStartTime = start + idx * duration;
-      const wordEndTime = wordStartTime + duration;
-      result += `${wordIndex++}\n${formatTime(wordStartTime)} --> ${formatTime(wordEndTime)}\n${word}\n\n`;
-    });
+    result += `${captionIndex++}\n${formatTime(start)} --> ${formatTime(end)}\n${text.trim()}\n\n`;
   });
 
   return result.trim();

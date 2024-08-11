@@ -20,7 +20,10 @@ export class GenerationRequestService {
   ) {}
 
   async generationRequest(input: Prisma.GenerationRequestFindUniqueArgs) {
-    return this.prisma.generationRequest.findUnique(input);
+    return this.prisma.generationRequest.findUnique({
+      ...input,
+      include: { videoImages: true },
+    });
   }
 
   async generationRequests(
@@ -49,14 +52,13 @@ export class GenerationRequestService {
     return this.prisma.generationRequest.delete(params);
   }
 
-  async updateGenerationRequestStatusAndQueue(
+  async handleSuccessfulPayment(
     generationRequestId: string,
-    status: RequestStatus,
   ): Promise<_GenerationRequest> {
     this.logger.log(`Updating and queueing request ${generationRequestId}`);
     const updatedRequest = await this.prisma.generationRequest.update({
       where: { id: generationRequestId },
-      data: { status },
+      data: { status: RequestStatus.PAID },
     });
 
     this.logger.log(`Queueing job for request ${generationRequestId}`);
@@ -81,15 +83,12 @@ export class GenerationRequestService {
     return jobCounts;
   }
 
-  async addVideoImage(
-    generationRequestId: string,
-    photoId: string,
-  ): Promise<VideoImage> {
-    return this.prisma.videoImage.create({
-      data: {
+  async addVideoImage(generationRequestId: string, ...photoIds: string[]) {
+    return this.prisma.videoImage.createMany({
+      data: photoIds.map((photoId) => ({
         photoId,
         generationRequestId,
-      },
+      })),
     });
   }
 

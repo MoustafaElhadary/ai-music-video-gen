@@ -57,6 +57,7 @@ export const RemotionRoot: React.FC = () => {
           subtitlesLinePerPage: 4,
           subtitlesZoomMeasurerSize: 10,
           subtitlesLineHeight: 98,
+          isRTL: false,
 
           // Wave settings
           waveColor: '#a3a5ae',

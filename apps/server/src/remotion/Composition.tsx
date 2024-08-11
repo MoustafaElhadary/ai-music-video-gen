@@ -47,17 +47,18 @@ export const AudioGramSchema = z.object({
   waveLinesToDisplay: z.number().int().min(0),
   waveFreqRangeStartIndex: z.number().int().min(0),
   waveNumberOfSamples: z.enum(['32', '64', '128', '256', '512']),
+  isRTL: z.boolean().optional(),
 });
 
 type AudiogramCompositionSchemaType = z.infer<typeof AudioGramSchema>;
 
 const AudioViz: React.FC<{
-  waveColor: string;
-  numberOfSamples: number;
-  freqRangeStartIndex: number;
-  waveLinesToDisplay: number;
-  mirrorWave: boolean;
-  audioSrc: string;
+  readonly waveColor: string;
+  readonly numberOfSamples: number;
+  readonly freqRangeStartIndex: number;
+  readonly waveLinesToDisplay: number;
+  readonly mirrorWave: boolean;
+  readonly audioSrc: string;
 }> = ({
   waveColor,
   numberOfSamples,
@@ -130,6 +131,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
   onlyDisplayCurrentSentence,
   mirrorWave,
   audioOffsetInSeconds,
+  isRTL, // Added this line
 }) => {
   const { durationInFrames } = useVideoConfig();
 
@@ -158,6 +160,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
             className="container"
             style={{
               fontFamily: 'IBM Plex Sans',
+              direction: isRTL ? 'rtl' : 'ltr',
             }}
           >
             <div className="row">
@@ -180,7 +183,10 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
             </div>
 
             <div
-              style={{ lineHeight: `${subtitlesLineHeight}px` }}
+              style={{
+                lineHeight: `${subtitlesLineHeight}px`,
+                textAlign: isRTL ? 'right' : 'left',
+              }}
               className="captions"
             >
               <PaginatedSubtitles
@@ -192,6 +198,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
                 subtitlesZoomMeasurerSize={subtitlesZoomMeasurerSize}
                 subtitlesLineHeight={subtitlesLineHeight}
                 onlyDisplayCurrentSentence={onlyDisplayCurrentSentence}
+                isRTL={isRTL}
               />
             </div>
           </div>

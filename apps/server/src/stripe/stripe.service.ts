@@ -102,9 +102,8 @@ export class StripeService {
     const generationRequestId = session.metadata?.generationRequestId;
 
     if (generationRequestId) {
-      await this.generationRequestService.updateGenerationRequestStatusAndQueue(
+      await this.generationRequestService.handleSuccessfulPayment(
         generationRequestId,
-        'PAID',
       );
     }
   }

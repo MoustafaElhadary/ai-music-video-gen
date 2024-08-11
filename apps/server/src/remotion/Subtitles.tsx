@@ -41,14 +41,15 @@ const useWindowedFrameSubs = (
 };
 
 export const PaginatedSubtitles: React.FC<{
-  subtitles: string;
-  startFrame: number;
-  endFrame: number;
-  linesPerPage: number;
-  subtitlesTextColor: string;
-  subtitlesZoomMeasurerSize: number;
-  subtitlesLineHeight: number;
-  onlyDisplayCurrentSentence: boolean;
+  readonly subtitles: string;
+  readonly startFrame: number;
+  readonly endFrame: number;
+  readonly linesPerPage: number;
+  readonly subtitlesTextColor: string;
+  readonly subtitlesZoomMeasurerSize: number;
+  readonly subtitlesLineHeight: number;
+  readonly onlyDisplayCurrentSentence: boolean;
+  readonly isRTL?: boolean;
 }> = ({
   startFrame,
   endFrame,
@@ -58,6 +59,7 @@ export const PaginatedSubtitles: React.FC<{
   subtitlesZoomMeasurerSize,
   subtitlesLineHeight,
   onlyDisplayCurrentSentence,
+  isRTL = false,
 }) => {
   const frame = useCurrentFrame();
   const windowRef = useRef<HTMLDivElement>(null);
@@ -135,6 +137,7 @@ export const PaginatedSubtitles: React.FC<{
         position: 'relative',
         overflow: 'hidden',
         paddingBottom: '20px',
+        direction: isRTL ? 'rtl' : 'ltr',
       }}
     >
       <div
@@ -149,6 +152,7 @@ export const PaginatedSubtitles: React.FC<{
               frame={frame}
               item={item}
               transcriptionColor={transcriptionColor}
+              isRTL={isRTL}
             />{' '}
           </span>
         ))}
