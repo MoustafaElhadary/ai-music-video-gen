@@ -25,5 +25,6 @@ module.exports = {
     'no-warning-comments': 'off',
     'no-useless-constructor': 'off',
     'capitalized-comments': 'off',
+    'camelcase': 'off',
   },
 };

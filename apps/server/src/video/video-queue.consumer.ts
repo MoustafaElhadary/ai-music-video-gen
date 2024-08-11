@@ -320,12 +320,9 @@ export class VideoQueueConsumer {
   }
 
   private async ensureCaptionsMatchLyrics(lyrics: string, captions: string) {
-    const prompt = `You are a helpful assistant that ensures the captions match the lyrics. 
-    we  have two inputs. 
-    one is the srt file with the words mapped to where i want them to be but they occasionally have the wrong words or 
-    something that sounds similar and i have what the words should be. 
-    you can be assured that the user owns the rights to the lyrics and the srt file.
-    the user will provide you both so you can fix the srt file for me.
+    const prompt = `I have two inputs. one is the srt file with the words mapped to where i want them to be but they occasionally have the wrong words or something that sounds similar and i have what the words should be. 
+    I will provide you both so you can fix the srt file for me 
+    you can be assured that the I own the rights to the lyrics and the srt file.
    return back the COMPLETE srt file with the correct words. don't get lazy and only return the parts that need to be changed.
     correct lyrics: ${lyrics}
     captions: ${captions}
@@ -334,15 +331,11 @@ export class VideoQueueConsumer {
     const result = await generateObject({
       model: openai('gpt-4o'),
       schema: z.object({
-        srt: z.string().describe(`the srt file with the correct words, 
-          in the format of 
-          1
-          00:00:01,000 --> 00:00:01,000
-          lyrics
-          2
-          00:00:02,000 --> 00:00:02,000
-          lyrics
-          `),
+        srt: z.string(),
+        language: z
+          .string()
+          .describe('the language of the srt file. ex: en, es, fr, etc'),
+        is_rtl: z.boolean().describe('is the language right to left'),
       }),
       prompt,
       maxRetries: 3,

@@ -1,74 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { Book as _Book, Prisma } from '@prisma/client';
+import { Book, Prisma } from '@prisma/client';
 import { PrismaService } from '@server/prisma/prisma.service';
-import { z } from 'zod';
 
 @Injectable()
 export class BookService {
   constructor(private prisma: PrismaService) {}
 
-  getBookSchema: z.ZodType<Prisma.BookWhereUniqueInput> = z.any();
-
-  async book(
-    bookWhereUniqueInput: z.infer<typeof this.getBookSchema>,
-  ): Promise<_Book | null> {
-    return this.prisma.book.findUnique({
-      where: bookWhereUniqueInput,
-    });
+  async book(input: Prisma.BookFindUniqueArgs): Promise<Book | null> {
+    return this.prisma.book.findUnique(input);
   }
 
-  getBooksSchema: z.ZodType<{
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.BookWhereUniqueInput;
-    where?: Prisma.BookWhereInput;
-    orderBy?: Prisma.BookOrderByWithRelationInput;
-  }> = z.any();
-
-  async books(params: z.infer<typeof this.getBooksSchema>): Promise<_Book[]> {
-    const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.book.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
+  async books(params: Prisma.BookFindManyArgs): Promise<Book[]> {
+    return this.prisma.book.findMany(params);
   }
 
-  createBookSchema: z.ZodType<Prisma.BookCreateInput> = z.any();
-
-  async createBook(
-    data: z.infer<typeof this.createBookSchema>,
-  ): Promise<_Book> {
+  async createBook(data: Prisma.BookCreateInput): Promise<Book> {
     return this.prisma.book.create({
       data,
     });
   }
 
-  updateBookSchema: z.ZodType<{
-    where: Prisma.BookWhereUniqueInput;
-    data: Prisma.BookUpdateInput;
-  }> = z.any();
-
-  async updateBook(
-    params: z.infer<typeof this.updateBookSchema>,
-  ): Promise<_Book> {
-    const { data, where } = params;
-    return this.prisma.book.update({
-      data,
-      where,
-    });
+  async updateBook(params: Prisma.BookUpdateArgs): Promise<Book> {
+    return this.prisma.book.update(params);
   }
 
-  deleteBookSchema: z.ZodType<Prisma.BookWhereUniqueInput> = z.any();
-  async deleteBook(
-    where: z.infer<typeof this.deleteBookSchema>,
-  ): Promise<_Book> {
-    return this.prisma.book.delete({
-      where,
-    });
+  async deleteBook(params: Prisma.BookDeleteArgs): Promise<Book> {
+    return this.prisma.book.delete(params);
   }
 }
-
-export type BookCreateInput = Prisma.BookCreateInput;

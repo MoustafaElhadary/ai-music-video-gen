@@ -10,6 +10,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.use('/api/stripe/webhook', express.raw({ type: '*/*' }));
+  app.use('/api/replicate-webhook', express.json({ type: 'application/json' }));
 
   const trpc = app.get(TrpcRouter);
   trpc.applyMiddleware(app);
