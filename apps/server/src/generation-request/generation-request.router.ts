@@ -28,7 +28,7 @@ export class GenerationRequestRouter {
         this.generationRequestService.generationRequest(input),
       ),
     create: this.trpc.protectedProcedure
-      .input(z.custom<Prisma.GenerationRequestCreateInput>())
+      .input(z.custom<Omit<Prisma.GenerationRequestCreateInput, 'userId'>>())
       .mutation(async ({ input, ctx }) =>
         this.generationRequestService.createGenerationRequest({
           ...input,
@@ -48,5 +48,22 @@ export class GenerationRequestRouter {
     getQueueStatus: this.trpc.protectedProcedure.query(async () =>
       this.generationRequestService.getQueueStatus(),
     ),
+    uploadFile: this.trpc.protectedProcedure
+      .input(this.generationRequestService.fileSchema.omit({ userId: true }))
+      .mutation(async ({ input, ctx }) =>
+        this.generationRequestService.uploadFile({
+          ...input,
+          userId: ctx.user.id,
+        }),
+      ),
+    deleteFile: this.trpc.protectedProcedure
+      .input(this.generationRequestService.fileSchema.omit({ userId: true }))
+      .mutation(async ({ input, ctx }) =>
+        this.generationRequestService.deleteFile({
+          generationRequestId: input.generationRequestId,
+          file: input.file,
+          userId: ctx.user.id,
+        }),
+      ),
   });
 }

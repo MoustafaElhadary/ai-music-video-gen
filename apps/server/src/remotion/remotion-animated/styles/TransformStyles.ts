@@ -11,7 +11,7 @@ const transformStyles = (values: AnimationValues): string | null => {
   if (values.translateX || values.translateY)
     translate = `translate(${value(values.translateX, 0)}px, ${value(
       values.translateY,
-      0
+      0,
     )}px)`;
 
   // We need to specifically check for undefined here, because 0 is a valid,

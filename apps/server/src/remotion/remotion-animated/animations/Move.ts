@@ -26,12 +26,12 @@ const Move = (options: MoveOptions): Animation => {
       const translateX = interpolateAnimation(
         spring,
         options.x,
-        options.initialX
+        options.initialX,
       );
       const translateY = interpolateAnimation(
         spring,
         options.y,
-        options.initialY
+        options.initialY,
       );
 
       return { translateX, translateY };

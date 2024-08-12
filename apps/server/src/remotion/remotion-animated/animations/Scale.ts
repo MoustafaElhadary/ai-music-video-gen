@@ -41,12 +41,12 @@ const Scale = (options: ScaleOptions): Animation => {
       const scaleX = interpolateAnimation(
         spring,
         options.x ?? options.by,
-        initialX
+        initialX,
       );
       const scaleY = interpolateAnimation(
         spring,
         options.y ?? options.by,
-        initialY
+        initialY,
       );
 
       return { scaleX, scaleY };

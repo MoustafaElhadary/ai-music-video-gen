@@ -7,7 +7,7 @@ export enum ReductionStrategy {
 }
 
 const reductionStrategyForProperty = (
-  property: keyof AnimationValues
+  property: keyof AnimationValues,
 ): ReductionStrategy => {
   switch (property) {
     case 'translateX':

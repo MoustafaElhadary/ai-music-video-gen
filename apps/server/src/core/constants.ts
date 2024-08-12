@@ -1,8 +1,4 @@
 export const VIDEO_QUEUE = 'video-queue';
-export const AUDIO_QUEUE = 'audio-queue';
-export const SUBTITLE_QUEUE = 'subtitle-queue';
-export const IMAGE_QUEUE = 'image-queue';
-export const UPLOAD_QUEUE = 'upload-queue';
 
 // TODO: remove later
 export const testVideoData = [

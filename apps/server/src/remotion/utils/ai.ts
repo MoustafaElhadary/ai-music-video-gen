@@ -61,7 +61,7 @@ export const fetchAIScenes = async ({ fieldNames }: ScenesRequestParams) => {
       // media: record.media?.map(
       // 	({url, type}: {url: string; type: string}) => ({url, type}),
       // ),
-      media: undefined, //TODO: remove
+      media: undefined, // TODO: remove
       text: record.text,
       name: fieldNames.name ? record.name : '',
       textStyle: fieldNames.textStyle ? record.textStyle : undefined,
@@ -69,7 +69,7 @@ export const fetchAIScenes = async ({ fieldNames }: ScenesRequestParams) => {
       bgStyle: fieldNames.bgStyle ? record.bgStyle : undefined,
       animation: fieldNames.animation ? record.animation : undefined,
       // volume: fieldNames.volume ? record.volume : null,
-      volume: undefined, //TODO: remove
+      volume: undefined, // TODO: remove
     }));
 
   const dataWithStartFrom = (): [SceneData[], number] => {

@@ -3,6 +3,7 @@
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Button} from '@web/components/ui/button';
 import {useCallback, useState} from 'react';
+import {trpc} from '@web/lib/trpc/client';
 
 import {FileUploader} from '@web/components/FileUploader';
 import useLocalStorage from '@web/lib/useLocalStorage';
@@ -93,11 +94,55 @@ const VideoGenerationForm = () => {
 		return headers[step] || giddySteps[step]?.text || '';
 	};
 
+	const {mutate: uploadFile} = trpc.generationRequests.uploadFile.useMutation({
+		onSuccess: () => {
+			// Handle successful upload
+		},
+		onError: (error) => {
+			console.error('Upload failed:', error);
+		},
+	});
+
+	const {mutate: deleteFile} = trpc.generationRequests.deleteFile.useMutation({
+		onSuccess: () => {
+			// Handle successful deletion
+		},
+		onError: (error) => {
+			console.error('Deletion failed:', error);
+		},
+	});
+
 	const handleFileChange = useCallback(
 		(files: File[]) => {
+			const filesToUpload = files.filter(
+				(file) => !uploadedFiles.some((uf) => uf.name === file.name),
+			);
+			const filesToDelete = uploadedFiles.filter(
+				(file) => !files.some((f) => f.name === file.name),
+			);
+
 			setUploadedFiles(files);
+
+			if (currentGenerationId) {
+				filesToUpload.forEach((file) => {
+					uploadFile({generationRequestId: currentGenerationId, file});
+				});
+
+				filesToDelete.forEach((file) => {
+					deleteFile({
+						generationRequestId: currentGenerationId,
+						file,
+					});
+				});
+			}
 		},
-		[setUploadedFiles],
+		[
+			setUploadedFiles,
+			currentGenerationId,
+			uploadFile,
+			deleteFile,
+			uploadedFiles,
+		],
 	);
 
 	const BottomNavigation = () => (

@@ -1,9 +1,8 @@
-/* eslint-disable camelcase */
+/* eslint-disable max-params */
 
 import { openai } from '@ai-sdk/openai';
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { GenerationRequest, RequestStatus } from '@prisma/client';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
@@ -17,38 +16,32 @@ import {
 } from '@server/remotion/type-utils';
 import { SunoApiService } from '@server/suno-api/suno-api.service';
 import { AudioInfo } from '@server/suno-api/types';
-import { createClient } from '@supabase/supabase-js';
 import { generateObject } from 'ai';
 import { type Job } from 'bull';
 import * as fs from 'fs';
 import path from 'path';
 import { random } from 'remotion';
-import Replicate from 'replicate';
 import { z } from 'zod';
 import { Caption, convertToSRT } from './srt';
+import { SupabaseService } from '@server/supabase/supabase.service';
+import { ReplicateService } from '@server/replicate/replicate.service';
 
 @Processor(VIDEO_QUEUE)
 export class VideoQueueConsumer {
   constructor(
-    private configService: ConfigService,
     private sunoApi: SunoApiService,
     private generationRequestService: GenerationRequestService,
+    private supabaseService: SupabaseService,
+    private replicateService: ReplicateService,
   ) {}
 
   private readonly logger = new Logger(VideoQueueConsumer.name);
 
-  replicate = new Replicate({
-    auth: this.configService.get('REPLICATE_API_TOKEN'),
-  });
-
-  private supabase = createClient(
-    this.configService.get('SUPABASE_URL') ?? '',
-    this.configService.get('SUPABASE_ANON_KEY') ?? '',
-  );
-
   @Process()
   async processJobRequest(job: Job<GenerationRequest>) {
-    this.logger.log(`Starting to process job ${job.id}`);
+    this.logger.log(
+      `Starting to process job ${job.id} for request ${job.data.id}`,
+    );
     const { id } = job.data;
 
     const generationRequest = await this.getGenerationRequest(id);
@@ -64,6 +57,7 @@ export class VideoQueueConsumer {
       await this.uploadAndFinalize(id);
 
       this.logger.log(`Successfully processed job ${job.id}`);
+      await job.remove();
       return generationRequest.finalVideoPath;
     } catch (error) {
       this.logger.error(`Error processing job ${job.id}:`, error);
@@ -159,28 +153,16 @@ export class VideoQueueConsumer {
     if (!generationRequest.sunoLyrics) {
       throw new Error('Lyrics not found');
     }
+    if (!generationRequest.sunoAudioUrl) {
+      throw new Error('Audio not found');
+    }
+
     await this.updateGenerationRequest(id, {
       status: RequestStatus.SUBTITLE_PROCESSING,
     });
 
-    const generatedSubtitles = await this.replicate.run(
-      'openai/whisper:4d50797290df275329f202e48c76360b3f22b08d28c196cbc54600319435f8d2',
-      {
-        input: {
-          audio: generationRequest.sunoAudioUrl!,
-          model: 'large-v3',
-          language: 'auto',
-          translate: false,
-          temperature: 0,
-          transcription: 'srt',
-          suppress_tokens: '-1',
-          logprob_threshold: -1,
-          no_speech_threshold: 0.6,
-          condition_on_previous_text: true,
-          compression_ratio_threshold: 2.4,
-          temperature_increment_on_fallback: 0.2,
-        },
-      },
+    const generatedSubtitles = await this.replicateService.generateSubtitles(
+      generationRequest.sunoAudioUrl,
     );
 
     const generatedSRT = convertToSRT(
@@ -192,7 +174,6 @@ export class VideoQueueConsumer {
       generatedSRT,
     );
 
-    // const srt = await this.getWordByWordSubtitles(generationRequest.sunoLyrics);
     if (!srt) {
       await this.updateGenerationRequest(generationRequest.id, {
         status: RequestStatus.SUBTITLE_FAILED,
@@ -213,6 +194,7 @@ export class VideoQueueConsumer {
     if (!generationRequest || !generationRequest.sunoLyrics) {
       throw new Error('Generation request or lyrics not found');
     }
+
     if (generationRequest.videoImages?.length > 5) {
       this.logger.log('Images already generated, skipping...');
       return;
@@ -225,14 +207,86 @@ export class VideoQueueConsumer {
     const imageDescriptions = await this.generateImageDescriptions(
       generationRequest.srt ?? generationRequest.sunoLyrics,
     );
+
+    // Fetch uploaded images from Supabase storage
+    const uploadedImages = await this.fetchUploadedImagesFromSupabase(id);
+
     const imageUrls = await Promise.all(
-      imageDescriptions.map((desc) => this.generateImage(desc.prompt)),
+      imageDescriptions.map((desc, index) =>
+        this.generateImage(desc.prompt, uploadedImages[index]),
+      ),
     );
 
     await this.generationRequestService.addVideoImage(id, ...imageUrls);
     await this.updateGenerationRequest(id, {
       status: RequestStatus.IMAGE_PROCESSED,
     });
+  }
+
+  private async fetchUploadedImagesFromSupabase(
+    generationRequestId: string,
+  ): Promise<string[]> {
+    return (
+      await this.supabaseService.listFiles('user-uploads', generationRequestId)
+    )
+      ?.filter((file) => file.name.match(/\.(jpg|jpeg|png|gif)$/i))
+      ?.map(
+        (file) =>
+          this.supabaseService.getPublicUrl(
+            'user-uploads',
+            `${generationRequestId}/${file.name}`,
+          ).data.publicUrl,
+      );
+  }
+
+  private async generateImageDescriptions(lyrics: string) {
+    const prompt = `
+    Given the following song lyrics, generate 5-7 image descriptions that capture key moments or themes from the song. 
+    Each description should include a prompt for image generation and a timestamp (in seconds) for when the image should appear in the video.
+    Make the descriptions extremely fun, funny, intriguing, and interesting. Think outside the box and create unexpected, whimsical, and captivating scenes that will surprise and delight viewers.
+    extremely fun, hilariously funny, deeply intriguing, eye-poppingly interesting, vibrant colors, unexpected elements, whimsical scene, surprising details
+    Lyrics:
+    ${lyrics}
+    `;
+
+    const result = await generateObject({
+      model: openai('gpt-4'),
+      schema: z.object({
+        imageDescriptions: z.array(
+          z.object({
+            prompt: z.string(),
+            startTime: z.number(),
+            endTime: z.number(),
+          }),
+        ),
+      }),
+      prompt,
+      maxRetries: 3,
+    });
+
+    return result.object.imageDescriptions;
+  }
+
+  private async generateImage(
+    prompt: string,
+    inputImage?: string,
+  ): Promise<string> {
+    let output;
+    if (inputImage) {
+      // Use PhotoMaker if we have an input image
+      output = await this.replicateService.generateImageWithBasePhoto(
+        prompt,
+        inputImage,
+      );
+    } else {
+      // Use SDXL if we don't have an input image
+      output = await this.replicateService.generateImage(prompt);
+    }
+
+    if (Array.isArray(output) && output.length > 0) {
+      return output[0] as string;
+    }
+    throw new Error('Failed to generate image');
   }
 
   private async processVideo(id: string) {
@@ -356,22 +410,19 @@ export class VideoQueueConsumer {
 
   private async uploadVideo(videoPath: string) {
     try {
-      // Read the file content
-      console.log({ videoPath });
       const fileContent = await fs.promises.readFile(videoPath);
-      // Generate a unique filename for the uploaded video
       const filename = path.basename(videoPath);
 
-      const { data, error } = await this.supabase.storage
-        .from('songs')
-        .upload(`public/${filename}`, fileContent, {
+      const data = await this.supabaseService.uploadFile(
+        'songs',
+        `public/${filename}`,
+        fileContent,
+        {
           contentType: 'video/mp4',
-        });
+        },
+      );
 
-      console.log({ error });
-      console.log({ data });
-
-      return data?.fullPath;
+      return data?.path;
     } catch (error) {
       this.logger.error(error);
     }
@@ -400,62 +451,5 @@ export class VideoQueueConsumer {
     });
 
     return result.object;
-  }
-
-  private async generateImageDescriptions(lyrics: string) {
-    const prompt = `
-    Given the following song lyrics, generate 5-7 image descriptions that capture key moments or themes from the song. 
-    Each description should include a prompt for image generation and a timestamp (in seconds) for when the image should appear in the video.
-    keep them fun and creative and imaginative.
-
-    Lyrics:
-    ${lyrics}
-
-    `;
-
-    const result = await generateObject({
-      model: openai('gpt-4'),
-      schema: z.object({
-        imageDescriptions: z.array(
-          z.object({
-            prompt: z.string(),
-            startTime: z.number(),
-            endTime: z.number(),
-          }),
-        ),
-      }),
-      prompt,
-      maxRetries: 3,
-    });
-
-    return result.object.imageDescriptions;
-  }
-
-  private async generateImage(prompt: string): Promise<string> {
-    const output = await this.replicate.run(
-      'stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc',
-      {
-        input: {
-          prompt,
-          negative_prompt: 'blurry, low quality, distorted, deformed',
-          width: 1024,
-          height: 1024,
-          num_outputs: 1,
-          guidance_scale: 7.5,
-          num_inference_steps: 50,
-          refine: 'expert_ensemble_refiner',
-          scheduler: 'K_EULER',
-          lora_scale: 0.6,
-          apply_watermark: false,
-          high_noise_frac: 0.8,
-          prompt_strength: 0.8,
-        },
-      },
-    );
-
-    if (Array.isArray(output) && output.length > 0) {
-      return output[0] as string;
-    }
-    throw new Error('Failed to generate image');
   }
 }

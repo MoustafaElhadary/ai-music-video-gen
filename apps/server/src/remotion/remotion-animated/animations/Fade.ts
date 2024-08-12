@@ -39,7 +39,7 @@ const Fade = (options: FadeOptions): Animation => {
       const opacity = interpolate(
         frame,
         [start, start + duration],
-        [options.initial ?? 1, options.to]
+        [options.initial ?? 1, options.to],
       );
       return { opacity };
     },

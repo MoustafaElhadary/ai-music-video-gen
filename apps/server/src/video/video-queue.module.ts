@@ -1,11 +1,14 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PrismaService } from '@server/prisma/prisma.service';
-import { SunoApiModule } from '@server/suno-api/suno-api.module';
-import { VIDEO_QUEUE } from '../core/constants';
-import { VideoQueueConsumer } from './video-queue.consumer';
 import { GenerationRequestService } from '@server/generation-request/generation-request.service';
+import { PrismaService } from '@server/prisma/prisma.service';
+import { ReplicateService } from '@server/replicate/replicate.service';
+import { SunoApiModule } from '@server/suno-api/suno-api.module';
+import { SupabaseService } from '@server/supabase/supabase.service';
+import { VIDEO_QUEUE } from '../core/constants';
+
+import { VideoQueueConsumer } from './video-queue.consumer';
 
 @Module({
   imports: [
@@ -21,12 +24,16 @@ import { GenerationRequestService } from '@server/generation-request/generation-
       }),
       inject: [ConfigService],
     }),
-    BullModule.registerQueue({
-      name: VIDEO_QUEUE,
-    }),
+    BullModule.registerQueue({ name: VIDEO_QUEUE }),
     SunoApiModule.register(),
   ],
   exports: [BullModule],
-  providers: [VideoQueueConsumer, PrismaService, GenerationRequestService],
+  providers: [
+    VideoQueueConsumer,
+    PrismaService,
+    GenerationRequestService,
+    SupabaseService,
+    ReplicateService,
+  ],
 })
 export class VideoQueueModule {}

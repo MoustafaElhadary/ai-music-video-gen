@@ -4,7 +4,7 @@ const interpolateAnimation = (
   spring: number,
   to: number | undefined,
   initialValue = 0,
-  defaultValue = initialValue
+  defaultValue = initialValue,
 ) =>
   to === undefined
     ? defaultValue

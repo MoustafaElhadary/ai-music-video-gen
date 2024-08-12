@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { z } from 'zod';
 export const CaptionSchema = z.object({
   id: z.number(),

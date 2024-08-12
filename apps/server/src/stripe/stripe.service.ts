@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TRPCError } from '@trpc/server';
@@ -50,6 +48,8 @@ export class StripeService {
         cancel_url: cancelUrl,
         automatic_tax: { enabled: true },
         metadata,
+        billing_address_collection: 'required',
+        phone_number_collection: { enabled: true },
       });
 
       return { url: session.url };

@@ -29,13 +29,13 @@ const Size = (options: SizeOptions): Animation => {
         values.width = interpolateAnimation(
           spring,
           options.width,
-          options.initialWidth
+          options.initialWidth,
         );
       if (options.height)
         values.height = interpolateAnimation(
           spring,
           options.height,
-          options.initialHeight
+          options.initialHeight,
         );
 
       return values;

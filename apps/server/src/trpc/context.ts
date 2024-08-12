@@ -4,17 +4,16 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 
 export const createContext = async ({
   req,
-  res,
 }: trpcExpress.CreateExpressContextOptions) => {
   try {
     const source = req.headers['x-trpc-source'];
     let token: string | null = null;
 
     if (source === 'rsc') {
-      const cookie = req.headers['cookie'];
+      const { cookie } = req.headers;
       token = cookie?.split('__session=')[1]?.split(';')[0] || null;
     } else {
-      token = req.headers['authorization']?.replace('Bearer ', '') || null;
+      token = req.headers.authorization?.replace('Bearer ', '') || null;
     }
 
     if (!token) throw new Error('Token not found');

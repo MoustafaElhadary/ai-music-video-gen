@@ -9,6 +9,8 @@ import {
 import { VIDEO_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
 import { Queue } from 'bull';
+import { SupabaseService } from '@server/supabase/supabase.service';
+import { z } from 'zod';
 
 @Injectable()
 export class GenerationRequestService {
@@ -17,6 +19,7 @@ export class GenerationRequestService {
   constructor(
     private prisma: PrismaService,
     @InjectQueue(VIDEO_QUEUE) private readonly videoQueue: Queue,
+    private supabaseService: SupabaseService,
   ) {}
 
   async generationRequest(input: Prisma.GenerationRequestFindUniqueArgs) {
@@ -98,5 +101,56 @@ export class GenerationRequestService {
         generationRequestId,
       },
     });
+  }
+
+  fileSchema = z.object({
+    generationRequestId: z.string(),
+    file: z.custom<File>(),
+    userId: z.string(),
+  });
+
+  async uploadFile({
+    generationRequestId,
+    file,
+    userId,
+  }: z.infer<typeof this.fileSchema>): Promise<string> {
+    const generationRequest = await this.prisma.generationRequest.findUnique({
+      where: { id: generationRequestId, userId },
+    });
+
+    if (!generationRequest) {
+      throw new Error('Generation request not found or unauthorized');
+    }
+
+    const fileBuffer = await file.arrayBuffer();
+    const fileName = `${generationRequestId}/${file.name}`;
+
+    const data = await this.supabaseService.uploadFile(
+      'user-uploads',
+      fileName,
+      Buffer.from(fileBuffer),
+      {
+        contentType: file.type,
+      },
+    );
+
+    return data.path;
+  }
+
+  async deleteFile({
+    generationRequestId,
+    file,
+    userId,
+  }: z.infer<typeof this.fileSchema>): Promise<void> {
+    const generationRequest = await this.prisma.generationRequest.findUnique({
+      where: { id: generationRequestId, userId },
+    });
+
+    if (!generationRequest) {
+      throw new Error('Generation request not found or unauthorized');
+    }
+
+    const filePath = `${generationRequestId}/${file.name}`;
+    await this.supabaseService.deleteFile('user-uploads', filePath);
   }
 }
