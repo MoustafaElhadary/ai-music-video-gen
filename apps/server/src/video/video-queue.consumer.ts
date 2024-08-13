@@ -125,6 +125,7 @@ export class VideoQueueConsumer {
       // 5 minutes timeout
       const [polledAudioInfo] = await this.sunoApi.getAudioInfo(audioId);
       if (
+        polledAudioInfo &&
         polledAudioInfo.status === 'complete' &&
         polledAudioInfo.audio_url &&
         polledAudioInfo.duration &&
@@ -213,7 +214,7 @@ export class VideoQueueConsumer {
 
     const imageUrls = await Promise.all(
       imageDescriptions.map((desc, index) =>
-        this.generateImage(desc.prompt, uploadedImages[index]),
+        this.generateImage(desc.prompt, uploadedImages[index], desc.style_name),
       ),
     );
 
@@ -243,7 +244,7 @@ export class VideoQueueConsumer {
     const prompt = `
     Given the following song lyrics, generate 5-7 image descriptions that capture key moments or themes from the song. 
     Each description should include a prompt for image generation and a timestamp (in seconds) for when the image should appear in the video.
-    Make the descriptions extremely fun, funny, intriguing, and interesting. Think outside the box and create unexpected, whimsical, and captivating scenes that will surprise and delight viewers.
+    Make the descriptions extremely fun, hilariously funny, intriguing, and interesting. Think outside the box and create unexpected, whimsical, and captivating scenes that will surprise and delight viewers.
     extremely fun, hilariously funny, deeply intriguing, eye-poppingly interesting, vibrant colors, unexpected elements, whimsical scene, surprising details
     Lyrics:
     ${lyrics}
@@ -257,6 +258,19 @@ export class VideoQueueConsumer {
             prompt: z.string(),
             startTime: z.number(),
             endTime: z.number(),
+            style_name: z.enum([
+              '(No style)',
+              'Cinematic',
+              'Disney Charactor',
+              'Digital Art',
+              'Photographic (Default)',
+              'Fantasy art',
+              'Neonpunk',
+              'Enhance',
+              'Comic book',
+              'Lowpoly',
+              'Line art',
+            ]),
           }),
         ),
       }),
@@ -270,21 +284,23 @@ export class VideoQueueConsumer {
   private async generateImage(
     prompt: string,
     inputImage?: string,
+    styleName?: string,
   ): Promise<string> {
-    let output;
+    let output: string[];
     if (inputImage) {
       // Use PhotoMaker if we have an input image
       output = await this.replicateService.generateImageWithBasePhoto(
         prompt,
         inputImage,
+        styleName,
       );
     } else {
       // Use SDXL if we don't have an input image
       output = await this.replicateService.generateImage(prompt);
     }
 
-    if (Array.isArray(output) && output.length > 0) {
-      return output[0] as string;
+    if (Array.isArray(output) && output.length > 0 && output[0]) {
+      return output[0];
     }
     throw new Error('Failed to generate image');
   }
@@ -361,7 +377,7 @@ export class VideoQueueConsumer {
       status: RequestStatus.UPLOADING,
     });
 
-    const videoUrl = await this.uploadVideo(generationRequest.localVideoPath!);
+    const videoUrl = await this.uploadVideo(generationRequest.localVideoPath);
     if (!videoUrl) {
       await this.updateGenerationRequest(generationRequest.id, {
         status: RequestStatus.UPLOAD_FAILED,
@@ -408,7 +424,7 @@ export class VideoQueueConsumer {
     }
   }
 
-  private async uploadVideo(videoPath: string) {
+  private async uploadVideo(videoPath: string): Promise<string | undefined> {
     try {
       const fileContent = await fs.promises.readFile(videoPath);
       const filename = path.basename(videoPath);
@@ -424,7 +440,8 @@ export class VideoQueueConsumer {
 
       return data?.path;
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error('Error uploading video:', error);
+      return undefined;
     }
   }
 

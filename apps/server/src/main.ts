@@ -16,4 +16,5 @@ async function bootstrap() {
   trpc.applyMiddleware(app);
   await app.listen(process.env.PORT ? parseInt(process.env.PORT, 10) : 4000);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

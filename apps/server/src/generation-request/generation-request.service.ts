@@ -11,6 +11,8 @@ import { PrismaService } from '@server/prisma/prisma.service';
 import { Queue } from 'bull';
 import { SupabaseService } from '@server/supabase/supabase.service';
 import { z } from 'zod';
+import { openai } from '@ai-sdk/openai';
+import { generateObject } from 'ai';
 
 @Injectable()
 export class GenerationRequestService {
@@ -21,6 +23,37 @@ export class GenerationRequestService {
     @InjectQueue(VIDEO_QUEUE) private readonly videoQueue: Queue,
     private supabaseService: SupabaseService,
   ) {}
+
+  aiPromptSchema = z.object({
+    senderName: z.string(),
+    occasion: z.string(),
+    recipientName: z.string(),
+    userPrompt: z.string(),
+  });
+
+  async generateAIPrompt(
+    input: z.infer<typeof this.aiPromptSchema>,
+  ): Promise<{ prompt: string; suggestions: string }> {
+    const prompt = `
+      Create a fun and engaging prompt for a song about ${input.recipientName} for the occasion of ${input.occasion}, requested by ${input.senderName}.
+      Original idea: "${input.userPrompt}"
+      The prompt should be creative, fun, and lead to an interesting and engaging song. 
+      Keep it under 190 characters. try and make it dense. with the important information. and add some of the recipient's personality. be creative and generous with the details. but short.
+      Also provide suggestions on how to improve the prompt or what might be missing.
+    `;
+
+    const result = await generateObject({
+      model: openai('gpt-4'),
+      schema: z.object({
+        prompt: z.string().max(200),
+        suggestions: z.string(),
+      }),
+      prompt,
+      maxRetries: 3,
+    });
+
+    return result.object;
+  }
 
   async generationRequest(input: Prisma.GenerationRequestFindUniqueArgs) {
     return this.prisma.generationRequest.findUnique({

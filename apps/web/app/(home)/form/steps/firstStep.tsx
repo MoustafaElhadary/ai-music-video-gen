@@ -1,7 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 
 'use client';
-import {useClerk, useUser} from '@clerk/nextjs';
 import {Button} from '@web/components/ui/button';
 import {Combobox} from '@web/components/ui/combobox';
 import {
@@ -14,26 +13,21 @@ import {
 } from '@web/components/ui/form';
 import {Input} from '@web/components/ui/input';
 import {Textarea} from '@web/components/ui/textarea';
+import {useVideoGeneration} from '../videoGenerationContext';
 
+import {useClerk, useUser} from '@clerk/nextjs';
 import {trpc} from '@web/lib/trpc/client';
-import {Dispatch, SetStateAction} from 'react';
-import {UseFormReturn} from 'react-hook-form';
 import {toast} from 'sonner';
 import {FormValues, MAX_CHARS} from '../utils';
 
-export const FirstStep = ({
-	form,
-	occasions,
-	setCurrentGenerationId,
-	setCurrentStep,
-	currentGenerationId,
-}: {
-	form: UseFormReturn<FormValues>;
-	occasions: {value: string; label: string}[];
-	setCurrentGenerationId: Dispatch<SetStateAction<string | null>>;
-	setCurrentStep: Dispatch<SetStateAction<number>>;
-	currentGenerationId: string | null;
-}) => {
+export const FirstStep = () => {
+	const {
+		form,
+		setCurrentGenerationId,
+		setCurrentStep,
+		currentGenerationId,
+		handleGeneratePrompt,
+	} = useVideoGeneration();
 	const {isLoaded, isSignedIn} = useUser();
 	const {openSignIn} = useClerk();
 
@@ -41,6 +35,7 @@ export const FirstStep = ({
 		trpc.generationRequests.create.useMutation({
 			onSuccess: (data) => {
 				setCurrentGenerationId(data.id);
+				handleGeneratePrompt();
 				setCurrentStep(1);
 			},
 			onError: (err) => toast.error(JSON.stringify(err)),
@@ -53,6 +48,7 @@ export const FirstStep = ({
 		});
 
 	const handleSubmit = async (values: FormValues) => {
+		console.log('values', values);
 		if (!isLoaded || !isSignedIn) {
 			toast.error(
 				'Please sign in or create an account to create a Giddy video',
@@ -67,7 +63,10 @@ export const FirstStep = ({
 				data: values,
 			});
 		} else {
-			createGenerationRequest(values);
+			createGenerationRequest({
+				...values,
+				userId: '...user.id', //TODO: fix this
+			});
 		}
 	};
 
@@ -79,6 +78,19 @@ export const FirstStep = ({
 			>
 				<FormField
 					control={form.control}
+					name="senderName"
+					render={({field}) => (
+						<FormItem>
+							<FormLabel>Your Name</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
 					name="occasion"
 					render={({field}) => (
 						<FormItem>
@@ -86,7 +98,19 @@ export const FirstStep = ({
 							<FormControl>
 								<Combobox
 									selected={field.value || ''}
-									options={occasions}
+									options={[
+										'Birthday',
+										'Graduation',
+										'Wedding',
+										'Anniversary',
+										'New Job',
+										'Retirement',
+										'Holiday',
+										'Just Because',
+									].map((_occasion) => ({
+										value: _occasion,
+										label: _occasion,
+									}))}
 									placeholder="Select an occasion"
 									mode="single"
 									{...field}
@@ -128,20 +152,6 @@ export const FirstStep = ({
 							<div className="text-sm text-muted-foreground text-right">
 								{field.value.length}/{MAX_CHARS}
 							</div>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="senderName"
-					render={({field}) => (
-						<FormItem>
-							<FormLabel>Your Name</FormLabel>
-							<FormControl>
-								<Input {...field} />
-							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}

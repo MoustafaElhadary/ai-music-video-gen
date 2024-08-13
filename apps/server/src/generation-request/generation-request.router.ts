@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { TrpcService } from '@server/trpc/trpc.service';
+import {
+  GenerationRequestCreateInputSchema,
+  GenerationRequestDeleteArgsSchema,
+  GenerationRequestFindManyArgsSchema,
+  GenerationRequestFindUniqueArgsSchema,
+  GenerationRequestUpdateArgsSchema,
+} from '../../prisma/generated/zod';
 import { GenerationRequestService } from './generation-request.service';
-import { z } from 'zod';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class GenerationRequestRouter {
@@ -13,7 +18,7 @@ export class GenerationRequestRouter {
 
   router = this.trpc.router({
     getAll: this.trpc.protectedProcedure
-      .input(z.custom<Prisma.GenerationRequestFindManyArgs>())
+      .input(GenerationRequestFindManyArgsSchema)
       .query(({ input, ctx }) =>
         this.generationRequestService.generationRequests({
           ...input,
@@ -23,12 +28,12 @@ export class GenerationRequestRouter {
         }),
       ),
     getOne: this.trpc.protectedProcedure
-      .input(z.custom<Prisma.GenerationRequestFindUniqueArgs>())
+      .input(GenerationRequestFindUniqueArgsSchema)
       .query(({ input }) =>
         this.generationRequestService.generationRequest(input),
       ),
     create: this.trpc.protectedProcedure
-      .input(z.custom<Omit<Prisma.GenerationRequestCreateInput, 'userId'>>())
+      .input(GenerationRequestCreateInputSchema)
       .mutation(async ({ input, ctx }) =>
         this.generationRequestService.createGenerationRequest({
           ...input,
@@ -36,12 +41,12 @@ export class GenerationRequestRouter {
         }),
       ),
     update: this.trpc.protectedProcedure
-      .input(z.custom<Prisma.GenerationRequestUpdateArgs>())
+      .input(GenerationRequestUpdateArgsSchema)
       .mutation(async ({ input }) =>
         this.generationRequestService.updateGenerationRequest(input),
       ),
     delete: this.trpc.protectedProcedure
-      .input(z.custom<Prisma.GenerationRequestDeleteArgs>())
+      .input(GenerationRequestDeleteArgsSchema)
       .mutation(async ({ input }) =>
         this.generationRequestService.deleteGenerationRequest(input),
       ),
@@ -65,5 +70,10 @@ export class GenerationRequestRouter {
           userId: ctx.user.id,
         }),
       ),
+    generateAIPrompt: this.trpc.protectedProcedure
+      .input(this.generationRequestService.aiPromptSchema)
+      .mutation(async ({ input }) => {
+        return this.generationRequestService.generateAIPrompt(input);
+      }),
   });
 }

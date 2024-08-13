@@ -14,7 +14,7 @@ import { VideoQueueConsumer } from './video-queue.consumer';
   imports: [
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         redis: {
           host: configService.get('UPSTASH_REDIS_HOST'),
           port: parseInt(configService.get('UPSTASH_REDIS_PORT') ?? '6379', 10),

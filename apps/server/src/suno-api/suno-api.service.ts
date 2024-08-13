@@ -23,63 +23,77 @@ export class SunoApiService {
   }
 
   async generateAudio(input: GenerateAudioDto): Promise<AudioInfo[]> {
-    const { data } = await firstValueFrom(
-      this.httpService.post(`${this.baseUrl}/api/generate`, input),
+    const response = await firstValueFrom(
+      this.httpService.post<AudioInfo[]>(`${this.baseUrl}/api/generate`, input),
     );
-    return data;
+    return response.data;
   }
 
   async customGenerateAudio(
     input: CustomGenerateAudioDto,
   ): Promise<AudioInfo[]> {
-    const { data } = await firstValueFrom(
-      this.httpService.post(`${this.baseUrl}/api/custom_generate`, input),
+    const response = await firstValueFrom(
+      this.httpService.post<AudioInfo[]>(
+        `${this.baseUrl}/api/custom_generate`,
+        input,
+      ),
     );
-    return data;
+    return response.data;
   }
 
   async extendAudio(input: ExtendAudioDto): Promise<AudioInfo> {
-    const { data } = await firstValueFrom(
-      this.httpService.post(`${this.baseUrl}/api/extend_audio`, input),
+    const response = await firstValueFrom(
+      this.httpService.post<AudioInfo>(
+        `${this.baseUrl}/api/extend_audio`,
+        input,
+      ),
     );
-    return data;
+    return response.data;
   }
 
   async generateLyrics(
     input: GenerateLyricsDto,
   ): Promise<{ text: string; title: string; status: string }> {
-    const { data } = await firstValueFrom(
-      this.httpService.post(`${this.baseUrl}/api/generate_lyrics`, input),
+    const response = await firstValueFrom(
+      this.httpService.post<{ text: string; title: string; status: string }>(
+        `${this.baseUrl}/api/generate_lyrics`,
+        input,
+      ),
     );
-    return data;
+    return response.data;
   }
 
   async getAudioInfo(ids?: string): Promise<AudioInfo[]> {
-    const { data } = await firstValueFrom(
-      this.httpService.get(`${this.baseUrl}/api/get`, { params: { ids } }),
+    const response = await firstValueFrom(
+      this.httpService.get<AudioInfo[]>(`${this.baseUrl}/api/get`, {
+        params: { ids },
+      }),
     );
-    return data;
+    return response.data;
   }
 
   async getQuotaInfo(): Promise<QuotaInfo> {
-    const { data } = await firstValueFrom(
-      this.httpService.get(`${this.baseUrl}/api/get_limit`),
+    const response = await firstValueFrom(
+      this.httpService.get<QuotaInfo>(`${this.baseUrl}/api/get_limit`),
     );
-    return data;
+    return response.data;
   }
 
   async getClipInfo(id: string): Promise<AudioInfo> {
-    const { data } = await firstValueFrom(
-      this.httpService.get(`${this.baseUrl}/api/clip`, { params: { id } }),
+    const response = await firstValueFrom(
+      this.httpService.get<AudioInfo>(`${this.baseUrl}/api/clip`, {
+        params: { id },
+      }),
     );
-    return data;
+    return response.data;
   }
 
   async concatAudio(clipId: string): Promise<AudioInfo> {
-    const { data } = await firstValueFrom(
-      // eslint-disable-next-line camelcase
-      this.httpService.post(`${this.baseUrl}/api/concat`, { clip_id: clipId }),
+    const response = await firstValueFrom(
+      this.httpService.post<AudioInfo>(`${this.baseUrl}/api/concat`, {
+        clip_id: clipId,
+      }),
     );
-    return data;
+    return response.data;
   }
 }

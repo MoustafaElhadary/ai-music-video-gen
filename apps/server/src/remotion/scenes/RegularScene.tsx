@@ -1,3 +1,5 @@
+/* eslint-disable @remotion/volume-callback */
+/* eslint-disable complexity */
 import cn from 'clsx';
 import React from 'react';
 import { Audio } from 'remotion';
@@ -5,11 +7,11 @@ import { Image } from '../components/Image';
 import { Text } from '../components/Text';
 import { VideoBlock } from '../components/VideoBlock';
 
+import { Animated, Animation, Move, Rotate, Scale } from '../remotion-animated';
 import { SceneData } from '../types';
-import { Animated, Move, Rotate, Scale, Animation } from '../remotion-animated';
 
 export function stringToReAnimated(str: string[]) {
-  let animationArray: Animation[] = [];
+  const animationArray: Animation[] = [];
 
   str.forEach((item) => {
     if (!item) return;
@@ -31,21 +33,21 @@ export function stringToReAnimated(str: string[]) {
       item.match(/overshootClamping: *(true|false)/)?.[1] || false;
 
     const springOptions = {
-      ...(!!mass && { mass: Number(mass) > 1 ? Number(mass) : 1 }),
-      ...(!!damping && {
+      ...(Boolean(mass) && { mass: Number(mass) > 1 ? Number(mass) : 1 }),
+      ...(Boolean(damping) && {
         damping: Number(damping) > 5 ? Number(damping) : 5,
       }),
-      ...(!!stiffness && {
+      ...(Boolean(stiffness) && {
         stiffness: Number(stiffness) > 1 ? Number(stiffness) : 1,
       }),
-      ...(!!overshootClamping && {
-        overshootClamping: overshootClamping === 'true' ? true : false,
+      ...(Boolean(overshootClamping) && {
+        overshootClamping: overshootClamping === 'true',
       }),
     };
 
     const timingOptions = {
       start: Number(start),
-      ...(!!duration && { duration: Number(duration) }),
+      ...(Boolean(duration) && { duration: Number(duration) }),
     };
 
     if (item.startsWith('Move')) {
@@ -63,11 +65,11 @@ export function stringToReAnimated(str: string[]) {
       animationArray.push(
         Scale({
           by: Number(by),
-          ...(!!initial && { initial: Number(initial) }),
-          ...(!!x && { x: Number(x) }),
-          ...(!!y && { y: Number(y) }),
-          ...(!!initialX && { initialX: Number(initialX) }),
-          ...(!!initialY && { initialY: Number(initialY) }),
+          ...(Boolean(initial) && { initial: Number(initial) }),
+          ...(Boolean(x) && { x: Number(x) }),
+          ...(Boolean(y) && { y: Number(y) }),
+          ...(Boolean(initialX) && { initialX: Number(initialX) }),
+          ...(Boolean(initialY) && { initialY: Number(initialY) }),
           ...timingOptions,
           ...springOptions,
         }),
@@ -114,7 +116,7 @@ export const RegularScene: React.FC<SceneData> = ({
           <VideoBlock src={video.url} mediaStyle={mediaStyle} volume={volume} />
         )}
         {image && <Image src={image.url} mediaStyle={mediaStyle} />}
-        {!!text && <Text text={text} textStyle={textStyle} />}
+        {Boolean(text) && <Text text={text} textStyle={textStyle} />}
       </Animated>
       {sound && <Audio src={sound.url} volume={volume} />}
     </>

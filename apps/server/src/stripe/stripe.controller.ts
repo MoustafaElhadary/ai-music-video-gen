@@ -21,7 +21,10 @@ export class StripeController {
   }
 
   @Post('webhook')
-  async handleWebhook(@Req() req: Request, @Res() res: Response) {
+  async handleWebhook(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     const webhookSecret = this.configService.get<string>(
       'STRIPE_WEBHOOK_SECRET',
@@ -30,14 +33,16 @@ export class StripeController {
     let event: Stripe.Event;
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       event = this.stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (err) {
       console.error(err);
-      return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
+      res.status(400).send(`Webhook Error: ${(err as Error).message}`);
+      return;
     }
 
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
       await this.handleSuccessfulPayment(session);
     }
 

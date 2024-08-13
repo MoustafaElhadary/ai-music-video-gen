@@ -3,18 +3,11 @@
 import {Button} from '@web/components/ui/button';
 import {trpc} from '@web/lib/trpc/client';
 import {useRouter} from 'next/navigation';
-import {UseFormReturn} from 'react-hook-form';
-import {FormValues} from '../utils';
+import {useVideoGeneration} from '../videoGenerationContext';
 
-export const ReviewStep = ({
-	form,
-	onEdit,
-	currentGenerationId,
-}: {
-	form: UseFormReturn<FormValues>;
-	onEdit: () => void;
-	currentGenerationId: string | null;
-}) => {
+export const ReviewStep = () => {
+	const {form, currentGenerationId, aiGeneratedPrompt, setCurrentStep} =
+		useVideoGeneration();
 	const router = useRouter();
 	const formValues = form.getValues();
 
@@ -50,14 +43,18 @@ export const ReviewStep = ({
 					<strong>Recipient's Name:</strong> {formValues.recipientName}
 				</p>
 				<p>
-					<strong>Prompt:</strong> {formValues.prompt}
+					<strong>Sender's Name:</strong> {formValues.senderName}
 				</p>
 				<p>
-					<strong>Sender's Name:</strong> {formValues.senderName}
+					<strong>Recipient's Phone Number:</strong>{' '}
+					{formValues.recipientPhoneNumber}
+				</p>
+				<p>
+					<strong>AI-Generated Prompt:</strong> {aiGeneratedPrompt}
 				</p>
 			</div>
 			<div className="flex space-x-4">
-				<Button onClick={onEdit}>Edit</Button>
+				<Button onClick={() => setCurrentStep(0)}>Edit</Button>
 				<Button onClick={handlePayment} disabled={isLoading}>
 					{isLoading ? 'Processing...' : 'Pay Now'}
 				</Button>

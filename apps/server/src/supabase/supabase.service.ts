@@ -13,7 +13,17 @@ export class SupabaseService {
     );
   }
 
-  async uploadFile(bucket: string, path: string, file: Buffer, options?: any) {
+  async uploadFile(
+    bucket: string,
+    path: string,
+    file: Buffer,
+    options?: {
+      cacheControl?: string;
+      contentType?: string;
+      upsert?: boolean;
+      duplex?: string;
+    },
+  ) {
     const { data, error } = await this.supabase.storage
       .from(bucket)
       .upload(path, file, options);

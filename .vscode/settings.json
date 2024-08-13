@@ -2,16 +2,20 @@
 	"cSpell.words": [
 		"Authed",
 		"camelcase",
+		"Charactor",
 		"clsx",
 		"giphy",
 		"knip",
 		"logprob",
+		"Lowpoly",
 		"lucide",
+		"Neonpunk",
 		"nestjs",
 		"nextjs",
 		"Offthread",
 		"openai",
 		"photomaker",
+		"poppingly",
 		"sdxl",
 		"shadcn",
 		"sonner",
@@ -24,6 +28,7 @@
 		"trpc",
 		"Trpc",
 		"tsparticles",
-		"upstash"
+		"upstash",
+		"webp"
 	]
 }

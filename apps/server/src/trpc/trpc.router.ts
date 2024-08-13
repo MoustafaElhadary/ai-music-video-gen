@@ -21,7 +21,7 @@ export class TrpcRouter {
     stripe: this.stripeRouter.router,
   });
 
-  async applyMiddleware(app: INestApplication) {
+  applyMiddleware(app: INestApplication) {
     app.use(
       `/trpc`,
       trpcExpress.createExpressMiddleware({

@@ -1,8 +1,7 @@
-/* eslint-disable react/no-unescaped-entities */
 'use client';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Button} from '@web/components/ui/button';
-import {useCallback, useState} from 'react';
+import {useCallback} from 'react';
 import {trpc} from '@web/lib/trpc/client';
 
 import {FileUploader} from '@web/components/FileUploader';
@@ -12,6 +11,13 @@ import {useForm} from 'react-hook-form';
 import {FirstStep} from './steps/firstStep';
 import {ReviewStep} from './steps/reviewStep';
 import {FormSchema, FormValues} from './utils';
+import {AIPromptStep} from './steps/aiPromptStep';
+import {PhoneNumberStep} from './steps/phoneNumberStep';
+import {
+	VideoGenerationProvider,
+	useVideoGeneration,
+} from './videoGenerationContext';
+import {toast} from 'sonner';
 
 // Giddy steps data
 const giddyStepsData = [
@@ -19,37 +25,31 @@ const giddyStepsData = [
 		stepNumber: 1,
 		stepId: 'write_prompt',
 		icon: '✍️',
-		text: 'Write a creative prompt describing your dream music video',
+		text: 'Describe your dream music video',
 	},
 	{
 		stepNumber: 2,
-		stepId: 'upload_media',
-		icon: '📸',
-		text: 'Upload your favorite photos or video clips',
+		stepId: 'ai_prompt',
+		icon: '🤖',
+		text: 'Review AI-enhanced prompt',
 	},
 	{
 		stepNumber: 3,
-		stepId: 'review_pay',
-		icon: '📊',
-		text: 'Review and Pay',
+		stepId: 'upload_media',
+		icon: '📸',
+		text: 'Upload photos (optional)',
 	},
 	{
 		stepNumber: 4,
-		stepId: 'ai_magic',
-		icon: '🤖',
-		text: 'Let our AI work its magic to create your unique music video',
+		stepId: 'add_phone',
+		icon: '📱',
+		text: "Add recipient's phone number",
 	},
 	{
 		stepNumber: 5,
-		stepId: 'add_phone',
-		icon: '📱',
-		text: "Add the recipient's phone number",
-	},
-	{
-		stepNumber: 6,
-		stepId: 'share_creation',
-		icon: '🚀',
-		text: 'Share your Giddy creation instantly!',
+		stepId: 'review_pay',
+		icon: '💳',
+		text: 'Review and Pay',
 	},
 ];
 
@@ -61,14 +61,10 @@ const VideoGenerationForm = () => {
 			recipientName: '',
 			prompt: '',
 			senderName: '',
+			recipientPhoneNumber: '',
 		},
 	);
 	const [giddySteps] = useLocalStorage('giddySteps', giddyStepsData);
-	const [currentStep, setCurrentStep] = useState(0);
-	const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(
-		null,
-	);
-	const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -82,33 +78,46 @@ const VideoGenerationForm = () => {
 		return () => subscription.unsubscribe();
 	}, [form, setStoredFormData]);
 
+	return (
+		<VideoGenerationProvider form={form}>
+			<VideoGenerationFormContent giddySteps={giddySteps} />
+		</VideoGenerationProvider>
+	);
+};
+
+const VideoGenerationFormContent = ({
+	giddySteps,
+}: {
+	giddySteps: typeof giddyStepsData;
+}) => {
+	const {
+		currentStep,
+		setCurrentStep,
+		currentGenerationId,
+		uploadedFiles,
+		setUploadedFiles,
+	} = useVideoGeneration();
+
 	const getStepHeaderText = (step: number) => {
 		const headers = [
 			'Ready to Get Giddy?',
-			'2. Upload Your Media (optional)',
-			'3. Review and Pay',
-			'4. AI Magic in Progress',
-			"5. Add Recipient's Contact",
-			'6. Share Your Creation',
+			'2. Review AI-enhanced Prompt',
+			'3. Upload Your Media (optional)',
+			"4. Add Recipient's Contact",
+			'5. Review and Pay',
 		];
 		return headers[step] || giddySteps[step]?.text || '';
 	};
 
 	const {mutate: uploadFile} = trpc.generationRequests.uploadFile.useMutation({
-		onSuccess: () => {
-			// Handle successful upload
-		},
 		onError: (error) => {
-			console.error('Upload failed:', error);
+			toast.error('Upload failed:' + error.message);
 		},
 	});
 
 	const {mutate: deleteFile} = trpc.generationRequests.deleteFile.useMutation({
-		onSuccess: () => {
-			// Handle successful deletion
-		},
 		onError: (error) => {
-			console.error('Deletion failed:', error);
+			toast.error('Deletion failed:' + error.message);
 		},
 	});
 
@@ -188,45 +197,26 @@ const VideoGenerationForm = () => {
 				{getStepHeaderText(currentStep)}
 			</h2>
 
-			{currentStep === 0 && (
-				<FirstStep
-					form={form}
-					occasions={[
-						'Birthday',
-						'Graduation',
-						'Wedding',
-						'Anniversary',
-						'New Job',
-						'Retirement',
-						'Holiday',
-						'Just Because',
-					].map((_occasion) => ({
-						value: _occasion,
-						label: _occasion,
-					}))}
-					currentGenerationId={currentGenerationId}
-					setCurrentGenerationId={setCurrentGenerationId}
-					setCurrentStep={setCurrentStep}
-				/>
-			)}
-
-			{currentStep === 1 && (
+			{currentStep === 0 && <FirstStep />}
+			{currentStep === 1 && <AIPromptStep />}
+			{currentStep === 2 && (
 				<div>
-					<p>Upload your favorite photos or video clips here.</p>
+					<p>
+						Upload photos of the recipient (optional). These photos will be
+						included in the video.
+					</p>
+					<p className="text-sm text-gray-600 mb-4">
+						For best results, upload clear photos showing just the
+						recipient&apos;s face.
+					</p>
 					<FileUploader
 						onChange={handleFileChange}
 						initialFiles={uploadedFiles}
 					/>
 				</div>
 			)}
-
-			{currentStep === 2 && (
-				<ReviewStep
-					form={form}
-					onEdit={() => setCurrentStep(0)}
-					currentGenerationId={currentGenerationId}
-				/>
-			)}
+			{currentStep === 3 && <PhoneNumberStep />}
+			{currentStep === 4 && <ReviewStep />}
 
 			{currentStep > 0 && <BottomNavigation />}
 		</>

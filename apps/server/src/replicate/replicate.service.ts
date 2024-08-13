@@ -28,22 +28,27 @@ export class ReplicateService {
     return this.replicate.run(model, options);
   }
 
-  async generateImageWithBasePhoto(prompt: string, inputImage: string) {
+  // type InputSchemaType = z.infer<typeof InputSchema>;
+  async generateImageWithBasePhoto(
+    prompt: string,
+    inputImage: string,
+    styleName: string = 'Photographic (Default)',
+  ) {
     return this.run(
-      'tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4',
+      'tencentarc/photomaker-style:467d062309da518648ba89d226490e02b8ed09b5abc15026e54e31c5a8cd0769',
       {
         input: {
-          prompt,
           num_steps: 50,
-          style_name: 'Photographic (Default)',
+          guidance_scale: 5,
+          prompt,
+          style_name: styleName,
           input_image: inputImage,
           num_outputs: 1,
-          guidance_scale: 7.5,
           negative_prompt: this.photoNegativePrompt,
           style_strength_ratio: 35,
         },
       },
-    );
+    ) as Promise<string[]>;
   }
 
   async generateImage(prompt: string) {
@@ -66,7 +71,7 @@ export class ReplicateService {
           num_inference_steps: 50,
         },
       },
-    );
+    ) as Promise<string[]>;
   }
 
   async generateSubtitles(audio: string) {

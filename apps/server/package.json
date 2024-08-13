@@ -24,7 +24,6 @@
     "db:studio": "prisma studio",
     "remotion:studio": "remotion studio src/remotion/index.ts --port 3002",
     "stripe:listen": "stripe listen --forward-to localhost:4000/api/stripe/webhook"
-
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.33",
@@ -67,7 +66,8 @@
     "rxjs": "^7.8.1",
     "stripe": "^15.12.0",
     "styled-components": "^6.1.11",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

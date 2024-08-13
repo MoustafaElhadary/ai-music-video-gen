@@ -1,19 +1,32 @@
 {
-	"compilerOptions": {
-		"baseUrl": ".",
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"incremental": true,
-		"skipLibCheck": true,
-		"strictNullChecks": true,
-		"noImplicitAny": true,
-		"strictBindCallApply": true,
-		"forceConsistentCasingInFileNames": true,
-		"noFallthroughCasesInSwitch": true,
-		"paths": {
-			"@server/*": ["./apps/server/src/*"],
-			"@web/*": ["./apps/web/*"],
-			"@suno-api/*": ["./apps/suno-api/src/*"]
-		}
-	}
+  "compilerOptions": {
+    "baseUrl": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+	
+    "useUnknownInCatchVariables": true,
+    "noUncheckedIndexedAccess": true,
+
+    "paths": {
+      "@server/*": ["./apps/server/src/*"],
+      "@web/*": ["./apps/web/*"],
+      "@suno-api/*": ["./apps/suno-api/src/*"]
+    }
+  }
 }

@@ -185,8 +185,8 @@ export const RemotionRoot: React.FC = () => {
           data: testVideoData,
         }}
         schema={GeneratedVideoSchema}
-        calculateMetadata={async ({ props }) => {
-          const durationInSeconds = props.data[0].durationInSeconds ?? 2;
+        calculateMetadata={({ props }) => {
+          const durationInSeconds = props.data?.[0]?.durationInSeconds ?? 2;
 
           console.log({ props, durationInSeconds });
 

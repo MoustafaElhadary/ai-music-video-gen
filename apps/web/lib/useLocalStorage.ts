@@ -47,6 +47,7 @@ function useLocalStorage<T>(
 				window.removeEventListener('storage', handleStorageChange);
 			};
 		}
+		return () => {};
 	}, [key]);
 
 	return [storedValue, setValue];

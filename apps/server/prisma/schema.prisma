@@ -3,6 +3,10 @@ generator client {
   // output   = "../../../node_modules/.prisma/client"
 }
 
+generator zod {
+  provider = "zod-prisma-types"
+}
+
 // generator zod {
 //   provider              = "zod-prisma"
 //   output                = "./zod"
@@ -29,26 +33,26 @@ model Book {
 }
 
 model GenerationRequest {
-  id             String        @id @default(cuid())
-  userId         String
-  occasion       String
-  recipientName  String
-  prompt         String
-  senderName     String
-  status         RequestStatus @default(STARTED)
-  sunoSongId     String?
-  sunoAudioUrl   String?
-  srt            String?
-  isRTL          Boolean?
-  language       String?
-  duration       Int?
-  sunoLyrics     String?
-  localVideoPath String?
-  finalVideoPath String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  videoImages    VideoImage[]
-
+  id                   String        @id @default(cuid())
+  userId               String
+  occasion             String
+  recipientName        String
+  prompt               String
+  senderName           String
+  status               RequestStatus @default(STARTED)
+  sunoSongId           String?
+  sunoAudioUrl         String?
+  srt                  String?
+  isRTL                Boolean?
+  language             String?
+  duration             Int?
+  sunoLyrics           String?
+  localVideoPath       String?
+  finalVideoPath       String?
+  recipientPhoneNumber String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  videoImages          VideoImage[]
 }
 
 model VideoImage {
