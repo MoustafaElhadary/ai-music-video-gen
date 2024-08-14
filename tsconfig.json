@@ -18,11 +18,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-
-	
     "useUnknownInCatchVariables": true,
     "noUncheckedIndexedAccess": true,
-
+    "exactOptionalPropertyTypes": false,
     "paths": {
       "@server/*": ["./apps/server/src/*"],
       "@web/*": ["./apps/web/*"],

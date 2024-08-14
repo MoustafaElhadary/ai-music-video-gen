@@ -1,12 +1,10 @@
 import 'server-only';
 
-
 import {createTRPCProxyClient, httpBatchLink, loggerLink} from '@trpc/client';
 
 import {AppRouter} from '@server/trpc/trpc.router';
-import {TRPC_URL} from './utils';
 import {cookies} from 'next/headers';
-import {getUserAuth} from '../auth/utils';
+import {TRPC_URL} from './utils';
 
 export const api = createTRPCProxyClient<AppRouter>({
 	links: [
@@ -22,9 +20,7 @@ export const api = createTRPCProxyClient<AppRouter>({
 			 **/
 			url: TRPC_URL,
 			// You can pass any HTTP headers you wish here
-			async headers() {
-				const token = await getUserAuth();
-
+			headers() {
 				return {
 					cookie: cookies().toString(),
 					Cookie: cookies().toString(),

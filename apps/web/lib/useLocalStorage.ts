@@ -12,7 +12,7 @@ function useLocalStorage<T>(
 		}
 		try {
 			const item = window.localStorage.getItem(key);
-			return item ? JSON.parse(item) : initialValue;
+			return item ? (JSON.parse(item) as T) : initialValue;
 		} catch (error) {
 			console.warn(`Error reading localStorage key "${key}":`, error);
 			return initialValue;
@@ -37,9 +37,9 @@ function useLocalStorage<T>(
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			const handleStorageChange = (event: StorageEvent) => {
+			const handleStorageChange = (event: StorageEvent): void => {
 				if (event.key === key && event.newValue !== null) {
-					setStoredValue(JSON.parse(event.newValue));
+					setStoredValue(JSON.parse(event.newValue) as T);
 				}
 			};
 			window.addEventListener('storage', handleStorageChange);

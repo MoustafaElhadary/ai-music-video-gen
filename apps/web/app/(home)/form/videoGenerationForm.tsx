@@ -53,7 +53,7 @@ const giddyStepsData = [
 	},
 ];
 
-const VideoGenerationForm = () => {
+const VideoGenerationForm = (): React.ReactNode => {
 	const [storedFormData, setStoredFormData] = useLocalStorage<FormValues>(
 		'video-generation-form',
 		{
@@ -89,7 +89,7 @@ const VideoGenerationFormContent = ({
 	giddySteps,
 }: {
 	giddySteps: typeof giddyStepsData;
-}) => {
+}): React.ReactNode => {
 	const {
 		currentStep,
 		setCurrentStep,
@@ -98,7 +98,7 @@ const VideoGenerationFormContent = ({
 		setUploadedFiles,
 	} = useVideoGeneration();
 
-	const getStepHeaderText = (step: number) => {
+	const getStepHeaderText = (step: number): string => {
 		const headers = [
 			'Ready to Get Giddy?',
 			'2. Review AI-enhanced Prompt',
@@ -154,19 +154,23 @@ const VideoGenerationFormContent = ({
 		],
 	);
 
-	const BottomNavigation = () => (
+	const BottomNavigation = (): React.ReactNode => (
 		<div className="flex justify-between mt-4">
 			<Button
-				onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))}
+				onClick={() => {
+					setCurrentStep((prev) => Math.max(prev - 1, 0));
+				}}
 				disabled={currentStep === 0}
 				className="bg-gray-500"
 			>
 				Back
 			</Button>
 			<Button
-				onClick={() =>
-					setCurrentStep((prev) => Math.min(prev + 1, giddySteps.length - 1))
-				}
+				onClick={() => {
+					setCurrentStep((prev: number) =>
+						Math.min(prev + 1, giddySteps.length - 1),
+					);
+				}}
 				disabled={currentStep === giddySteps.length - 1}
 				className="bg-blue-700"
 			>

@@ -11,16 +11,21 @@ export const WobbleCard = ({
 	children: React.ReactNode;
 	containerClassName?: string;
 	className?: string;
-}) => {
+}): React.ReactNode => {
 	const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
 	const [isHovering, setIsHovering] = useState(false);
 
-	const handleMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+	const handleMouseMove = (event: React.MouseEvent<HTMLElement>): void => {
 		const {clientX, clientY} = event;
-		const rect = event.currentTarget.getBoundingClientRect();
-		const x = (clientX - (rect.left + rect.width / 2)) / 20;
-		const y = (clientY - (rect.top + rect.height / 2)) / 20;
-		setMousePosition({x, y});
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		const currentTarget = event.currentTarget;
+		if (currentTarget instanceof HTMLElement) {
+			const rect = currentTarget.getBoundingClientRect();
+			const x = (clientX - (rect.left + rect.width / 2)) / 20;
+			const y = (clientY - (rect.top + rect.height / 2)) / 20;
+			setMousePosition({x, y});
+		}
 	};
 	return (
 		<motion.section
@@ -65,7 +70,7 @@ export const WobbleCard = ({
 	);
 };
 
-export const Noise = () => {
+export const Noise = (): React.ReactNode => {
 	return (
 		<div
 			className="absolute inset-0 w-full h-full scale-[1.2] transform opacity-10 [mask-image:radial-gradient(#fff,transparent,75%)] -z-10"

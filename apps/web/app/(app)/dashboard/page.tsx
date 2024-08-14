@@ -2,7 +2,7 @@ import {Button} from '@web/components/ui/button';
 import {getUserAuth} from '@web/lib/auth/utils';
 import Link from 'next/link';
 
-export default async function Home() {
+export default async function Home(): Promise<JSX.Element> {
 	const userAuth = await getUserAuth();
 	return (
 		<main className="space-y-6">

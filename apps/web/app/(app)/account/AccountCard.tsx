@@ -9,7 +9,7 @@ interface AccountCardProps {
 	children: React.ReactNode;
 }
 
-export function AccountCard({params, children}: AccountCardProps) {
+export function AccountCard({params, children}: AccountCardProps): JSX.Element {
 	const {header, description} = params;
 	return (
 		<Card>
@@ -22,7 +22,11 @@ export function AccountCard({params, children}: AccountCardProps) {
 	);
 }
 
-export function AccountCardBody({children}: {children: React.ReactNode}) {
+export function AccountCardBody({
+	children,
+}: {
+	children: React.ReactNode;
+}): JSX.Element {
 	return <div className="p-4">{children}</div>;
 }
 
@@ -32,7 +36,7 @@ export function AccountCardFooter({
 }: {
 	children: React.ReactNode;
 	description: string;
-}) {
+}): JSX.Element {
 	return (
 		<div
 			className="bg-muted p-4 border dark:bg-card flex justify-between items-center rounded-b-lg"

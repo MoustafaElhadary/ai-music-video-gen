@@ -29,7 +29,7 @@ const VideoGenerationContext = createContext<
 	VideoGenerationContextType | undefined
 >(undefined);
 
-export const useVideoGeneration = () => {
+export const useVideoGeneration = (): VideoGenerationContextType => {
 	const context = useContext(VideoGenerationContext);
 	if (!context) {
 		throw new Error(
@@ -64,7 +64,7 @@ export const VideoGenerationProvider: React.FC<{
 			},
 		});
 
-	const handleGeneratePrompt = () => {
+	const handleGeneratePrompt = (): void => {
 		generateAIPromptMutation.mutate({
 			senderName: formValues.senderName,
 			occasion: formValues.occasion,

@@ -13,7 +13,9 @@ import { Scene3 } from './Scene3';
 import './style.css';
 import { Wrapped } from './Wrapped';
 
-export const preloadHTMLScript = (src: string) => {
+export const preloadHTMLScript = (
+  src: string,
+): HTMLScriptElement | (() => undefined) => {
   if (typeof document === 'undefined') {
     console.warn('() was called outside the browser. Doing nothing.');
     return () => undefined;

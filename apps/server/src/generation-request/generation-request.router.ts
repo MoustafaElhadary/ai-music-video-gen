@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { TrpcService } from '@server/trpc/trpc.service';
+import { TrpcService } from '../trpc/trpc.service';
 import {
   GenerationRequestCreateInputSchema,
   GenerationRequestDeleteArgsSchema,
   GenerationRequestFindManyArgsSchema,
   GenerationRequestFindUniqueArgsSchema,
   GenerationRequestUpdateArgsSchema,
-} from '../../prisma/generated/zod';
+} from '../prisma/generated/zod';
 import { GenerationRequestService } from './generation-request.service';
 
 @Injectable()

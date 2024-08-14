@@ -1,12 +1,12 @@
 'use client';
 
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {loggerLink, httpBatchLink} from '@trpc/client';
+import {httpBatchLink, loggerLink} from '@trpc/client';
 import React, {useState} from 'react';
 
+import {useAuth} from '@clerk/nextjs';
 import {trpc} from './client';
 import {TRPC_URL} from './utils';
-import {useAuth} from '@clerk/nextjs';
 
 export default function TrpcProvider({
 	children,
@@ -14,7 +14,7 @@ export default function TrpcProvider({
 }: {
 	children: React.ReactNode;
 	cookies: string;
-}) {
+}): React.ReactNode {
 	const {getToken} = useAuth();
 
 	const [queryClient] = useState(() => new QueryClient({}));

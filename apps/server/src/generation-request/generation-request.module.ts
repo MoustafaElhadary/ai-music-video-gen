@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from '@server/prisma/prisma.service';
-import { TrpcService } from '@server/trpc/trpc.service';
-import { VideoQueueModule } from '@server/video/video-queue.module';
+import { PrismaService } from '../prisma/prisma.service';
+import { ReplicateService } from '../replicate/replicate.service';
+import { SupabaseService } from '../supabase/supabase.service';
+import { TrpcService } from '../trpc/trpc.service';
+import { VideoQueueModule } from '../video/video-queue.module';
 import { GenerationRequestRouter } from './generation-request.router';
 import { GenerationRequestService } from './generation-request.service';
-import { SupabaseService } from '@server/supabase/supabase.service';
-import { ReplicateService } from '@server/replicate/replicate.service';
 
 @Module({
   imports: [VideoQueueModule],

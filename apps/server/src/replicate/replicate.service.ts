@@ -1,6 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Caption } from '@server/video/srt';
 import Replicate, { WebhookEventType } from 'replicate';
+
+interface Output {
+  segments: Caption[];
+  translation: string | null;
+  transcription: string;
+  detected_language: string;
+}
 
 @Injectable()
 export class ReplicateService {
@@ -15,7 +23,7 @@ export class ReplicateService {
     });
   }
 
-  private async run(
+  private async run<T>(
     model: `${string}/${string}:${string}`,
     options: {
       input: object;
@@ -24,8 +32,8 @@ export class ReplicateService {
       webhook_events_filter?: WebhookEventType[];
       signal?: AbortSignal;
     },
-  ) {
-    return this.replicate.run(model, options);
+  ): Promise<T> {
+    return this.replicate.run(model, options) as Promise<T>;
   }
 
   // type InputSchemaType = z.infer<typeof InputSchema>;
@@ -33,8 +41,8 @@ export class ReplicateService {
     prompt: string,
     inputImage: string,
     styleName: string = 'Photographic (Default)',
-  ) {
-    return this.run(
+  ): Promise<string[]> {
+    return this.run<string[]>(
       'tencentarc/photomaker-style:467d062309da518648ba89d226490e02b8ed09b5abc15026e54e31c5a8cd0769',
       {
         input: {
@@ -48,11 +56,11 @@ export class ReplicateService {
           style_strength_ratio: 35,
         },
       },
-    ) as Promise<string[]>;
+    );
   }
 
-  async generateImage(prompt: string) {
-    return this.run(
+  async generateImage(prompt: string): Promise<string[]> {
+    return this.run<string[]>(
       'stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc',
       {
         input: {
@@ -71,11 +79,11 @@ export class ReplicateService {
           num_inference_steps: 50,
         },
       },
-    ) as Promise<string[]>;
+    );
   }
 
-  async generateSubtitles(audio: string) {
-    return this.run(
+  async generateSubtitles(audio: string): Promise<Output> {
+    return this.run<Output>(
       'openai/whisper:4d50797290df275329f202e48c76360b3f22b08d28c196cbc54600319435f8d2',
       {
         input: {

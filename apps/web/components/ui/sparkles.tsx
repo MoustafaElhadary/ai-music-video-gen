@@ -18,7 +18,7 @@ type ParticlesProps = {
 	particleColor?: string;
 	particleDensity?: number;
 };
-export const SparklesCore = (props: ParticlesProps) => {
+export const SparklesCore = (props: ParticlesProps): React.ReactNode => {
 	const {
 		id,
 		className,
@@ -31,17 +31,19 @@ export const SparklesCore = (props: ParticlesProps) => {
 	} = props;
 	const [init, setInit] = useState(false);
 	useEffect(() => {
-		initParticlesEngine(async (engine) => {
-			await loadSlim(engine);
-		}).then(() => {
+		const initEngine = async (): Promise<void> => {
+			await initParticlesEngine(async (engine) => {
+				await loadSlim(engine);
+			});
 			setInit(true);
-		});
+		};
+		initEngine().catch(console.error);
 	}, []);
 	const controls = useAnimation();
 
-	const particlesLoaded = async (container?: Container) => {
+	const particlesLoaded = async (container?: Container): Promise<void> => {
 		if (container) {
-			controls.start({
+			await controls.start({
 				opacity: 1,
 				transition: {
 					duration: 1,
@@ -79,7 +81,9 @@ export const SparklesCore = (props: ParticlesProps) => {
 									enable: false,
 									mode: 'repulse',
 								},
-								resize: true as any,
+								resize: {
+									enable: true,
+								},
 							},
 							modes: {
 								push: {

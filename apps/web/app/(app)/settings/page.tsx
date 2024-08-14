@@ -3,7 +3,7 @@
 import {Button} from '@web/components/ui/button';
 import {useTheme} from 'next-themes';
 
-export default function Page() {
+export default function Page(): React.ReactNode {
 	const {setTheme} = useTheme();
 	return (
 		<div>

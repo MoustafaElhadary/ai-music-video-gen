@@ -11,7 +11,7 @@ export type AuthSession = {
 	} | null;
 };
 
-export const getUserAuth = async () => {
+export const getUserAuth = async (): Promise<AuthSession> => {
 	const {userId} = auth();
 	const user = await currentUser();
 
@@ -30,7 +30,7 @@ export const getUserAuth = async () => {
 	}
 };
 
-export const checkAuth = async () => {
+export const checkAuth = (): void => {
 	const {userId} = auth();
 	if (!userId) redirect('/sign-in');
 };

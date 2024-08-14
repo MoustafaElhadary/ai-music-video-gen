@@ -9,11 +9,11 @@ export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
-}>) {
+}>): React.ReactNode {
 	const [isScrolled, setIsScrolled] = useState(false);
 
 	useEffect(() => {
-		const handleScroll = () => {
+		const handleScroll = (): void => {
 			setIsScrolled(window.scrollY > 0);
 		};
 

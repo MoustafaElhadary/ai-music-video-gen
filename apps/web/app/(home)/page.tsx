@@ -2,7 +2,7 @@
 'use client';
 
 import {FlipWords} from '@web/components/ui/flip-words';
-import React, {useRef} from 'react';
+import React from 'react';
 import {FAQ} from './faq';
 import VideoGenerationForm from './form/videoGenerationForm';
 import {WhyGetGiddy} from './whyGetGiddy';

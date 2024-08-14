@@ -18,9 +18,11 @@ export default function BookModal({
 }: {
 	book?: Book;
 	emptyState?: boolean;
-}) {
+}): React.ReactNode {
 	const [open, setOpen] = useState(false);
-	const closeModal = () => setOpen(false);
+	const closeModal = (): void => {
+		setOpen(false);
+	};
 	const editing = !!book?.id;
 	return (
 		<Dialog onOpenChange={setOpen} open={open}>

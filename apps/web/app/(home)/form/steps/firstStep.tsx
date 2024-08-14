@@ -20,7 +20,7 @@ import {trpc} from '@web/lib/trpc/client';
 import {toast} from 'sonner';
 import {FormValues, MAX_CHARS} from '../utils';
 
-export const FirstStep = () => {
+export const FirstStep = (): JSX.Element => {
 	const {
 		form,
 		setCurrentGenerationId,
@@ -43,12 +43,13 @@ export const FirstStep = () => {
 
 	const {mutate: updateGenerationRequest, isLoading: isUpdating} =
 		trpc.generationRequests.update.useMutation({
-			onSuccess: () => setCurrentStep(1),
+			onSuccess: () => {
+				setCurrentStep(1);
+			},
 			onError: (err) => toast.error(JSON.stringify(err)),
 		});
 
-	const handleSubmit = async (values: FormValues) => {
-		console.log('values', values);
+	const handleSubmit = (values: FormValues): void => {
 		if (!isLoaded || !isSignedIn) {
 			toast.error(
 				'Please sign in or create an account to create a Giddy video',
@@ -73,7 +74,9 @@ export const FirstStep = () => {
 	return (
 		<Form {...form}>
 			<form
-				onSubmit={(e) => form.handleSubmit(handleSubmit)(e)}
+				onSubmit={(e) => {
+					void form.handleSubmit(handleSubmit)(e);
+				}}
 				className="space-y-4"
 			>
 				<FormField

@@ -6,7 +6,7 @@ export type GetAllBooks = RouterOutput['books']['getAll'];
 
 export type Book = NonNullable<GetAllBooks>[0];
 
-export default function BookList({books}: {books: Book[]}) {
+export default function BookList({books}: {books: Book[]}): JSX.Element {
 	const {data} = trpc.books.getAll.useQuery(
 		{},
 		{
@@ -27,7 +27,7 @@ export default function BookList({books}: {books: Book[]}) {
 	);
 }
 
-const BookComponent = ({book}: {book: Book}) => {
+const BookComponent = ({book}: {book: Book}): JSX.Element => {
 	return (
 		<li className="flex justify-between my-2">
 			<div className="w-full">
@@ -38,7 +38,7 @@ const BookComponent = ({book}: {book: Book}) => {
 	);
 };
 
-const EmptyState = () => {
+const EmptyState = (): JSX.Element => {
 	return (
 		<div className="text-center">
 			<h3 className="mt-2 text-sm font-semibold text-secondary-foreground">

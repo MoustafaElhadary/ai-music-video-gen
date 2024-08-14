@@ -7,7 +7,7 @@ export default function UserSettings({
 	session,
 }: {
 	session: AuthSession['session'];
-}) {
+}): JSX.Element {
 	return (
 		<>
 			<UpdateNameCard name={session?.user.name ?? ''} />

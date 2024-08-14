@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import path from 'path';
 import { random } from 'remotion';
 import { z } from 'zod';
-import { Caption, convertToSRT } from './srt';
+import { convertToSRT } from './srt';
 import { SupabaseService } from '@server/supabase/supabase.service';
 import { ReplicateService } from '@server/replicate/replicate.service';
 
@@ -166,9 +166,7 @@ export class VideoQueueConsumer {
       generationRequest.sunoAudioUrl,
     );
 
-    const generatedSRT = convertToSRT(
-      (generatedSubtitles as { segments: Caption[] }).segments,
-    );
+    const generatedSRT = convertToSRT(generatedSubtitles.segments);
 
     const { srt, language, is_rtl } = await this.ensureCaptionsMatchLyrics(
       generationRequest.sunoLyrics,

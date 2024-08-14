@@ -5,12 +5,12 @@ import Sidebar from '@web/components/Sidebar';
 import {ClerkProvider} from '@clerk/nextjs';
 import TrpcProvider from '@web/lib/trpc/Provider';
 import {cookies} from 'next/headers';
-export default async function AppLayout({
+export default function AppLayout({
 	children,
 }: {
 	children: React.ReactNode;
-}) {
-	await checkAuth();
+}): React.ReactNode {
+	checkAuth();
 	return (
 		<main>
 			<ClerkProvider>

@@ -14,7 +14,7 @@ export interface SidebarLink {
 	icon: LucideIcon;
 }
 
-const SidebarItems = () => {
+const SidebarItems = (): React.ReactNode => {
 	return (
 		<>
 			<SidebarLinkGroup links={defaultLinks} />
@@ -41,7 +41,7 @@ const SidebarLinkGroup = ({
 	links: SidebarLink[];
 	title?: string;
 	border?: boolean;
-}) => {
+}): React.ReactNode => {
 	const fullPathname = usePathname();
 	const pathname = '/' + fullPathname.split('/')[1];
 
@@ -62,7 +62,13 @@ const SidebarLinkGroup = ({
 		</div>
 	);
 };
-const SidebarLink = ({link, active}: {link: SidebarLink; active: boolean}) => {
+const SidebarLink = ({
+	link,
+	active,
+}: {
+	link: SidebarLink;
+	active: boolean;
+}): React.ReactNode => {
 	return (
 		<Link
 			href={link.href}

@@ -3,8 +3,8 @@ import NewBookModal from '@web/components/books/BookModal';
 import {checkAuth} from '@web/lib/auth/utils';
 import {api} from '@web/lib/trpc/api';
 
-export default async function Books() {
-	await checkAuth();
+export default async function Books(): Promise<JSX.Element> {
+	checkAuth();
 	const books = await api.books.getAll.query({});
 
 	return (

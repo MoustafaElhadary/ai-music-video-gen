@@ -1,18 +1,18 @@
 'use client';
 
+import {
+	Carousel,
+	CarouselApi,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from '@web/components/ui/carousel';
 import {cn} from '@web/lib/utils';
-import {ChevronLeft, ChevronRight, Trash2, X} from 'lucide-react';
+import {Trash2, X} from 'lucide-react';
 import Image from 'next/image';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
-import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselPrevious,
-	CarouselNext,
-	CarouselApi,
-} from '@web/components/ui/carousel';
 
 interface FileUploaderProps {
 	onChange: (files: File[]) => void;
@@ -26,12 +26,12 @@ export function FileUploader({
 	maxFiles = 10,
 	acceptedFileTypes = ['image/*'],
 	initialFiles = [],
-}: FileUploaderProps) {
+}: FileUploaderProps): React.ReactNode {
 	const [files, setFiles] = useState<File[]>(initialFiles);
 	const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-	const [api, setApi] = React.useState<CarouselApi>();
-	const [current, setCurrent] = React.useState(0);
-	const [count, setCount] = React.useState(0);
+	const [api, setApi] = useState<CarouselApi>();
+	const [current, setCurrent] = useState(0);
+	const [count, setCount] = useState(0);
 
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
@@ -48,7 +48,7 @@ export function FileUploader({
 		maxFiles,
 	});
 
-	const removeFile = (index: number) => {
+	const removeFile = (index: number): void => {
 		setFiles((prev) => {
 			const newFiles = prev.filter((_, i) => i !== index);
 			onChange(newFiles);
@@ -57,25 +57,25 @@ export function FileUploader({
 	};
 
 	const handlePreview = {
-		open: (index: number) => {
+		open: (index: number): void => {
 			setPreviewIndex(index);
 		},
-		close: () => {
+		close: (): void => {
 			setPreviewIndex(null);
 		},
-		next: () => {
+		next: (): void => {
 			setPreviewIndex((prev) =>
 				prev === null || prev === files.length - 1 ? 0 : prev + 1,
 			);
 		},
-		prev: () => {
+		prev: (): void => {
 			setPreviewIndex((prev) =>
 				prev === null || prev === 0 ? files.length - 1 : prev - 1,
 			);
 		},
 	};
-
-	const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
+	const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		if (e.target === e.currentTarget) {
 			handlePreview.close();
 		}
@@ -86,7 +86,7 @@ export function FileUploader({
 		onChange(initialFiles);
 	}, [initialFiles, onChange]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!api) {
 			return;
 		}

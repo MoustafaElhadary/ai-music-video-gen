@@ -5,7 +5,7 @@ import {trpc} from '@web/lib/trpc/client';
 import {useRouter} from 'next/navigation';
 import {useVideoGeneration} from '../videoGenerationContext';
 
-export const ReviewStep = () => {
+export const ReviewStep = (): React.ReactNode => {
 	const {form, currentGenerationId, aiGeneratedPrompt, setCurrentStep} =
 		useVideoGeneration();
 	const router = useRouter();
@@ -14,16 +14,18 @@ export const ReviewStep = () => {
 	const {mutate: createPaymentIntent, isLoading} =
 		trpc.stripe.createPaymentIntent.useMutation({
 			onSuccess: (data) => {
-				router.push(data.url!);
+				if (data.url) {
+					router.push(data.url);
+				}
 			},
 			onError: (error) => {
 				console.error('Payment intent creation failed:', error);
 			},
 		});
 
-	const handlePayment = () => {
+	const handlePayment = (): void => {
 		createPaymentIntent({
-			priceId: process.env.NEXT_PUBLIC_SONG_PRICE_ID!,
+			priceId: process.env['NEXT_PUBLIC_SONG_PRICE_ID'] ?? '',
 			successUrl: `${window.location.origin}/payment-success?generationRequestId=${currentGenerationId}`,
 			cancelUrl: `${window.location.origin}/payment-cancelled`,
 			metadata: {
@@ -54,7 +56,13 @@ export const ReviewStep = () => {
 				</p>
 			</div>
 			<div className="flex space-x-4">
-				<Button onClick={() => setCurrentStep(0)}>Edit</Button>
+				<Button
+					onClick={() => {
+						setCurrentStep(0);
+					}}
+				>
+					Edit
+				</Button>
 				<Button onClick={handlePayment} disabled={isLoading}>
 					{isLoading ? 'Processing...' : 'Pay Now'}
 				</Button>

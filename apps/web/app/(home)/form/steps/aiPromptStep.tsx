@@ -3,7 +3,7 @@ import {Textarea} from '@web/components/ui/textarea';
 import {useVideoGeneration} from '../videoGenerationContext';
 import {MAX_CHARS} from '../utils';
 
-export const AIPromptStep = () => {
+export const AIPromptStep = (): React.ReactNode => {
 	const {
 		aiGeneratedPrompt,
 		setAiGeneratedPrompt,
@@ -23,7 +23,9 @@ export const AIPromptStep = () => {
 				<>
 					<Textarea
 						value={aiGeneratedPrompt}
-						onChange={(e) => setAiGeneratedPrompt(e.target.value)}
+						onChange={(e) => {
+							setAiGeneratedPrompt(e.target.value);
+						}}
 						className="h-32 resize-none"
 						maxLength={200}
 					/>
@@ -36,7 +38,12 @@ export const AIPromptStep = () => {
 					</div>
 				</>
 			)}
-			<Button onClick={() => setCurrentStep(2)} disabled={!aiGeneratedPrompt}>
+			<Button
+				onClick={() => {
+					setCurrentStep(2);
+				}}
+				disabled={!aiGeneratedPrompt}
+			>
 				Next
 			</Button>
 		</div>

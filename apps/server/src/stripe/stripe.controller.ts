@@ -49,10 +49,11 @@ export class StripeController {
     res.json({ received: true });
   }
 
-  private async handleSuccessfulPayment(session: Stripe.Checkout.Session) {
+  private async handleSuccessfulPayment(
+    session: Stripe.Checkout.Session,
+  ): Promise<void> {
     const generationRequestId = session.metadata?.generationRequestId;
 
-    console.log({ generationRequestId, metadata: session.metadata });
     if (generationRequestId) {
       await this.stripeService.handleSuccessfulPayment(session);
     }

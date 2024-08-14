@@ -6,10 +6,10 @@ import {toast} from 'sonner';
 import {useTransition} from 'react';
 import {useRouter} from 'next/navigation';
 
-export default function UpdateNameCard({name}: {name: string}) {
-	const [isPending, startTransition] = useTransition();
+export default function UpdateNameCard({name}: {name: string}): JSX.Element {
+	const [, startTransition] = useTransition();
 	const router = useRouter();
-	const handleSubmit = async (event: React.SyntheticEvent) => {
+	const handleSubmit = (event: React.SyntheticEvent): void => {
 		event.preventDefault();
 		const target = event.target as HTMLFormElement;
 		const form = new FormData(target);

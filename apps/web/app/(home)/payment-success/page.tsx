@@ -1,20 +1,22 @@
 'use client';
 
-import {useEffect} from 'react';
-import {useRouter} from 'next/navigation';
-import confetti from 'canvas-confetti';
 import {trpc} from '@web/lib/trpc/client';
+import confetti from 'canvas-confetti';
+import {useEffect} from 'react';
 
-export default function PaymentSuccessPage() {
-	const router = useRouter();
+export default function PaymentSuccessPage(): JSX.Element {
 	const {data: userGenerations, isLoading} =
 		trpc.generationRequests.getAll.useQuery({});
 
 	useEffect(() => {
-		confetti({
-			particleCount: 100,
-			spread: 70,
-			origin: {y: 0.6},
+		(
+			confetti({
+				particleCount: 100,
+				spread: 70,
+				origin: {y: 0.6},
+			}) as Promise<void>
+		).catch((error) => {
+			console.error('Confetti failed:', error);
 		});
 	}, []);
 

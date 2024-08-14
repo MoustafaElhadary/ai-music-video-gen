@@ -5,7 +5,7 @@ import {UserButton} from '@clerk/nextjs';
 
 import {AuthSession, getUserAuth} from '@web/lib/auth/utils';
 
-const Sidebar = async () => {
+const Sidebar = async (): Promise<JSX.Element | null> => {
 	const session = await getUserAuth();
 	if (session.session === null) return null;
 
@@ -24,7 +24,7 @@ const Sidebar = async () => {
 
 export default Sidebar;
 
-const UserDetails = ({session}: {session: AuthSession}) => {
+const UserDetails = ({session}: {session: AuthSession}): JSX.Element | null => {
 	if (session.session === null) return null;
 	const {user} = session.session;
 
