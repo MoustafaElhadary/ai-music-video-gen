@@ -1,4 +1,4 @@
-export const ensureFont = () => {
+export const ensureFont = (): Promise<void> => {
   if (typeof window !== 'undefined' && 'FontFace' in window) {
     const font = new FontFace(
       'IBM Plex Sans',

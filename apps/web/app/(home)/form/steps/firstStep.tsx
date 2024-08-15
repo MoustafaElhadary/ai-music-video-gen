@@ -64,10 +64,7 @@ export const FirstStep = (): JSX.Element => {
 				data: values,
 			});
 		} else {
-			createGenerationRequest({
-				...values,
-				userId: '...user.id', //TODO: fix this
-			});
+			createGenerationRequest(values);
 		}
 	};
 

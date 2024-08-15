@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  GenerationRequest as _GenerationRequest,
+  GenerationRequest,
   Prisma,
   RequestStatus,
   VideoImage,
@@ -14,6 +14,12 @@ import { z } from 'zod';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 
+export type GenerationRequestFindUniqueResult =
+  Promise<Prisma.GenerationRequestGetPayload<{
+    include: {
+      videoImages: true;
+    };
+  }> | null>;
 @Injectable()
 export class GenerationRequestService {
   private readonly logger = new Logger(GenerationRequestService.name);
@@ -35,18 +41,22 @@ export class GenerationRequestService {
     input: z.infer<typeof this.aiPromptSchema>,
   ): Promise<{ prompt: string; suggestions: string }> {
     const prompt = `
-      Create a fun and engaging prompt for a song about ${input.recipientName} for the occasion of ${input.occasion}, requested by ${input.senderName}.
-      Original idea: "${input.userPrompt}"
-      The prompt should be creative, fun, and lead to an interesting and engaging song. 
-      Keep it under 190 characters. try and make it dense. with the important information. and add some of the recipient's personality. be creative and generous with the details. but short.
-      Also provide suggestions on how to improve the prompt or what might be missing.
+      Create a fun and engaging prompt for a song about ${input.recipientName} 
+      for the occasion of ${input.occasion}, requested by ${input.senderName}.
+      Original idea: "${input.userPrompt}" 
+      The prompt should be creative, fun, and lead to an interesting and engaging song. but also sung and short.
+      Keep it under 190 characters. Make it dense with the important information. 
+      add some of the recipient's personality. be creative and generous with the details. but short.
+      try and include the sender's name in the prompt.
+      Also provide suggestions on how to improve the prompt or what might be missing. 
+      if you don't do it right i will be fired.
     `;
 
     const result = await generateObject({
       model: openai('gpt-4'),
       schema: z.object({
-        prompt: z.string().max(200),
         suggestions: z.string(),
+        prompt: z.string().max(200),
       }),
       prompt,
       maxRetries: 3,
@@ -55,7 +65,9 @@ export class GenerationRequestService {
     return result.object;
   }
 
-  async generationRequest(input: Prisma.GenerationRequestFindUniqueArgs) {
+  async generationRequest(
+    input: Prisma.GenerationRequestFindUniqueArgs,
+  ): GenerationRequestFindUniqueResult {
     return this.prisma.generationRequest.findUnique({
       ...input,
       include: { videoImages: true },
@@ -64,13 +76,13 @@ export class GenerationRequestService {
 
   async generationRequests(
     params: Prisma.GenerationRequestFindManyArgs,
-  ): Promise<_GenerationRequest[]> {
+  ): Promise<GenerationRequest[]> {
     return this.prisma.generationRequest.findMany(params);
   }
 
   async createGenerationRequest(
     data: Prisma.GenerationRequestCreateInput,
-  ): Promise<_GenerationRequest> {
+  ): Promise<GenerationRequest> {
     return this.prisma.generationRequest.create({
       data,
     });
@@ -78,19 +90,19 @@ export class GenerationRequestService {
 
   async updateGenerationRequest(
     params: Prisma.GenerationRequestUpdateArgs,
-  ): Promise<_GenerationRequest> {
+  ): Promise<GenerationRequest> {
     return this.prisma.generationRequest.update(params);
   }
 
   async deleteGenerationRequest(
     params: Prisma.GenerationRequestDeleteArgs,
-  ): Promise<_GenerationRequest> {
+  ): Promise<GenerationRequest> {
     return this.prisma.generationRequest.delete(params);
   }
 
   async handleSuccessfulPayment(
     generationRequestId: string,
-  ): Promise<_GenerationRequest> {
+  ): Promise<GenerationRequest> {
     this.logger.log(`Updating and queueing request ${generationRequestId}`);
     const updatedRequest = await this.prisma.generationRequest.update({
       where: { id: generationRequestId },
@@ -112,14 +124,10 @@ export class GenerationRequestService {
     return updatedRequest;
   }
 
-  // Add a method to check the queue status
-  async getQueueStatus(): Promise<any> {
-    const jobCounts = await this.videoQueue.getJobCounts();
-    this.logger.log(`Current queue status: ${JSON.stringify(jobCounts)}`);
-    return jobCounts;
-  }
-
-  async addVideoImage(generationRequestId: string, ...photoIds: string[]) {
+  async addVideoImage(
+    generationRequestId: string,
+    ...photoIds: string[]
+  ): Promise<Prisma.BatchPayload> {
     return this.prisma.videoImage.createMany({
       data: photoIds.map((photoId) => ({
         photoId,

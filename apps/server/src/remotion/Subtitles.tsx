@@ -13,7 +13,7 @@ import { Word } from './Word';
 const useWindowedFrameSubs = (
   src: string,
   options: { windowStart: number; windowEnd: number },
-) => {
+): SubtitleItem[] => {
   const { windowStart, windowEnd } = options;
   const config = useVideoConfig();
   const { fps } = config;

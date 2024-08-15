@@ -1,5 +1,5 @@
-import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
@@ -1294,35 +1294,32 @@ export const BookUncheckedUpdateManyInputSchema: z.ZodType<Prisma.BookUncheckedU
     })
     .strict();
 
-export const GenerationRequestCreateInputSchema: z.ZodType<Prisma.GenerationRequestCreateInput> =
-  z
-    .object({
-      id: z.string().cuid().optional(),
-      userId: z.string(),
-      occasion: z.string(),
-      recipientName: z.string(),
-      prompt: z.string(),
-      senderName: z.string(),
-      status: z.lazy(() => RequestStatusSchema).optional(),
-      sunoSongId: z.string().optional().nullable(),
-      sunoAudioUrl: z.string().optional().nullable(),
-      srt: z.string().optional().nullable(),
-      isRTL: z.boolean().optional().nullable(),
-      language: z.string().optional().nullable(),
-      duration: z.number().int().optional().nullable(),
-      sunoLyrics: z.string().optional().nullable(),
-      localVideoPath: z.string().optional().nullable(),
-      finalVideoPath: z.string().optional().nullable(),
-      recipientPhoneNumber: z.string().optional().nullable(),
-      createdAt: z.coerce.date().optional(),
-      updatedAt: z.coerce.date().optional(),
-      videoImages: z
-        .lazy(
-          () => VideoImageCreateNestedManyWithoutGenerationRequestInputSchema,
-        )
-        .optional(),
-    })
-    .strict();
+export const GenerationRequestCreateInputSchema = z
+  .object({
+    id: z.string().cuid().optional(),
+    userId: z.string(),
+    occasion: z.string(),
+    recipientName: z.string(),
+    prompt: z.string(),
+    senderName: z.string(),
+    status: z.lazy(() => RequestStatusSchema).optional(),
+    sunoSongId: z.string().optional().nullable(),
+    sunoAudioUrl: z.string().optional().nullable(),
+    srt: z.string().optional().nullable(),
+    isRTL: z.boolean().optional().nullable(),
+    language: z.string().optional().nullable(),
+    duration: z.number().int().optional().nullable(),
+    sunoLyrics: z.string().optional().nullable(),
+    localVideoPath: z.string().optional().nullable(),
+    finalVideoPath: z.string().optional().nullable(),
+    recipientPhoneNumber: z.string().optional().nullable(),
+    createdAt: z.coerce.date().optional(),
+    updatedAt: z.coerce.date().optional(),
+    videoImages: z
+      .lazy(() => VideoImageCreateNestedManyWithoutGenerationRequestInputSchema)
+      .optional(),
+  })
+  .strict();
 
 export const GenerationRequestUncheckedCreateInputSchema: z.ZodType<Prisma.GenerationRequestUncheckedCreateInput> =
   z

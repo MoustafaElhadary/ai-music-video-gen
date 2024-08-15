@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { TrpcService } from '../trpc/trpc.service';
 import {
   GenerationRequestCreateInputSchema,
   GenerationRequestDeleteArgsSchema,
@@ -7,6 +6,7 @@ import {
   GenerationRequestFindUniqueArgsSchema,
   GenerationRequestUpdateArgsSchema,
 } from '../prisma/generated/zod';
+import { TrpcService } from '../trpc/trpc.service';
 import { GenerationRequestService } from './generation-request.service';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class GenerationRequestRouter {
         this.generationRequestService.generationRequest(input),
       ),
     create: this.trpc.protectedProcedure
-      .input(GenerationRequestCreateInputSchema)
+      .input(GenerationRequestCreateInputSchema.omit({ userId: true }))
       .mutation(async ({ input, ctx }) =>
         this.generationRequestService.createGenerationRequest({
           ...input,
@@ -50,9 +50,7 @@ export class GenerationRequestRouter {
       .mutation(async ({ input }) =>
         this.generationRequestService.deleteGenerationRequest(input),
       ),
-    getQueueStatus: this.trpc.protectedProcedure.query(async () =>
-      this.generationRequestService.getQueueStatus(),
-    ),
+
     uploadFile: this.trpc.protectedProcedure
       .input(this.generationRequestService.fileSchema.omit({ userId: true }))
       .mutation(async ({ input, ctx }) =>

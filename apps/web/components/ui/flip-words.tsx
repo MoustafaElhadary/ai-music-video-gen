@@ -11,12 +11,12 @@ export const FlipWords = ({
 	words: string[];
 	duration?: number;
 	className?: string;
-}) => {
-	const [currentWord, setCurrentWord] = useState(words[0]);
+}): React.ReactNode => {
+	const [currentWord, setCurrentWord] = useState(words[0] || '');
 	const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
 	const startAnimation = useCallback(() => {
-		const word = words[words.indexOf(currentWord) + 1] || words[0];
+		const word = words[words.indexOf(currentWord) + 1] || words[0] || '';
 		setCurrentWord(word);
 		setIsAnimating(true);
 	}, [currentWord, words]);

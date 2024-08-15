@@ -1,17 +1,18 @@
-import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import {Slot} from '@radix-ui/react-slot';
+import * as React from 'react';
 import {
 	Controller,
 	ControllerProps,
+	FieldError,
 	FieldPath,
 	FieldValues,
 	FormProvider,
 	useFormContext,
 } from 'react-hook-form';
 
-import {cn} from '@web/lib/utils';
 import {Label} from '@web/components/ui/label';
+import {cn} from '@web/lib/utils';
 
 const Form = FormProvider;
 
@@ -31,7 +32,7 @@ const FormField = <
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
 	...props
-}: ControllerProps<TFieldValues, TName>) => {
+}: ControllerProps<TFieldValues, TName>): React.ReactNode => {
 	return (
 		<FormFieldContext.Provider value={{name: props.name}}>
 			<Controller {...props} />
@@ -39,7 +40,18 @@ const FormField = <
 	);
 };
 
-const useFormField = () => {
+const useFormField = (): {
+	id: string;
+	name: string;
+	formItemId: string;
+	formDescriptionId: string;
+	formMessageId: string;
+	invalid: boolean;
+	isDirty: boolean;
+	isTouched: boolean;
+	isValidating: boolean;
+	error?: FieldError;
+} => {
 	const fieldContext = React.useContext(FormFieldContext);
 	const itemContext = React.useContext(FormItemContext);
 	const {getFieldState, formState} = useFormContext();
@@ -165,12 +177,12 @@ const FormMessage = React.forwardRef<
 FormMessage.displayName = 'FormMessage';
 
 export {
-	useFormField,
 	Form,
-	FormItem,
-	FormLabel,
 	FormControl,
 	FormDescription,
-	FormMessage,
 	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	useFormField,
 };

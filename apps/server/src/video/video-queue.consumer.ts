@@ -8,7 +8,10 @@ import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import { VIDEO_QUEUE } from '@server/core/constants';
 import { randomString } from '@server/core/utils';
-import { GenerationRequestService } from '@server/generation-request/generation-request.service';
+import {
+  GenerationRequestFindUniqueResult,
+  GenerationRequestService,
+} from '@server/generation-request/generation-request.service';
 import { AudioGramSchema } from '@server/remotion/Composition';
 import {
   CompositionId,
@@ -38,7 +41,7 @@ export class VideoQueueConsumer {
   private readonly logger = new Logger(VideoQueueConsumer.name);
 
   @Process()
-  async processJobRequest(job: Job<GenerationRequest>) {
+  async processJobRequest(job: Job<GenerationRequest>): Promise<void> {
     this.logger.log(
       `Starting to process job ${job.id} for request ${job.data.id}`,
     );
@@ -58,7 +61,6 @@ export class VideoQueueConsumer {
 
       this.logger.log(`Successfully processed job ${job.id}`);
       await job.remove();
-      return generationRequest.finalVideoPath;
     } catch (error) {
       this.logger.error(`Error processing job ${job.id}:`, error);
       await this.updateGenerationRequest(id, { status: RequestStatus.FAILED });
@@ -66,7 +68,9 @@ export class VideoQueueConsumer {
     }
   }
 
-  private async getGenerationRequest(id: string) {
+  private async getGenerationRequest(
+    id: string,
+  ): GenerationRequestFindUniqueResult {
     return this.generationRequestService.generationRequest({
       where: { id },
       include: { videoImages: true },
@@ -76,14 +80,14 @@ export class VideoQueueConsumer {
   private async updateGenerationRequest(
     id: string,
     data: Partial<GenerationRequest>,
-  ) {
+  ): Promise<GenerationRequest> {
     return this.generationRequestService.updateGenerationRequest({
       where: { id },
       data,
     });
   }
 
-  private async processAudio(id: string) {
+  private async processAudio(id: string): Promise<void> {
     const generationRequest = await this.getGenerationRequest(id);
     if (!generationRequest) {
       throw new Error('Generation request not found');
@@ -140,7 +144,7 @@ export class VideoQueueConsumer {
     throw new Error('Audio generation timed out');
   }
 
-  private async processSubtitles(id: string) {
+  private async processSubtitles(id: string): Promise<void> {
     const generationRequest = await this.getGenerationRequest(id);
     if (!generationRequest) {
       throw new Error('Generation request not found');
@@ -188,7 +192,7 @@ export class VideoQueueConsumer {
     });
   }
 
-  private async processImages(id: string) {
+  private async processImages(id: string): Promise<void> {
     const generationRequest = await this.getGenerationRequest(id);
     if (!generationRequest || !generationRequest.sunoLyrics) {
       throw new Error('Generation request or lyrics not found');
@@ -238,7 +242,34 @@ export class VideoQueueConsumer {
       );
   }
 
-  private async generateImageDescriptions(lyrics: string) {
+  AiImageDescriptionSchema = z.object({
+    imageDescriptions: z.array(
+      z.object({
+        prompt: z.string(),
+        startTime: z.number(),
+        endTime: z.number(),
+        style_name: z.enum([
+          '(No style)',
+          'Cinematic',
+          'Disney Charactor',
+          'Digital Art',
+          'Photographic (Default)',
+          'Fantasy art',
+          'Neonpunk',
+          'Enhance',
+          'Comic book',
+          'Lowpoly',
+          'Line art',
+        ]),
+      }),
+    ),
+  });
+
+  private async generateImageDescriptions(
+    lyrics: string,
+  ): Promise<
+    z.infer<typeof this.AiImageDescriptionSchema>['imageDescriptions']
+  > {
     const prompt = `
     Given the following song lyrics, generate 5-7 image descriptions that capture key moments or themes from the song. 
     Each description should include a prompt for image generation and a timestamp (in seconds) for when the image should appear in the video.
@@ -250,28 +281,7 @@ export class VideoQueueConsumer {
 
     const result = await generateObject({
       model: openai('gpt-4'),
-      schema: z.object({
-        imageDescriptions: z.array(
-          z.object({
-            prompt: z.string(),
-            startTime: z.number(),
-            endTime: z.number(),
-            style_name: z.enum([
-              '(No style)',
-              'Cinematic',
-              'Disney Charactor',
-              'Digital Art',
-              'Photographic (Default)',
-              'Fantasy art',
-              'Neonpunk',
-              'Enhance',
-              'Comic book',
-              'Lowpoly',
-              'Line art',
-            ]),
-          }),
-        ),
-      }),
+      schema: this.AiImageDescriptionSchema,
       prompt,
       maxRetries: 3,
     });
@@ -303,7 +313,7 @@ export class VideoQueueConsumer {
     throw new Error('Failed to generate image');
   }
 
-  private async processVideo(id: string) {
+  private async processVideo(id: string): Promise<void> {
     const generationRequest = await this.getGenerationRequest(id);
     if (!generationRequest) {
       throw new Error('Generation request not found');
@@ -353,7 +363,7 @@ export class VideoQueueConsumer {
     });
   }
 
-  private async uploadAndFinalize(id: string) {
+  private async uploadAndFinalize(id: string): Promise<void> {
     const generationRequest = await this.getGenerationRequest(id);
     if (!generationRequest) {
       throw new Error('Generation request not found');
@@ -389,7 +399,9 @@ export class VideoQueueConsumer {
     });
   }
 
-  private async createVideo(props: z.infer<typeof AudioGramSchema>) {
+  private async createVideo(
+    props: z.infer<typeof AudioGramSchema>,
+  ): Promise<string> {
     try {
       const compositionId: CompositionId = 'Audiogram';
 
@@ -443,7 +455,18 @@ export class VideoQueueConsumer {
     }
   }
 
-  private async ensureCaptionsMatchLyrics(lyrics: string, captions: string) {
+  AiCaptionSchema = z.object({
+    srt: z.string(),
+    language: z
+      .string()
+      .describe('the language of the srt file. ex: en, es, fr, etc'),
+    is_rtl: z.boolean().describe('is the language right to left'),
+  });
+
+  private async ensureCaptionsMatchLyrics(
+    lyrics: string,
+    captions: string,
+  ): Promise<z.infer<typeof this.AiCaptionSchema>> {
     const prompt = `I have two inputs. one is the srt file with the words mapped to where i want them to be but they occasionally have the wrong words or something that sounds similar and i have what the words should be. 
     I will provide you both so you can fix the srt file for me 
     you can be assured that the I own the rights to the lyrics and the srt file.
@@ -454,13 +477,7 @@ export class VideoQueueConsumer {
 
     const result = await generateObject({
       model: openai('gpt-4o'),
-      schema: z.object({
-        srt: z.string(),
-        language: z
-          .string()
-          .describe('the language of the srt file. ex: en, es, fr, etc'),
-        is_rtl: z.boolean().describe('is the language right to left'),
-      }),
+      schema: this.AiCaptionSchema,
       prompt,
       maxRetries: 3,
     });

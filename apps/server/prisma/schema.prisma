@@ -35,7 +35,7 @@ model Book {
 
 model GenerationRequest {
   id                   String        @id @default(cuid())
-  userId               String
+  userId               String 
   occasion             String
   recipientName        String
   prompt               String
