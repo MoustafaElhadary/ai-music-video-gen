@@ -1,5 +1,8 @@
 export const VIDEO_QUEUE = 'video-queue';
 
+export const MAX_FILE_SIZE_MB = 40;
+export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 // TODO: remove later
 export const testVideoData = [
   {

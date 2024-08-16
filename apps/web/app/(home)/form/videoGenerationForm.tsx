@@ -1,57 +1,25 @@
 'use client';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {Button} from '@web/components/ui/button';
-import {useCallback} from 'react';
 import {trpc} from '@web/lib/trpc/client';
+import {useCallback} from 'react';
 
+import {MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB} from '@server/core/constants';
 import {FileUploader} from '@web/components/FileUploader';
 import useLocalStorage from '@web/lib/useLocalStorage';
 import {useEffect} from 'react';
 import {useForm} from 'react-hook-form';
+import {toast} from 'sonner';
+import {AIPromptStep} from './steps/aiPromptStep';
 import {FirstStep} from './steps/firstStep';
+import {PhoneNumberStep} from './steps/phoneNumberStep';
 import {ReviewStep} from './steps/reviewStep';
 import {FormSchema, FormValues} from './utils';
-import {AIPromptStep} from './steps/aiPromptStep';
-import {PhoneNumberStep} from './steps/phoneNumberStep';
 import {
 	VideoGenerationProvider,
 	useVideoGeneration,
 } from './videoGenerationContext';
-import {toast} from 'sonner';
 
 // Giddy steps data
-const giddyStepsData = [
-	{
-		stepNumber: 1,
-		stepId: 'write_prompt',
-		icon: '✍️',
-		text: 'Describe your dream music video',
-	},
-	{
-		stepNumber: 2,
-		stepId: 'ai_prompt',
-		icon: '🤖',
-		text: 'Review AI-enhanced prompt',
-	},
-	{
-		stepNumber: 3,
-		stepId: 'upload_media',
-		icon: '📸',
-		text: 'Upload photos (optional)',
-	},
-	{
-		stepNumber: 4,
-		stepId: 'add_phone',
-		icon: '📱',
-		text: "Add recipient's phone number",
-	},
-	{
-		stepNumber: 5,
-		stepId: 'review_pay',
-		icon: '💳',
-		text: 'Review and Pay',
-	},
-];
 
 const VideoGenerationForm = (): React.ReactNode => {
 	const [storedFormData, setStoredFormData] = useLocalStorage<FormValues>(
@@ -64,7 +32,6 @@ const VideoGenerationForm = (): React.ReactNode => {
 			recipientPhoneNumber: '',
 		},
 	);
-	const [giddySteps] = useLocalStorage('giddySteps', giddyStepsData);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(FormSchema),
@@ -80,22 +47,19 @@ const VideoGenerationForm = (): React.ReactNode => {
 
 	return (
 		<VideoGenerationProvider form={form}>
-			<VideoGenerationFormContent giddySteps={giddySteps} />
+			<VideoGenerationFormContent />
 		</VideoGenerationProvider>
 	);
 };
 
-const VideoGenerationFormContent = ({
-	giddySteps,
-}: {
-	giddySteps: typeof giddyStepsData;
-}): React.ReactNode => {
+const VideoGenerationFormContent = (): React.ReactNode => {
 	const {
 		currentStep,
-		setCurrentStep,
+		giddySteps,
 		currentGenerationId,
 		uploadedFiles,
 		setUploadedFiles,
+		BottomNavigation,
 	} = useVideoGeneration();
 
 	const getStepHeaderText = (step: number): string => {
@@ -111,7 +75,11 @@ const VideoGenerationFormContent = ({
 
 	const {mutate: uploadFile} = trpc.generationRequests.uploadFile.useMutation({
 		onError: (error) => {
-			toast.error('Upload failed:' + error.message);
+			if (error.message.includes('exceeds the maximum size')) {
+				toast.error(error.message);
+			} else {
+				toast.error('Upload failed:' + error.message);
+			}
 		},
 	});
 
@@ -134,13 +102,39 @@ const VideoGenerationFormContent = ({
 
 			if (currentGenerationId) {
 				filesToUpload.forEach((file) => {
-					uploadFile({generationRequestId: currentGenerationId, file});
+					if (file.size <= MAX_FILE_SIZE_BYTES) {
+						const reader = new FileReader();
+						reader.onload = (e): void => {
+							const base64 = e.target?.result?.toString().split(',')[1];
+							if (base64) {
+								uploadFile({
+									generationRequestId: currentGenerationId,
+									file: {
+										name: file.name,
+										type: file.type,
+										size: file.size,
+										base64,
+									},
+								});
+							}
+						};
+						reader.readAsDataURL(file);
+					} else {
+						toast.error(
+							`File "${file.name}" exceeds the maximum size of ${MAX_FILE_SIZE_MB} MB`,
+						);
+					}
 				});
 
 				filesToDelete.forEach((file) => {
 					deleteFile({
 						generationRequestId: currentGenerationId,
-						file,
+						file: {
+							name: file.name,
+							type: file.type,
+							size: file.size,
+							base64: '', // We don't need the base64 for deletion
+						},
 					});
 				});
 			}
@@ -152,31 +146,6 @@ const VideoGenerationFormContent = ({
 			deleteFile,
 			uploadedFiles,
 		],
-	);
-
-	const BottomNavigation = (): React.ReactNode => (
-		<div className="flex justify-between mt-4">
-			<Button
-				onClick={() => {
-					setCurrentStep((prev) => Math.max(prev - 1, 0));
-				}}
-				disabled={currentStep === 0}
-				className="bg-gray-500"
-			>
-				Back
-			</Button>
-			<Button
-				onClick={() => {
-					setCurrentStep((prev: number) =>
-						Math.min(prev + 1, giddySteps.length - 1),
-					);
-				}}
-				disabled={currentStep === giddySteps.length - 1}
-				className="bg-blue-700"
-			>
-				Next
-			</Button>
-		</div>
 	);
 
 	return (
@@ -204,25 +173,26 @@ const VideoGenerationFormContent = ({
 			{currentStep === 0 && <FirstStep />}
 			{currentStep === 1 && <AIPromptStep />}
 			{currentStep === 2 && (
-				<div>
-					<p>
-						Upload photos of the recipient (optional). These photos will be
-						included in the video.
-					</p>
-					<p className="text-sm text-gray-600 mb-4">
-						For best results, upload clear photos showing just the
-						recipient&apos;s face.
-					</p>
-					<FileUploader
-						onChange={handleFileChange}
-						initialFiles={uploadedFiles}
-					/>
-				</div>
+				<>
+					<div>
+						<p>
+							Upload photos of the recipient (optional). These photos will be
+							included in the video.
+						</p>
+						<p className="text-sm text-gray-600 mb-4">
+							For best results, upload clear photos showing just the
+							recipient&apos;s face.
+						</p>
+						<FileUploader
+							onChange={handleFileChange}
+							initialFiles={uploadedFiles}
+						/>
+					</div>
+					<BottomNavigation />
+				</>
 			)}
 			{currentStep === 3 && <PhoneNumberStep />}
 			{currentStep === 4 && <ReviewStep />}
-
-			{currentStep > 0 && <BottomNavigation />}
 		</>
 	);
 };

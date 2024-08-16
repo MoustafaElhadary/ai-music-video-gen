@@ -13,6 +13,8 @@ import {Trash2, X} from 'lucide-react';
 import Image from 'next/image';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
+import {MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB} from '@server/core/constants';
+import {toast} from 'sonner';
 
 interface FileUploaderProps {
 	onChange: (files: File[]) => void;
@@ -35,7 +37,17 @@ export function FileUploader({
 
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
-			const newFiles = [...files, ...acceptedFiles].slice(0, maxFiles);
+			const validFiles = acceptedFiles.filter((file) => {
+				if (file.size > MAX_FILE_SIZE_BYTES) {
+					toast.error(
+						`File "${file.name}" exceeds the maximum size of ${MAX_FILE_SIZE_MB} MB`,
+					);
+					return false;
+				}
+				return true;
+			});
+
+			const newFiles = [...files, ...validFiles].slice(0, maxFiles);
 			setFiles(newFiles);
 			onChange(newFiles);
 		},

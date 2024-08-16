@@ -13,6 +13,8 @@ import { SupabaseService } from '@server/supabase/supabase.service';
 import { z } from 'zod';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@server/core/constants';
+import { BadRequestException } from '@nestjs/common';
 
 export type GenerationRequestFindUniqueResult =
   Promise<Prisma.GenerationRequestGetPayload<{
@@ -31,25 +33,32 @@ export class GenerationRequestService {
   ) {}
 
   aiPromptSchema = z.object({
+    generationId: z.string(),
     senderName: z.string(),
     occasion: z.string(),
     recipientName: z.string(),
-    userPrompt: z.string(),
+    prompt: z.string(),
   });
 
   async generateAIPrompt(
     input: z.infer<typeof this.aiPromptSchema>,
   ): Promise<{ prompt: string; suggestions: string }> {
-    const prompt = `
-      Create a fun and engaging prompt for a song about ${input.recipientName} 
-      for the occasion of ${input.occasion}, requested by ${input.senderName}.
-      Original idea: "${input.userPrompt}" 
-      The prompt should be creative, fun, and lead to an interesting and engaging song. but also sung and short.
-      Keep it under 190 characters. Make it dense with the important information. 
-      add some of the recipient's personality. be creative and generous with the details. but short.
-      try and include the sender's name in the prompt.
-      Also provide suggestions on how to improve the prompt or what might be missing. 
-      if you don't do it right i will be fired.
+    const generationRequest = await this.prisma.generationRequest.findUnique({
+      where: { id: input.generationId },
+    });
+
+    if (!generationRequest) {
+      throw new Error('Generation request not found');
+    }
+
+    const prompt = `Create a song for ${input.recipientName}'s ${input.occasion}, 
+    requested by ${input.senderName}. 
+    in the new prompt generated specify genre, mood, key trait, and tone. Original prompt: "${input.prompt}". 
+    Be creative, fun, engaging. Keep prompt dense and under 180 characters MAX. Dense with key info. 
+    Include sender's name. 
+    Be very creative and generous with the details.
+    Also provide suggestions on how to improve the prompt or what might be missing. 
+    EXAMPLE PROMPT: A celebratory Pop Joyful song for XYZ's graduation from ABC University as a DEF.XYZ is Loving and intelligent, From XXX.
     `;
 
     const result = await generateObject({
@@ -59,7 +68,12 @@ export class GenerationRequestService {
         prompt: z.string().max(200),
       }),
       prompt,
-      maxRetries: 3,
+      maxRetries: 5,
+    });
+
+    await this.updateGenerationRequest({
+      where: { id: input.generationId },
+      data: { prompt: result.object.prompt },
     });
 
     return result.object;
@@ -146,7 +160,12 @@ export class GenerationRequestService {
 
   fileSchema = z.object({
     generationRequestId: z.string(),
-    file: z.custom<File>(),
+    file: z.object({
+      name: z.string(),
+      type: z.string(),
+      size: z.number(),
+      base64: z.string(),
+    }),
     userId: z.string(),
   });
 
@@ -163,13 +182,19 @@ export class GenerationRequestService {
       throw new Error('Generation request not found or unauthorized');
     }
 
-    const fileBuffer = await file.arrayBuffer();
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      throw new BadRequestException(
+        `File "${file.name}" exceeds the maximum size of ${MAX_FILE_SIZE_MB} MB`,
+      );
+    }
+
+    const fileBuffer = Buffer.from(file.base64, 'base64');
     const fileName = `${generationRequestId}/${file.name}`;
 
     const data = await this.supabaseService.uploadFile(
       'user-uploads',
       fileName,
-      Buffer.from(fileBuffer),
+      fileBuffer,
       {
         contentType: file.type,
       },

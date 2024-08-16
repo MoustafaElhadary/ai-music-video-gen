@@ -35,7 +35,7 @@ export const FirstStep = (): JSX.Element => {
 		trpc.generationRequests.create.useMutation({
 			onSuccess: (data) => {
 				setCurrentGenerationId(data.id);
-				handleGeneratePrompt();
+				handleGeneratePrompt(data.id);
 				setCurrentStep(1);
 			},
 			onError: (err) => toast.error(JSON.stringify(err)),

@@ -6,8 +6,7 @@ import {useRouter} from 'next/navigation';
 import {useVideoGeneration} from '../videoGenerationContext';
 
 export const ReviewStep = (): React.ReactNode => {
-	const {form, currentGenerationId, aiGeneratedPrompt, setCurrentStep} =
-		useVideoGeneration();
+	const {form, currentGenerationId, setCurrentStep} = useVideoGeneration();
 	const router = useRouter();
 	const formValues = form.getValues();
 
@@ -52,7 +51,7 @@ export const ReviewStep = (): React.ReactNode => {
 					{formValues.recipientPhoneNumber}
 				</p>
 				<p>
-					<strong>AI-Generated Prompt:</strong> {aiGeneratedPrompt}
+					<strong> Prompt:</strong> {formValues.prompt}
 				</p>
 			</div>
 			<div className="flex space-x-4">

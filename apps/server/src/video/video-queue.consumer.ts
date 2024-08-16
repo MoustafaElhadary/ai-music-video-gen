@@ -7,7 +7,6 @@ import { GenerationRequest, RequestStatus } from '@prisma/client';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import { VIDEO_QUEUE } from '@server/core/constants';
-import { randomString } from '@server/core/utils';
 import {
   GenerationRequestFindUniqueResult,
   GenerationRequestService,
@@ -17,8 +16,10 @@ import {
   CompositionId,
   getCompositionProps,
 } from '@server/remotion/type-utils';
+import { ReplicateService } from '@server/replicate/replicate.service';
 import { SunoApiService } from '@server/suno-api/suno-api.service';
 import { AudioInfo } from '@server/suno-api/types';
+import { SupabaseService } from '@server/supabase/supabase.service';
 import { generateObject } from 'ai';
 import { type Job } from 'bull';
 import * as fs from 'fs';
@@ -26,8 +27,6 @@ import path from 'path';
 import { random } from 'remotion';
 import { z } from 'zod';
 import { convertToSRT } from './srt';
-import { SupabaseService } from '@server/supabase/supabase.service';
-import { ReplicateService } from '@server/replicate/replicate.service';
 
 @Processor(VIDEO_QUEUE)
 export class VideoQueueConsumer {
@@ -60,7 +59,6 @@ export class VideoQueueConsumer {
       await this.uploadAndFinalize(id);
 
       this.logger.log(`Successfully processed job ${job.id}`);
-      await job.remove();
     } catch (error) {
       this.logger.error(`Error processing job ${job.id}:`, error);
       await this.updateGenerationRequest(id, { status: RequestStatus.FAILED });
@@ -215,9 +213,13 @@ export class VideoQueueConsumer {
     const uploadedImages = await this.fetchUploadedImagesFromSupabase(id);
 
     const imageUrls = await Promise.all(
-      imageDescriptions.map((desc, index) =>
-        this.generateImage(desc.prompt, uploadedImages[index], desc.style_name),
-      ),
+      imageDescriptions.map((desc, index) => {
+        const uploadedImage =
+          uploadedImages.length > 0
+            ? uploadedImages[index % uploadedImages.length]
+            : undefined;
+        return this.generateImage(desc.prompt, uploadedImage, desc.style_name);
+      }),
     );
 
     await this.generationRequestService.addVideoImage(id, ...imageUrls);
@@ -273,8 +275,10 @@ export class VideoQueueConsumer {
     const prompt = `
     Given the following song lyrics, generate 5-7 image descriptions that capture key moments or themes from the song. 
     Each description should include a prompt for image generation and a timestamp (in seconds) for when the image should appear in the video.
-    Make the descriptions extremely fun, hilariously funny, intriguing, and interesting. Think outside the box and create unexpected, whimsical, and captivating scenes that will surprise and delight viewers.
-    extremely fun, hilariously funny, deeply intriguing, eye-poppingly interesting, vibrant colors, unexpected elements, whimsical scene, surprising details
+    Make the descriptions extremely fun, hilariously funny, intriguing, and interesting. 
+    Think outside the box and create unexpected, whimsical, and captivating scenes that will surprise and delight viewers.
+    extremely fun, hilariously funny, deeply intriguing, eye-poppingly interesting, vibrant colors, unexpected elements, whimsical scene, surprising details.
+    Always include the word "img" (in lower case) in the prompt. and always include the user in the prompt.
     Lyrics:
     ${lyrics}
     `;
@@ -286,7 +290,16 @@ export class VideoQueueConsumer {
       maxRetries: 3,
     });
 
-    return result.object.imageDescriptions;
+    return result.object.imageDescriptions.map((desc) => {
+      let normalizedPrompt = desc.prompt.toLowerCase().replace(/img/g, '');
+
+      normalizedPrompt = 'img ' + normalizedPrompt.trim();
+
+      return {
+        ...desc,
+        prompt: normalizedPrompt,
+      };
+    });
   }
 
   private async generateImage(
@@ -349,7 +362,7 @@ export class VideoQueueConsumer {
       waveNumberOfSamples: '256',
     };
 
-    const videoPath = await this.createVideo(videoProps);
+    const videoPath = await this.createVideo(videoProps, generationRequest.id);
     if (!videoPath) {
       await this.updateGenerationRequest(generationRequest.id, {
         status: RequestStatus.VIDEO_FAILED,
@@ -401,8 +414,16 @@ export class VideoQueueConsumer {
 
   private async createVideo(
     props: z.infer<typeof AudioGramSchema>,
+    generationId: string,
   ): Promise<string> {
     try {
+      // Save props to a local file
+      const propsFileName = `${generationId}.json`;
+      await fs.promises.writeFile(
+        path.join('out', propsFileName),
+        JSON.stringify(props, null, 2),
+      );
+
       const compositionId: CompositionId = 'Audiogram';
 
       const serveUrl = await bundle({
@@ -418,7 +439,7 @@ export class VideoQueueConsumer {
         inputProps,
       });
 
-      const outputLocation = `out/${compositionId}-${randomString(5)}.mp4`;
+      const outputLocation = `out/${compositionId}-${generationId}.mp4`;
       await renderMedia({
         composition,
         serveUrl,
@@ -467,10 +488,13 @@ export class VideoQueueConsumer {
     lyrics: string,
     captions: string,
   ): Promise<z.infer<typeof this.AiCaptionSchema>> {
-    const prompt = `I have two inputs. one is the srt file with the words mapped to where i want them to be but they occasionally have the wrong words or something that sounds similar and i have what the words should be. 
-    I will provide you both so you can fix the srt file for me 
+    const prompt = `We have two inputs. 
+    one is the srt file with the words mapped to where we want them to be but they occasionally have the wrong words or something that sounds similar 
+    and we have what the correct words should be. 
+    you will be provided both so you can fix the srt file for me 
     you can be assured that the I own the rights to the lyrics and the srt file.
    return back the COMPLETE srt file with the correct words. don't get lazy and only return the parts that need to be changed.
+   don't  get lazy and just write Music or something similar. default to the original words if you are not sure.
     correct lyrics: ${lyrics}
     captions: ${captions}
     `;

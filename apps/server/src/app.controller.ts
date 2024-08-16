@@ -17,7 +17,7 @@ export class AppController {
   @Get('paid-event')
   async test(): Promise<string> {
     await this.generationRequestService.handleSuccessfulPayment(
-      'clzop40j6000098slrpdvb2ns', // TODO: remove hardcoded id
+      'clzx25s550005416iv92qwl2t', // TODO: remove hardcoded id
     );
     return 'test';
   }
