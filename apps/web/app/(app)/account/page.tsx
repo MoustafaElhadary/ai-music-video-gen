@@ -2,7 +2,7 @@ import UserSettings from './UserSettings';
 import {checkAuth, getUserAuth} from '@web/lib/auth/utils';
 
 export default async function Account(): Promise<JSX.Element> {
-	await checkAuth();
+	checkAuth();
 	const {session} = await getUserAuth();
 
 	return (
