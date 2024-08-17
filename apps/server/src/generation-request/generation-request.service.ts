@@ -8,7 +8,7 @@ import {
 } from '@prisma/client';
 import { USER_UPLOAD_FOLDER, VIDEO_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
-import { Queue } from 'bull';
+import type { Queue } from 'bull';
 import { SupabaseService } from '@server/supabase/supabase.service';
 import { z } from 'zod';
 import { openai } from '@ai-sdk/openai';

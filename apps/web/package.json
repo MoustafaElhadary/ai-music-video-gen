@@ -4,7 +4,8 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "set NODE_ENV=production & next build",
+		"backend": "cd ../server && pnpm i && pnpm run db:generate && pnpm build && pnpm format && cd ../web",
+		"build": "pnpm backend && set NODE_ENV=production & next build",
 		"start": "next start",
 		"lint": "next lint",
 		"lint:fix": "next lint --fix"

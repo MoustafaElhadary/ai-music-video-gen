@@ -3,10 +3,11 @@ generator client {
   // output   = "../../../node_modules/.prisma/client"
 }
 
-generator zod {
-  provider = "zod-prisma-types"
-  output   = "../src/prisma/generated/zod"
-}
+// only run this if you want to generate zod types
+// generator zod {
+//   provider = "zod-prisma-types"
+//   output   = "../src/prisma/generated/zod"
+// }
 
 // generator zod {
 //   provider              = "zod-prisma"
@@ -35,7 +36,7 @@ model Book {
 
 model GenerationRequest {
   id                   String        @id @default(cuid())
-  userId               String 
+  userId               String
   occasion             String
   recipientName        String
   prompt               String
