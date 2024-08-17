@@ -6,7 +6,7 @@ const getBaseUrl = (): string => {
 		return localhost;
 	if (process.env['VERCEL_URL'])
 		// reference for vercel.com
-		return `https://${process.env['VERCEL_URL']}`;
+		return process.env['VERCEL_URL'];
 	if (process.env['RENDER_INTERNAL_HOSTNAME'])
 		// reference for render.com
 		return `http://${process.env['RENDER_INTERNAL_HOSTNAME']}:${process.env['PORT']}`;

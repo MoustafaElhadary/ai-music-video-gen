@@ -7,11 +7,3 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 export const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789');
-
-export function absoluteUrl(path: string): string {
-	return `${process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'}${path}`;
-}
-export const timestamps: {createdAt: true; updatedAt: true} = {
-	createdAt: true,
-	updatedAt: true,
-};

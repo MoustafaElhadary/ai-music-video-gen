@@ -6,12 +6,12 @@ import {AppRouter} from '@server/trpc/trpc.router';
 import {cookies} from 'next/headers';
 import {TRPC_URL} from './utils';
 
+console.log({TRPC_URL});
+
 export const api = createTRPCProxyClient<AppRouter>({
 	links: [
 		loggerLink({
-			enabled: (op) =>
-				process.env.NODE_ENV === 'development' ||
-				(op.direction === 'down' && op.result instanceof Error),
+			enabled: () => true,
 		}),
 		httpBatchLink({
 			/**

@@ -17,6 +17,7 @@ export default function TrpcProvider({
 }): React.ReactNode {
 	const {getToken} = useAuth();
 
+	console.log({TRPC_URL});
 	const [queryClient] = useState(() => new QueryClient({}));
 	const [trpcClient] = useState(() =>
 		trpc.createClient({
