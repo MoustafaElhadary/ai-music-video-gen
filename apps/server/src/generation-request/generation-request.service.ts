@@ -6,7 +6,7 @@ import {
   RequestStatus,
   VideoImage,
 } from '@prisma/client';
-import { VIDEO_QUEUE } from '@server/core/constants';
+import { USER_UPLOAD_FOLDER, VIDEO_QUEUE } from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
 import { Queue } from 'bull';
 import { SupabaseService } from '@server/supabase/supabase.service';
@@ -17,11 +17,11 @@ import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@server/core/constants';
 import { BadRequestException } from '@nestjs/common';
 
 export type GenerationRequestFindUniqueResult =
-  Promise<Prisma.GenerationRequestGetPayload<{
+  Prisma.GenerationRequestGetPayload<{
     include: {
       videoImages: true;
     };
-  }> | null>;
+  }>;
 @Injectable()
 export class GenerationRequestService {
   private readonly logger = new Logger(GenerationRequestService.name);
@@ -81,7 +81,7 @@ export class GenerationRequestService {
 
   async generationRequest(
     input: Prisma.GenerationRequestFindUniqueArgs,
-  ): GenerationRequestFindUniqueResult {
+  ): Promise<GenerationRequestFindUniqueResult | null> {
     return this.prisma.generationRequest.findUnique({
       ...input,
       include: { videoImages: true },
@@ -106,6 +106,16 @@ export class GenerationRequestService {
     params: Prisma.GenerationRequestUpdateArgs,
   ): Promise<GenerationRequest> {
     return this.prisma.generationRequest.update(params);
+  }
+
+  async simpleUpdate(
+    id: string,
+    data: Partial<GenerationRequest>,
+  ): Promise<GenerationRequest> {
+    return this.updateGenerationRequest({
+      where: { id },
+      data,
+    });
   }
 
   async deleteGenerationRequest(
@@ -192,7 +202,7 @@ export class GenerationRequestService {
     const fileName = `${generationRequestId}/${file.name}`;
 
     const data = await this.supabaseService.uploadFile(
-      'user-uploads',
+      USER_UPLOAD_FOLDER,
       fileName,
       fileBuffer,
       {
@@ -217,6 +227,15 @@ export class GenerationRequestService {
     }
 
     const filePath = `${generationRequestId}/${file.name}`;
-    await this.supabaseService.deleteFile('user-uploads', filePath);
+    await this.supabaseService.deleteFile(USER_UPLOAD_FOLDER, filePath);
+  }
+
+  async requestByIdWithImages(
+    id: string,
+  ): Promise<GenerationRequestFindUniqueResult | null> {
+    return this.generationRequest({
+      where: { id },
+      include: { videoImages: true },
+    });
   }
 }

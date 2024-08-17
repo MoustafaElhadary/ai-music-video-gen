@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zColor } from '@remotion/zod-types';
 
 const MediaSchema = z.object({
   url: z.string().describe('The URL of the media file'),
@@ -40,6 +41,35 @@ export const SceneDataSchema = z.object({
     .number()
     .optional()
     .describe('Optional volume level for the scene (0 to 1)'),
+
+  subtitles: z
+    .object({
+      srt: z.string().describe('Optional SRT file for the scene'),
+      isRTL: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Optional RTL for the scene'),
+      audioOffsetInSeconds: z
+        .number()
+        .optional()
+        .default(0)
+        .describe('Optional audio offset in seconds for the scene'),
+
+      subtitlesLinePerPage: z.number().int().min(0),
+      subtitlesLineHeight: z.number().int().min(0),
+      subtitlesZoomMeasurerSize: z.number().int().min(0),
+      onlyDisplayCurrentSentence: z.boolean(),
+      subtitlesTextColor: zColor(),
+    })
+    .optional(),
+  children: z
+    .array(
+      z.object({
+        className: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export type SceneData = z.infer<typeof SceneDataSchema>;

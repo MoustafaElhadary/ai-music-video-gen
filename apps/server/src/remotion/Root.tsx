@@ -190,8 +190,6 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={({ props }) => {
           const durationInSeconds = props.data?.[0]?.durationInSeconds ?? 2;
 
-          console.log({ props, durationInSeconds });
-
           return {
             durationInFrames: Math.floor(durationInSeconds * 30),
           };

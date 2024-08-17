@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Caption } from '@server/video/srt';
+import { Caption } from '@server/video-generation/srt';
 import Replicate, { WebhookEventType } from 'replicate';
 
 interface Output {

@@ -2,15 +2,19 @@
 /* eslint-disable complexity */
 import cn from 'clsx';
 import React from 'react';
-import { Audio } from 'remotion';
+import { Audio, useVideoConfig } from 'remotion';
 import { Image } from '../components/Image';
 import { Text } from '../components/Text';
 import { VideoBlock } from '../components/VideoBlock';
 
+import { z } from 'zod';
 import { Animated, Animation, Move, Rotate, Scale } from '../remotion-animated';
-import { SceneData } from '../types';
+import { PaginatedSubtitles } from '../Subtitles';
+import { SceneData, SceneDataSchema } from '../types';
 
-export function stringToReAnimated(str: string[]) {
+export const fps = 30;
+
+export function stringToReAnimated(str: string[]): Animation[] {
   const animationArray: Animation[] = [];
 
   str.forEach((item) => {
@@ -89,6 +93,54 @@ export function stringToReAnimated(str: string[]) {
   return animationArray;
 }
 
+export const Subtitles: React.FC<
+  z.infer<typeof SceneDataSchema.shape.subtitles>
+> = ({ ...props }) => {
+  const {
+    srt,
+    audioOffsetInSeconds,
+    subtitlesLinePerPage,
+    subtitlesZoomMeasurerSize,
+    subtitlesLineHeight,
+    onlyDisplayCurrentSentence,
+    subtitlesTextColor,
+    isRTL,
+  } = props;
+  const { durationInFrames } = useVideoConfig();
+
+  const audioOffsetInFrames = Math.round(audioOffsetInSeconds * fps);
+
+  return (
+    <div
+      style={{
+        direction: isRTL ? 'rtl' : 'ltr',
+      }}
+      className="px-32"
+    >
+      <div
+        style={{
+          lineHeight: `${subtitlesLineHeight}px`,
+          textAlign: isRTL ? 'right' : 'left',
+          marginTop: '1320px',
+        }}
+        className="text-6xl"
+      >
+        <PaginatedSubtitles
+          subtitles={srt}
+          startFrame={audioOffsetInFrames}
+          endFrame={audioOffsetInFrames + durationInFrames}
+          linesPerPage={subtitlesLinePerPage}
+          subtitlesTextColor={subtitlesTextColor}
+          subtitlesZoomMeasurerSize={subtitlesZoomMeasurerSize}
+          subtitlesLineHeight={subtitlesLineHeight}
+          onlyDisplayCurrentSentence={onlyDisplayCurrentSentence}
+          isRTL={isRTL}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const RegularScene: React.FC<SceneData> = ({
   text,
   media,
@@ -97,6 +149,8 @@ export const RegularScene: React.FC<SceneData> = ({
   bgStyle,
   animation,
   volume,
+  subtitles,
+  children,
 }) => {
   const image = media?.[0]?.type?.startsWith('image') ? media[0] : null;
   const video = media?.[0]?.type?.startsWith('video') ? media[0] : null;
@@ -118,7 +172,12 @@ export const RegularScene: React.FC<SceneData> = ({
         {image && <Image src={image.url} mediaStyle={mediaStyle} />}
         {Boolean(text) && <Text text={text} textStyle={textStyle} />}
       </Animated>
+      {children &&
+        children.map((child, index) => (
+          <div key={index} className={child.className} />
+        ))}
       {sound && <Audio src={sound.url} volume={volume} />}
+      {subtitles && <Subtitles {...subtitles} />}
     </>
   );
 };

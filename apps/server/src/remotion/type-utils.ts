@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from 'zod';
 import { AudioGramSchema } from './Composition';
 import { GeneratedVideoSchema } from './GeneratedVideo';

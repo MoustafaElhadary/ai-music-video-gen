@@ -7,7 +7,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { StripeModule } from './stripe/stripe.module';
 import { SunoApiModule } from './suno-api/suno-api.module';
 import { TrpcModule } from './trpc/trpc.module';
-import { VideoQueueModule } from './video/video-queue.module';
+import { VideoQueueModule } from './video-generation/video-queue.module';
 import { GenerationRequestModule } from './generation-request/generation-request.module';
 import { StripeController } from './stripe/stripe.controller';
 

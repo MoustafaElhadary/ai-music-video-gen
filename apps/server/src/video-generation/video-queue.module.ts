@@ -9,6 +9,10 @@ import { SupabaseService } from '@server/supabase/supabase.service';
 import { VIDEO_QUEUE } from '../core/constants';
 
 import { VideoQueueConsumer } from './video-queue.consumer';
+import { AudioService } from './services/audio.service';
+import { ImageService } from './services/image.service';
+import { SubtitleService } from './services/subtitle.service';
+import { UploadService } from './services/upload.service';
 
 @Module({
   imports: [
@@ -34,6 +38,10 @@ import { VideoQueueConsumer } from './video-queue.consumer';
     GenerationRequestService,
     SupabaseService,
     ReplicateService,
+    AudioService,
+    ImageService,
+    SubtitleService,
+    UploadService,
   ],
 })
 export class VideoQueueModule {}

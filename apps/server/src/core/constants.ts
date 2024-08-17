@@ -1,41 +1,39 @@
+import { SceneDataArraySchema } from '@server/remotion/types';
+import { z } from 'zod';
+
 export const VIDEO_QUEUE = 'video-queue';
 
 export const MAX_FILE_SIZE_MB = 40;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
+export const USER_UPLOAD_FOLDER = 'user-uploads';
+
+export const VIDEOS_FOLDER = 'videos';
+
 // TODO: remove later
-export const testVideoData = [
+export const testVideoData: z.infer<typeof SceneDataArraySchema> = [
   {
-    durationInSeconds: 46,
+    durationInSeconds: 176,
     startFrom: 0,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/imdbp1uQIzH-9u2faC84nQ/RibT7l0BKzL3GcWTPOIrTBTjcLCiMn2dKV0IdYs6WN64j1p6JiXsuRG9GsYkDKkhX0uCnySbz-0sjK3s7ou6OhWlojzvrC9BW6KfBdHj-yNY0OW6ZltITFVi5KDvZWePj5Qaw_jkCIocx2193IVVdL7RpXBBg6oPp8WR2yNQM2Q/mBAxeOOWM_vrCSay3JAi1D7o-0FGcEEExS5yIyExlJA',
+        url: 'https://cdn1.suno.ai/a307051f-4685-49ab-9e51-d634b384695d.mp3',
         type: 'audio/mpeg',
       },
     ],
     name: 'Bg music',
   },
   {
-    durationInSeconds: 46,
+    durationInSeconds: 176,
     startFrom: 0,
     name: 'BG white',
     bgStyle: 'bg-white',
   },
   {
-    durationInSeconds: 10,
-    startFrom: 10,
+    durationInSeconds: 176,
+    startFrom: 0,
     name: 'BG pink',
     bgStyle: 'bg-gradient-to-bl from-white via-pink-200 to-indigo-300',
-  },
-  {
-    durationInSeconds: 20,
-    startFrom: 0,
-    name: 'BG gray',
-    bgStyle: 'bg-gradient-to-bl from-white via-gray-200 to-gray-300',
-    animation: [
-      'Move({ x: 1080, y: , start: 240, duration: 36, mass: 4, damping: 9, stiffness: 10, overshootClamping: true })',
-    ],
   },
   {
     durationInSeconds: 10,
@@ -53,8 +51,8 @@ export const testVideoData = [
     startFrom: 0,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/l2CwOSKK3uDBBw27L8jtsA/VUZvQGHxAkth3vy1J_Sr3xYuUKrAghfPXWnJx302QvMV1TENDfFZzwo2j3MykScG4mO2tcXu2Zl1Lqe63WXBWDLZqIe46STVtrK_5x0At4cv1kpdK476mn8KcZh39Hov_nmZ4yib4JE2WP5sfKaYfw/Czpmgo5cV21nrFzIORydUL6KEZRR9y8x5dFqMkCC634',
-        type: 'image/svg+xml',
+        url: 'https://images.ctfassets.net/lzny33ho1g45/2olcy4TVSWAjqy5dsxLNZd/c9e889eebe44cebf52990f09270ac2d4/best-image-generators.jpg?w=1520&fm=jpg&q=30&fit=thumb&h=760',
+        type: 'image/png',
       },
     ],
     name: 'Logo SVG',
@@ -89,7 +87,7 @@ export const testVideoData = [
     startFrom: 6,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/tdpVl5Fi67czcH74VvwuzQ/4AzMga5KJ7-FL6q4lSXkzKTFoOzdUdtfJfaPOH6IIVPeDCrgbEgRcmhgOxnI61h3ZLB3dbIL4vXbAnDp8585a56k8kpvohEeyLLGJSs3k12tK0u-js0QUnRK1aH2qBlt_GT_W45hz6nQsMJSMmkzRuBuWW5KHXOAJYt5KQLgnrM/cInPtYAMUXy8lIyVDBLUL-hIDN_g0XGKkuoxcsSFEwA',
+        url: 'https://images.ctfassets.net/lzny33ho1g45/2olcy4TVSWAjqy5dsxLNZd/c9e889eebe44cebf52990f09270ac2d4/best-image-generators.jpg?w=1520&fm=jpg&q=30&fit=thumb&h=760',
         type: 'image/png',
       },
     ],
@@ -108,7 +106,7 @@ export const testVideoData = [
     startFrom: 7,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/nRA9xy7QqKfqvqh_sj2nCA/T1VDyyXQSA4CUnEumo1CGcyhGhN-g6GcCIYuVQ7VK4m_zqaimLLhUWuc9OABaat1Cs6uABcvNpNZlYN2_fVP2Y8e2Br_PpYADi17i-1bsGxBgFOymYRrHsEE6_ypjKbdWvyTp0szooSyo3IUeHpVJWahDzTesC_X87P1Nl-ZT70/FvvvnvpWqD0k30EG6SNPOD1QV_XK3gRKWBnQO3zGolI',
+        url: 'https://images.ctfassets.net/lzny33ho1g45/2olcy4TVSWAjqy5dsxLNZd/c9e889eebe44cebf52990f09270ac2d4/best-image-generators.jpg?w=1520&fm=jpg&q=30&fit=thumb&h=760',
         type: 'image/png',
       },
     ],
@@ -127,7 +125,7 @@ export const testVideoData = [
     startFrom: 8,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/6pQzvW_g7kEgetu1C0WJ9A/PPFApf4dQi6j-keJSnHuVpa8WJQq5y758yrdtxVlltMrlH6FnkqMHrkgP2QDJRJTMwaF4HAjEFqzjagaF5BRPX72jBqAGoyvVFiazSAEq1GUVV5GTLcogLB6lm5607DegXJg6jXqQxZJQl8i9iajCTG2Vl0qBSQeyYqhZ2KT7kE/F1Y8Wy855xeBKUALigKmJ4_8ZGfSqTR5RAN0mAFadD0',
+        url: 'https://images.ctfassets.net/lzny33ho1g45/2olcy4TVSWAjqy5dsxLNZd/c9e889eebe44cebf52990f09270ac2d4/best-image-generators.jpg?w=1520&fm=jpg&q=30&fit=thumb&h=760',
         type: 'image/png',
       },
     ],
@@ -146,7 +144,7 @@ export const testVideoData = [
     startFrom: 9,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/5CZn_jfAQkRxzhvZz2P58w/LmAVE2eNJtGrR14dfkrrdeNBZWKJFys7Yuyu3-lhYbzCKpKv8zcRfqoRht476moWIfo2aCSBCrrVZOP3dLG7k6E_v_I3uTtdSod7OWbgQG6DZAokGL-DmWZzZNBUuqN8GPKKLQNWPAL6ar-NTPpNlt2QT3RnAeRnO1Uk8WAL56I/vAhVp0jT3mzzGYHycDAZC2VPjuOkqTIwDyQqse9KohY',
+        url: 'https://images.ctfassets.net/lzny33ho1g45/2olcy4TVSWAjqy5dsxLNZd/c9e889eebe44cebf52990f09270ac2d4/best-image-generators.jpg?w=1520&fm=jpg&q=30&fit=thumb&h=760',
         type: 'image/png',
       },
     ],
@@ -169,10 +167,11 @@ export const testVideoData = [
     startFrom: 11,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/9c3ZKYHVGur1h82uk432bg/WivSGv-fGq7nkCUliLY2FsCZM4MP3ZceslYzvg82Iqf_1d1HGph7g6sDBKS4TU0yz6BZNQCN7d3L8Djw4vcOqncPMv6XWo_edBFi6xa6wUncpQD4EJHd4Dv3J7uz3sNI-0K8xTkK0UPW1Jb-gVbTQg/X_ddRN27CiEP8AIa-jy6tcB7tITVrg597Cv_8Og1J94',
+        url: 'https://ifpupndmbhydfccmnbuz.supabase.co/storage/v1/object/public/songs/public/Audiogram-clzx25s550005416iv92qwl2t.mp4?t=2024-08-16T19%3A29%3A27.891Z',
         type: 'video/mp4',
       },
     ],
+    volume: 0,
     name: 'Dog',
     mediaStyle: 'rounded-3xl',
     animation: [
@@ -188,10 +187,11 @@ export const testVideoData = [
     startFrom: 12,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/ZU3whwAvWnuzECimnjNRgw/AgSzok8NOHPnutMxFRUKfZ-gitKuGZ8WFcD3g7iCxaJf-1VtcnKuF1vQaBz0HPYigB3qMgnzPghM6JyULjmwYIbwAorLw9YY_ikMpPYLwsQWjgmzi8QEhQYcux8XST4SnU11HKsDuRfmn-lk10R1F1JdOxhCXziE7b_OJuINc_M/5MBSsYU6hfOv-jf9fojVeOXX_BE23Xxzx1TqmKFju84',
+        url: 'https://ifpupndmbhydfccmnbuz.supabase.co/storage/v1/object/public/songs/public/Audiogram-clzx25s550005416iv92qwl2t.mp4?t=2024-08-16T19%3A29%3A27.891Z',
         type: 'video/mp4',
       },
     ],
+    volume: 0,
     name: 'Dog2',
     mediaStyle: 'rounded-3xl',
     animation: [
@@ -207,10 +207,11 @@ export const testVideoData = [
     startFrom: 13,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/ReyZgT0S-3-451O1oA-EdA/noJ66INUaIGWyw-BT8ZffjErNfM6N6gTjro-WZDsIGWPdShjoybxy72QQTsF2qHWyUoJH7rUgumepvHzbE_z8MgAP3OVL-J9gjHdzJqlhQ9Cuy309iyUF3bm8EOxtij0kUVhE2Q7nuqL6Y4HJrnkw9sVQdah3Hga5Z3M_Le20WY/--7TrcmigebuP5uuzaFRE1b4bEVCPoF7PskbXoucc4M',
+        url: 'https://ifpupndmbhydfccmnbuz.supabase.co/storage/v1/object/public/songs/public/Audiogram-clzx25s550005416iv92qwl2t.mp4?t=2024-08-16T19%3A29%3A27.891Z',
         type: 'video/mp4',
       },
     ],
+    volume: 0,
     name: 'Dog4',
     mediaStyle: 'rounded-3xl',
     animation: [
@@ -226,10 +227,11 @@ export const testVideoData = [
     startFrom: 14,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/tMlvvSQ7X5ffNMx_mR0hRg/QKf1MmaT-HmnQuUcALzDezYBoAqSk9UkXh3i52mub0qwFrUkI2nIDiU21gNMzMZsZemVDOAUMDBln3So-YJ-C1yytjChd1Bk8wU9wt3tnVVb80SCKCK0Yc5TCWBYi2tFpmr74NllFjaTKSDN0ZrvClQLzpIoqF7fjCK8wOjYS2o/G0cQeqYq4SZNHWkDHSvUOoRRZKG1P6xdgg-caxj2k5g',
+        url: 'https://ifpupndmbhydfccmnbuz.supabase.co/storage/v1/object/public/songs/public/Audiogram-clzx25s550005416iv92qwl2t.mp4?t=2024-08-16T19%3A29%3A27.891Z',
         type: 'video/mp4',
       },
     ],
+    volume: 0,
     name: 'Dog5',
     mediaStyle: 'rounded-3xl',
     animation: [
@@ -303,12 +305,12 @@ export const testVideoData = [
     startFrom: 19,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/XuvL9fL5KtamSD1_A6OONA/BKgob14vaXfVwOCvZ3IdAstAd71X2Gp5RGPmbtn9mcap3kZL72DzrdOtEHnXMOigeQXxSf79o8idyAAZuc_sps5kGZpyR4LBBIY-HKYXpurARIIk0zgt1nMBUZk5xvrb-l9-A4z4KCzZ0od-x_2Y02qAM9v3ILwHPB4s4u9StSY/8yaOFAGwDe5T84esbNgKnViEtujTx8DO4JZ7VKXduAs',
+        url: 'https://ifpupndmbhydfccmnbuz.supabase.co/storage/v1/object/public/songs/public/Audiogram-clzx25s550005416iv92qwl2t.mp4?t=2024-08-16T19%3A29%3A27.891Z',
         type: 'video/mp4',
       },
     ],
+    volume: 0,
     name: 'Airtable demo',
-    bgStyle: 'bg-gray-500',
     animation: [
       'Move({ x: , y: , initialY: 1920, duration: 12, overshootClamping: true })',
       'Move({ x: , y: , initialX: 1080, duration: 12, overshootClamping: true })',
@@ -340,10 +342,11 @@ export const testVideoData = [
     startFrom: 37,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/4YcfXSHMosxknhNrKyL1gA/vqFfmZPfuvQHkkF4czDgCTER7PquGNCiZ_-Mcmd-QiQPg9AC2HeJAitZBXdGfxKrFZcf2p99ARTYx6HdRL2-XfIDhl9k2HvAX5YCUVMWACV2ZV1oxYzTR_VTT56E7eKfBnkGow_v6gbj9Z9CHAd_WQ/1xs0M5Ng-OJ9l3OAWpNSRAwtl16Ta0OUufdv7QbjDPM',
+        url: 'https://ifpupndmbhydfccmnbuz.supabase.co/storage/v1/object/public/songs/public/Audiogram-clzx25s550005416iv92qwl2t.mp4?t=2024-08-16T19%3A29%3A27.891Z',
         type: 'video/mp4',
       },
     ],
+    volume: 0,
     name: 'Video output',
     animation: [
       'Move({ x: , y: , initialY: 1920, duration: 12, overshootClamping: true })',
@@ -361,8 +364,8 @@ export const testVideoData = [
     startFrom: 41,
     media: [
       {
-        url: 'https://v5.airtableusercontent.com/v3/u/30/30/1719734400000/l2CwOSKK3uDBBw27L8jtsA/VUZvQGHxAkth3vy1J_Sr3xYuUKrAghfPXWnJx302QvMV1TENDfFZzwo2j3MykScG4mO2tcXu2Zl1Lqe63WXBWDLZqIe46STVtrK_5x0At4cv1kpdK476mn8KcZh39Hov_nmZ4yib4JE2WP5sfKaYfw/Czpmgo5cV21nrFzIORydUL6KEZRR9y8x5dFqMkCC634',
-        type: 'image/svg+xml',
+        url: 'https://images.ctfassets.net/lzny33ho1g45/2olcy4TVSWAjqy5dsxLNZd/c9e889eebe44cebf52990f09270ac2d4/best-image-generators.jpg?w=1520&fm=jpg&q=30&fit=thumb&h=760',
+        type: 'image/png',
       },
     ],
     name: 'Logo SVG',
@@ -383,5 +386,20 @@ export const testVideoData = [
     name: '📄📋 copy paste content ',
     textStyle:
       'absolute flex h-80 max-w-lg translate-y-[600px] translate-x-7 scale-150 place-items-center  text-center text-5xl font-bold text-gray-900',
+  },
+  {
+    name: 'Subtitles',
+    durationInSeconds: 170,
+    startFrom: 0,
+    subtitles: {
+      onlyDisplayCurrentSentence: false,
+      subtitlesTextColor: 'rgba(0, 255, 255, 1)',
+      subtitlesLinePerPage: 4,
+      subtitlesZoomMeasurerSize: 10,
+      subtitlesLineHeight: 98,
+      isRTL: false,
+      audioOffsetInSeconds: 4,
+      srt: "1\n00:00:00,000 --> 00:00:11,000\nMaha shines so bright\n\n2\n00:00:11,000 --> 00:00:16,000\nBarry dreams in sight\n\n3\n00:00:16,000 --> 00:00:20,000\nCounselor's heart so wide\n\n4\n00:00:20,000 --> 00:00:25,000\nNow it's her time to ride\n\n5\n00:00:25,000 --> 00:00:27,000\nCelebrate\n\n6\n00:00:27,000 --> 00:00:29,000\nMaha's day\n\n7\n00:00:29,000 --> 00:00:31,000\nDance and shout\n\n8\n00:00:31,000 --> 00:00:34,000\nHooray\n\n9\n00:00:34,000 --> 00:00:36,000\nFuture's clear\n\n10\n00:00:36,000 --> 00:00:38,000\nAs light\n\n11\n00:00:38,000 --> 00:00:40,000\nMaha's shining bright\n\n12\n00:00:59,000 --> 00:01:14,000\nBarry dreams in sight\n\n13\n00:01:14,000 --> 00:01:18,000\nCounselor's heart so wide\n\n14\n00:01:18,000 --> 00:01:24,000\nBarry dreams in sight\n\n15\n00:01:24,000 --> 00:01:26,000\nMaha shines so bright\n\n16\n00:01:26,000 --> 00:01:28,000\nBarry dreams in sight\n\n17\n00:01:28,000 --> 00:01:29,000\nMaha shines so bright\n\n18\n00:01:29,000 --> 00:01:29,000\nHooray!\n\n19\n00:01:29,000 --> 00:01:29,000\nFuture's clear\n\n20\n00:01:29,000 --> 00:01:29,000\nMaha shines so bright\n\n21\n00:01:29,000 --> 00:01:31,000\nAs light\n\n22\n00:01:31,000 --> 00:01:33,000\nMaha shines so bright\n\n23\n00:01:33,000 --> 00:01:36,000\nTwo kids by her side\n\n24\n00:01:36,000 --> 00:01:40,000\nIn her love they confide\n\n25\n00:01:40,000 --> 00:01:45,000\nThrough each stage and tide\n\n26\n00:01:45,000 --> 00:01:49,000\nMaha's joy can't hide\n\n27\n00:01:49,000 --> 00:01:51,000\nCelebrate\n\n28\n00:01:51,000 --> 00:01:54,000\nMaha's day\n\n29\n00:01:54,000 --> 00:01:56,000\nDance and shout\n\n30\n00:01:56,000 --> 00:01:58,000\nHooray!\n\n31\n00:01:58,000 --> 00:02:00,000\nFuture's clear\n\n32\n00:02:00,000 --> 00:02:02,000\nAs light\n\n33\n00:02:02,000 --> 00:02:04,000\nMaha's shining bright\n\n34\n00:02:04,000 --> 00:02:06,000\nHooray!\n\n35\n00:02:06,000 --> 00:02:08,000\nHooray!\n\n36\n00:02:08,000 --> 00:02:10,000\nHooray!\n\n37\n00:02:10,000 --> 00:02:12,000\nHooray!\n\n38\n00:02:12,000 --> 00:02:14,000\nMaha shines so bright\n\n39\n00:02:14,000 --> 00:02:16,000\nMaha shines so bright\n\n40\n00:02:16,000 --> 00:02:18,000\nHooray!\n\n41\n00:02:18,000 --> 00:02:20,000\nEgypt's pride and joy\n\n42\n00:02:20,000 --> 00:02:22,000\nHooray!\n\n43\n00:02:22,000 --> 00:02:24,000\nCounselor deploy\n\n44\n00:02:24,000 --> 00:02:26,000\nWisdom she'll employ\n\n45\n00:02:26,000 --> 00:02:27,000\nWith love she will enjoy\n\n46\n00:02:27,000 --> 00:02:30,000\nCelebrate\n\n47\n00:02:30,000 --> 00:02:33,000\nMaha's day\n\n48\n00:02:33,000 --> 00:02:37,000\nDance and shout\n\n49\n00:02:37,000 --> 00:02:38,000\nHooray!\n\n50\n00:02:38,000 --> 00:02:40,000\nFuture's clear\n\n51\n00:02:40,000 --> 00:02:43,000\nAs light\n\n52\n00:02:43,000 --> 00:02:45,000\nMaha's shining bright\n\n53\n00:02:45,000 --> 00:02:47,000\nHooray!\n\n54\n00:02:47,000 --> 00:02:49,000\nMaha's shining bright\n\n55\n00:02:49,000 --> 00:02:53,000\nHooray!\n\n56\n00:02:53,000 --> 00:02:56,000\nMaha's shining bright\n\n57\n00:02:56,000 --> 00:02:57,000\nHooray!\n\n58\n00:02:57,000 --> 00:03:00,000\nOh, oh, oh, oh",
+    },
   },
 ];

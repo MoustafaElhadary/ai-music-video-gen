@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ReplicateService } from '../replicate/replicate.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { TrpcService } from '../trpc/trpc.service';
-import { VideoQueueModule } from '../video/video-queue.module';
+import { VideoQueueModule } from '../video-generation/video-queue.module';
 import { GenerationRequestRouter } from './generation-request.router';
 import { GenerationRequestService } from './generation-request.service';
 
