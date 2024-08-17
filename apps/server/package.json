@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "pnpm i && pnpm db:generate && pnpm format && nest build",
     "format": "prettier --write \"src/**/*.ts\" ",
     "start": "nest start",
     "dev": "nest start --watch",
@@ -69,7 +69,7 @@
     "rxjs": "^7.8.1",
     "stripe": "^15.12.0",
     "styled-components": "^6.1.11",
-    "zod": "3.22.3",
+    "zod": "^3.23.8",
     "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
