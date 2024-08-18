@@ -2,27 +2,24 @@
 
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
-import { GenerationRequest, RequestStatus } from '@prisma/client';
+import type { GenerationRequest } from '@prisma/client';
+import { RequestStatus } from '@prisma/client';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import { VIDEO_QUEUE } from '@server/core/constants';
-import {
-  GenerationRequestFindUniqueResult,
-  GenerationRequestService,
-} from '@server/generation-request/generation-request.service';
-import {
-  CompositionId,
-  getCompositionProps,
-} from '@server/remotion/type-utils';
+import type { GenerationRequestFindUniqueResult } from '@server/generation-request/generation-request.service';
+import { GenerationRequestService } from '@server/generation-request/generation-request.service';
+import type { CompositionId } from '@server/remotion/type-utils';
+import { getCompositionProps } from '@server/remotion/type-utils';
 import { SceneDataSchema } from '@server/remotion/types';
 import { type Job } from 'bull';
+import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
 import { AudioService } from './services/audio.service';
 import { ImageService } from './services/image.service';
 import { SubtitleService } from './services/subtitle.service';
 import { UploadService } from './services/upload.service';
-import fs from 'fs';
 
 @Processor(VIDEO_QUEUE)
 export class VideoQueueConsumer {

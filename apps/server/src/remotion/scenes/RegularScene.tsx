@@ -8,9 +8,11 @@ import { Text } from '../components/Text';
 import { VideoBlock } from '../components/VideoBlock';
 
 import { z } from 'zod';
-import { Animated, Animation, Move, Rotate, Scale } from '../animation';
+import type { Animation } from '../animation';
+import { Animated, Move, Rotate, Scale } from '../animation';
 import { PaginatedSubtitles } from '../Subtitles';
-import { SceneData, SceneDataSchema } from '../types';
+import type { SceneData } from '../types';
+import { SceneDataSchema } from '../types';
 
 export const fps = 30;
 

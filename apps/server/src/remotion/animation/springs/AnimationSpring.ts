@@ -1,5 +1,6 @@
-import { spring, SpringConfig } from 'remotion';
-import AnimationOptions from '../animations/AnimationOptions';
+import { spring } from 'remotion';
+import type { SpringConfig } from 'remotion';
+import type { AnimationOptions } from '../animations/AnimationOptions';
 
 const AnimationSpring =
   (withDefaultConfig?: Partial<SpringConfig>) =>

@@ -1,7 +1,6 @@
-import { Easing } from 'remotion';
-import { interpolate } from 'remotion';
+import type { SubtitleItem } from 'parse-srt';
 import React from 'react';
-import { SubtitleItem } from 'parse-srt';
+import { Easing, interpolate } from 'remotion';
 
 export const Word: React.FC<{
   readonly item: SubtitleItem;

@@ -1,4 +1,5 @@
-import { INestApplication, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import { BookRouter } from '@server/book/book.router';
 import { GenerationRequestRouter } from '@server/generation-request/generation-request.router';
 import { StripeRouter } from '@server/stripe/stripe.router';

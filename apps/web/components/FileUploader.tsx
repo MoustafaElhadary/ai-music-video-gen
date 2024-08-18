@@ -1,8 +1,9 @@
 'use client';
 
+import {MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB} from '@server/core/constants';
+import type {CarouselApi} from '@web/components/ui/carousel';
 import {
 	Carousel,
-	CarouselApi,
 	CarouselContent,
 	CarouselItem,
 	CarouselNext,
@@ -13,7 +14,6 @@ import {Trash2, X} from 'lucide-react';
 import Image from 'next/image';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
-import {MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB} from '@server/core/constants';
 import {toast} from 'sonner';
 
 interface FileUploaderProps {

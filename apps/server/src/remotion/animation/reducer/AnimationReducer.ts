@@ -1,4 +1,4 @@
-import AnimationValues from './AnimationValues';
+import type { AnimationValues } from './AnimationValues';
 import reductionStrategyForProperty, {
   ReductionStrategy,
 } from './ReductionStrategy';

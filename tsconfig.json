@@ -4,8 +4,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "incremental": true,
-    "skipLibCheck": true,
-    "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -19,12 +17,34 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "useUnknownInCatchVariables": true,
-    "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
     "paths": {
-      "@server/*": ["./apps/server/src/*"],
-      "@web/*": ["./apps/web/*"],
-      "@suno-api/*": ["./apps/suno-api/src/*"]
-    }
+      "@server/*": [
+        "./apps/server/src/*"
+      ],
+      "@web/*": [
+        "./apps/web/*"
+      ],
+      "@suno-api/*": [
+        "./apps/suno-api/src/*"
+      ]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "target": "es2021",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "noImplicitOverride": true,
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true
   }
 }

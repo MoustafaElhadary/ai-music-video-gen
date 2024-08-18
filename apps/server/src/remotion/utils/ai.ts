@@ -1,6 +1,8 @@
 import { openai } from '@ai-sdk/openai';
-import { CoreMessage, generateObject } from 'ai';
-import { SceneData, SceneDataArraySchema, ScenesRequestParams } from '../types';
+import { generateObject } from 'ai';
+import type { CoreMessage } from 'ai';
+import type { SceneData, ScenesRequestParams } from '../types';
+import { SceneDataArraySchema } from '../types';
 
 import { z } from 'zod';
 

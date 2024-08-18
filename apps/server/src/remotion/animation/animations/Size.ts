@@ -1,8 +1,8 @@
-import AnimationValues from '../reducer/AnimationValues';
+import type { AnimationValues } from '../reducer/AnimationValues';
 import SmoothSpring from '../springs/SmoothSpring';
-import Animation from './Animation';
+import type { Animation } from './Animation';
 import interpolateAnimation from './AnimationInterpolation';
-import AnimationOptions from './AnimationOptions';
+import type { AnimationOptions } from './AnimationOptions';
 
 export interface SizeOptions extends AnimationOptions {
   /** The element's width will be animated to this value, if set. */

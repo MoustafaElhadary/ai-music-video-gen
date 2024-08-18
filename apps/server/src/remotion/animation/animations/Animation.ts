@@ -10,5 +10,3 @@ export const AnimationSchema = z.object({
 });
 
 export type Animation = z.infer<typeof AnimationSchema>;
-
-export default Animation;

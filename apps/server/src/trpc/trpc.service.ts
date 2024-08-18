@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { initTRPC, TRPCError } from '@trpc/server';
-import { Context } from './context';
+import type { Context } from './context';
 import { ZodError } from 'zod';
 
 @Injectable()

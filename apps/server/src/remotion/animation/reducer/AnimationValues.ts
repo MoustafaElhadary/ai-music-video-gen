@@ -12,5 +12,3 @@ export const AnimationValuesSchema = z.object({
 });
 
 export type AnimationValues = z.infer<typeof AnimationValuesSchema>;
-
-export default AnimationValues;

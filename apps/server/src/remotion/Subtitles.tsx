@@ -1,4 +1,5 @@
-import parseSRT, { SubtitleItem } from 'parse-srt';
+import type { SubtitleItem } from 'parse-srt';
+import parseSRT from 'parse-srt';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   cancelRender,

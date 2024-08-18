@@ -1,7 +1,7 @@
 import SmoothSpring from '../springs/SmoothSpring';
-import Animation from './Animation';
+import type { Animation } from './Animation';
 import interpolateAnimation from './AnimationInterpolation';
-import AnimationOptions from './AnimationOptions';
+import type { AnimationOptions } from './AnimationOptions';
 
 export interface MoveOptions extends AnimationOptions {
   /** The element will be moved to the right by this amount (in pixels). */

@@ -1,9 +1,6 @@
 'use client';
-import {
-	RequestStatusSchema,
-	RequestStatusType,
-} from '@server/prisma/generated/zod';
-
+import {RequestStatusSchema} from '@server/prisma/generated/zod';
+import type {RequestStatusType} from '@server/prisma/generated/zod';
 import {Alert, AlertDescription, AlertTitle} from '@web/components/ui/alert';
 import {Button} from '@web/components/ui/button';
 import {

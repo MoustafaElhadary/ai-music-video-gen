@@ -13,7 +13,8 @@ import {AIPromptStep} from './steps/aiPromptStep';
 import {FirstStep} from './steps/firstStep';
 import {PhoneNumberStep} from './steps/phoneNumberStep';
 import {ReviewStep} from './steps/reviewStep';
-import {FormSchema, FormValues} from './utils';
+import {FormSchema} from './utils';
+import type {FormValues} from './utils';
 import {
 	VideoGenerationProvider,
 	useVideoGeneration,

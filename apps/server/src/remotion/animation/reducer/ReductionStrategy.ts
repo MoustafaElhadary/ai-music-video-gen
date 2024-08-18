@@ -1,4 +1,4 @@
-import AnimationValues from './AnimationValues';
+import type { AnimationValues } from './AnimationValues';
 
 export enum ReductionStrategy {
   Addition,

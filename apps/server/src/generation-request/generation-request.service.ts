@@ -2,12 +2,10 @@ import { openai } from '@ai-sdk/openai';
 import { InjectQueue } from '@nestjs/bull';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import type { $Enums } from '@prisma/client';
-import {
-  GenerationRequest,
-  Prisma,
-  RequestStatus,
-  VideoImage,
-} from '@prisma/client';
+import { Prisma, RequestStatus } from '@prisma/client';
+
+import type { GenerationRequest, VideoImage } from '@prisma/client';
+
 import {
   MAX_FILE_SIZE_BYTES,
   MAX_FILE_SIZE_MB,

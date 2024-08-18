@@ -1,4 +1,5 @@
-import { Module, DynamicModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import type { DynamicModule } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { SunoApiService } from './suno-api.service';
 

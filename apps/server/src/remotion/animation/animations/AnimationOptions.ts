@@ -1,6 +1,6 @@
-import { SpringConfig } from 'remotion';
+import type { SpringConfig } from 'remotion';
 
-interface AnimationOptions extends Partial<SpringConfig> {
+export interface AnimationOptions extends Partial<SpringConfig> {
   /**
    * Frame at which the animation should start. _Defaults to `0`._
    *
@@ -14,5 +14,3 @@ interface AnimationOptions extends Partial<SpringConfig> {
    */
   duration?: number;
 }
-
-export default AnimationOptions;

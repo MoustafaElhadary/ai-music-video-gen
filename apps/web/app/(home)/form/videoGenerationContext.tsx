@@ -3,8 +3,8 @@ import {Button} from '@web/components/ui/button';
 import {trpc} from '@web/lib/trpc/client';
 import useLocalStorage from '@web/lib/useLocalStorage';
 import React, {createContext, useContext, useState} from 'react';
-import {UseFormReturn} from 'react-hook-form';
-import {FormValues} from './utils';
+import type {UseFormReturn} from 'react-hook-form';
+import type {FormValues} from './utils';
 
 const giddyStepsData = [
 	{

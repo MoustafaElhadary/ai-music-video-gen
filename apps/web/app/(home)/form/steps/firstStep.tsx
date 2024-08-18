@@ -18,7 +18,8 @@ import {useVideoGeneration} from '../videoGenerationContext';
 import {useClerk, useUser} from '@clerk/nextjs';
 import {trpc} from '@web/lib/trpc/client';
 import {toast} from 'sonner';
-import {FormValues, MAX_CHARS} from '../utils';
+import {MAX_CHARS} from '../utils';
+import type {FormValues} from '../utils';
 
 export const FirstStep = (): JSX.Element => {
 	const {
@@ -32,6 +33,7 @@ export const FirstStep = (): JSX.Element => {
 	const {openSignIn} = useClerk();
 
 	const {mutate: createGenerationRequest, isLoading: isCreating} =
+		// @ts-expect-error TODO: will fix
 		trpc.generationRequests.create.useMutation({
 			onSuccess: (data) => {
 				setCurrentGenerationId(data.id);

@@ -1,8 +1,8 @@
 import type { AnimatedProps } from './Animated';
 import Animated from './Animated';
 
-import type Animation from './animations/Animation';
-import type AnimationOptions from './animations/AnimationOptions';
+import type { Animation } from './animations/Animation';
+import type { AnimationOptions } from './animations/AnimationOptions';
 
 import type { FadeOptions } from './animations/Fade';
 import Fade from './animations/Fade';
@@ -19,19 +19,14 @@ import Scale from './animations/Scale';
 import type { SizeOptions } from './animations/Size';
 import Size from './animations/Size';
 
-export {
-  Animated,
+export { Animated, Fade, Move, Rotate, Scale, Size };
+export type {
   AnimatedProps,
   Animation,
   AnimationOptions,
-  Fade,
   FadeOptions,
-  Move,
   MoveOptions,
-  Rotate,
   RotateOptions,
-  Scale,
   ScaleOptions,
-  Size,
   SizeOptions,
 };

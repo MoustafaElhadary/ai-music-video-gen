@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { RequestStatus } from '@prisma/client';
 import { GenerationRequestService } from '@server/generation-request/generation-request.service';
 import { SunoApiService } from '@server/suno-api/suno-api.service';
-import { AudioInfo } from '@server/suno-api/types';
+import type { AudioInfo } from '@server/suno-api/types';
 import { random } from 'remotion';
 
 @Injectable()

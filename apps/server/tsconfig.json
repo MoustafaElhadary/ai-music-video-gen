@@ -4,15 +4,8 @@
     "jsx": "react",
     "module": "commonjs",
     "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
     "target": "es2021",
     "sourceMap": true,
     "outDir": "./dist",
-    "incremental": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
   }
 }

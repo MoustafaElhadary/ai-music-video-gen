@@ -1,6 +1,9 @@
-import AnimationValues from '../reducer/AnimationValues';
+import type { AnimationValues } from '../reducer/AnimationValues';
 
-const value = (currentValue: number | undefined, defaultValue: number) =>
+const value = (
+  currentValue: number | undefined,
+  defaultValue: number,
+): string | number =>
   currentValue === undefined ? defaultValue : currentValue.toFixed(4);
 
 const transformStyles = (values: AnimationValues): string | null => {

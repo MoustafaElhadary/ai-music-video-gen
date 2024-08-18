@@ -1,5 +1,5 @@
 import React from 'react';
-import AnimationValues from '../reducer/AnimationValues';
+import type { AnimationValues } from '../reducer/AnimationValues';
 import transformStyles from './TransformStyles';
 
 const stylesFromValues = (values: AnimationValues): React.CSSProperties => {

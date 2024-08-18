@@ -1,6 +1,7 @@
-import { interpolate, SpringConfig } from 'remotion';
-import Animation from './Animation';
-import AnimationOptions from './AnimationOptions';
+import { interpolate } from 'remotion';
+import type { SpringConfig } from 'remotion';
+import type { Animation } from './Animation';
+import type { AnimationOptions } from './AnimationOptions';
 
 export interface FadeOptions
   extends Omit<AnimationOptions, keyof Partial<SpringConfig>> {

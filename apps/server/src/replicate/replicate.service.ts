@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Caption } from '@server/video-generation/srt';
-import Replicate, { WebhookEventType } from 'replicate';
+import type { Caption } from '@server/video-generation/srt';
+import Replicate from 'replicate';
+import type { WebhookEventType } from 'replicate';
 
 interface Output {
   segments: Caption[];
