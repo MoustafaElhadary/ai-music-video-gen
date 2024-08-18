@@ -26,13 +26,13 @@ export interface AnimatedProps {
 const animatedStylesFromAnimations = (
   animations: Animation[],
   currentFrame: number,
-  fps: number
-) => {
+  fps: number,
+): React.CSSProperties => {
   const currentAnimations = animations.filter(
-    (animation) => animation.in <= currentFrame
+    (animation) => animation.in <= currentFrame,
   );
   const computedValues = currentAnimations.map(
-    (animation) => animation.valuesAt(currentFrame, fps) ?? {}
+    (animation) => animation.valuesAt(currentFrame, fps) ?? {},
   );
   const animatedValues = reduceComputedValues(computedValues);
   return stylesFromValues(animatedValues);
@@ -41,14 +41,14 @@ const animatedStylesFromAnimations = (
 /**
  * The `Animated` component renders a container that can be animated.
  */
-const Animated = (props: AnimatedProps) => {
+const Animated = (props: AnimatedProps): React.JSX.Element | null => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const animationFrame = frame - (props.delay ?? 0);
   const animatedStyles = useMemo(
     () => animatedStylesFromAnimations(props.animations, animationFrame, fps),
-    [animationFrame, fps, props.animations]
+    [animationFrame, fps, props.animations],
   );
 
   const isBeforeInPoint = props.in && frame < props.in;

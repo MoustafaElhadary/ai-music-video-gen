@@ -1,6 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 import { Injectable, Logger } from '@nestjs/common';
-import { RequestStatus } from '@prisma/client';
+import { $Enums, RequestStatus } from '@prisma/client';
 import { USER_UPLOAD_FOLDER } from '@server/core/constants';
 import { GenerationRequestService } from '@server/generation-request/generation-request.service';
 import { ReplicateService } from '@server/replicate/replicate.service';
@@ -37,6 +37,7 @@ export class ImageService {
     const imageDescriptions = await this.generateImageDescriptions(
       generationRequest.srt ?? generationRequest.sunoLyrics,
     );
+    this.logger.log('Image descriptions generated', imageDescriptions);
 
     // Fetch uploaded images from Supabase storage
     const uploadedImages = await this.fetchUploadedImagesFromSupabase(id);
@@ -51,7 +52,12 @@ export class ImageService {
       }),
     );
 
-    await this.generationRequestService.addVideoImage(id, ...imageUrls);
+    await Promise.all(
+      imageUrls.map((imageUrl) => {
+        return this.addVideoImage(id, imageUrl, 'AI_GENERATED');
+      }),
+    );
+
     await this.generationRequestService.simpleUpdate(id, {
       status: RequestStatus.IMAGE_PROCESSED,
     });
@@ -105,12 +111,14 @@ export class ImageService {
     z.infer<typeof this.AiImageDescriptionSchema>['imageDescriptions']
   > {
     const prompt = `
-    Given the following song lyrics, generate 5-7 image descriptions that capture key moments or themes from the song. 
+    Given the following song lyrics, generate 10 image descriptions that capture key moments or themes from the song. 
     Each description should include a prompt for image generation and a timestamp (in seconds) for when the image should appear in the video.
     Make the descriptions extremely fun, hilariously funny, intriguing, and interesting. 
     Think outside the box and create unexpected, whimsical, and captivating scenes that will surprise and delight viewers.
     extremely fun, hilariously funny, deeply intriguing, eye-poppingly interesting, vibrant colors, unexpected elements, whimsical scene, surprising details.
     Always include the word "img" (in lower case) in the prompt. and always include the user in the prompt.
+    Make sure the prompts all have the same style and follow the same storyline. you are telling a story through those images.
+    Make sure the prompts are all unique and not repetitive.
     Lyrics:
     ${lyrics}
     `;
@@ -141,20 +149,50 @@ export class ImageService {
   ): Promise<string> {
     let output: string[];
     if (inputImage) {
-      // Use PhotoMaker if we have an input image
       output = await this.replicateService.generateImageWithBasePhoto(
         prompt,
         inputImage,
         styleName,
       );
     } else {
-      // Use SDXL if we don't have an input image
       output = await this.replicateService.generateImage(prompt);
     }
 
     if (Array.isArray(output) && output.length > 0 && output[0]) {
-      return output[0];
+      // Upload the image to Supabase
+      const imageUrl = await this.uploadImageToSupabase(output[0]);
+      return imageUrl;
     }
     throw new Error('Failed to generate image');
+  }
+
+  private async uploadImageToSupabase(imageUrl: string): Promise<string> {
+    const response = await fetch(imageUrl);
+    const buffer = await response.arrayBuffer();
+    const filename = `image-${Date.now()}.png`;
+
+    const data = await this.supabaseService.uploadFile(
+      'ai-generated-images',
+      filename,
+      Buffer.from(buffer),
+      {
+        contentType: 'image/png',
+      },
+    );
+
+    return this.supabaseService.getPublicUrl('ai-generated-images', data.path)
+      .data.publicUrl;
+  }
+
+  async addVideoImage(
+    generationRequestId: string,
+    imageUrl: string,
+    imageType: $Enums.ImageType,
+  ): Promise<void> {
+    await this.generationRequestService.addVideoImage(
+      generationRequestId,
+      imageUrl,
+      imageType,
+    );
   }
 }

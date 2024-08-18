@@ -52,6 +52,7 @@ model GenerationRequest {
   localVideoPath       String?
   finalVideoPath       String?
   recipientPhoneNumber String?
+  videoProps           Json?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   videoImages          VideoImage[]
@@ -62,8 +63,14 @@ model VideoImage {
   photoId             String
   generationRequest   GenerationRequest @relation(fields: [generationRequestId], references: [id])
   generationRequestId String
+  imageType           ImageType         @default(AI_GENERATED)
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
+}
+
+enum ImageType {
+  USER_UPLOADED
+  AI_GENERATED
 }
 
 enum RequestStatus {

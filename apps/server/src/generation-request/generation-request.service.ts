@@ -1,20 +1,24 @@
+import { openai } from '@ai-sdk/openai';
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import type { $Enums } from '@prisma/client';
 import {
   GenerationRequest,
   Prisma,
   RequestStatus,
   VideoImage,
 } from '@prisma/client';
-import { USER_UPLOAD_FOLDER, VIDEO_QUEUE } from '@server/core/constants';
+import {
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+  USER_UPLOAD_FOLDER,
+  VIDEO_QUEUE,
+} from '@server/core/constants';
 import { PrismaService } from '@server/prisma/prisma.service';
-import type { Queue } from 'bull';
 import { SupabaseService } from '@server/supabase/supabase.service';
-import { z } from 'zod';
-import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
-import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@server/core/constants';
-import { BadRequestException } from '@nestjs/common';
+import type { Queue } from 'bull';
+import { z } from 'zod';
 
 export type GenerationRequestFindUniqueResult =
   Prisma.GenerationRequestGetPayload<{
@@ -110,7 +114,10 @@ export class GenerationRequestService {
 
   async simpleUpdate(
     id: string,
-    data: Partial<GenerationRequest>,
+    data: Prisma.XOR<
+      Prisma.GenerationRequestUpdateInput,
+      Prisma.GenerationRequestUncheckedUpdateInput
+    >,
   ): Promise<GenerationRequest> {
     return this.updateGenerationRequest({
       where: { id },
@@ -150,13 +157,15 @@ export class GenerationRequestService {
 
   async addVideoImage(
     generationRequestId: string,
-    ...photoIds: string[]
-  ): Promise<Prisma.BatchPayload> {
-    return this.prisma.videoImage.createMany({
-      data: photoIds.map((photoId) => ({
+    photoId: string,
+    imageType: $Enums.ImageType,
+  ): Promise<VideoImage> {
+    return this.prisma.videoImage.create({
+      data: {
         photoId,
+        imageType,
         generationRequestId,
-      })),
+      },
     });
   }
 

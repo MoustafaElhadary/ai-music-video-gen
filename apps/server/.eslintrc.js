@@ -30,5 +30,7 @@ module.exports = {
     'camelcase': 'off',
     'spaced-comment': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
+    "@typescript-eslint/no-redundant-type-constituents": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
   },
 };

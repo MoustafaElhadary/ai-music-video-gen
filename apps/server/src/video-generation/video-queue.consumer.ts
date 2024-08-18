@@ -115,23 +115,21 @@ export class VideoQueueConsumer {
         data: this.videoPropsData(generationRequest),
       });
 
-      // Ensure the output directory exists
-      const outDir = path.resolve('./out');
-      if (!fs.existsSync(outDir)) {
-        fs.mkdirSync(outDir, { recursive: true });
-      }
-
-      // Save the input props to the folder
-      fs.writeFileSync(
-        path.join(outDir, `${id}.json`),
-        JSON.stringify(inputProps),
-      );
+      // Save the input props to the database
+      await this.generationRequestService.simpleUpdate(id, {
+        videoProps: inputProps,
+      });
 
       const composition = await selectComposition({
         serveUrl,
         id: compositionId,
         inputProps,
       });
+      // Ensure the output directory exists
+      const outDir = path.resolve('./out');
+      if (!fs.existsSync(outDir)) {
+        fs.mkdirSync(outDir, { recursive: true });
+      }
 
       const outputLocation = `out/${compositionId}-${id}.mp4`;
       await renderMedia({
@@ -231,7 +229,7 @@ export class VideoQueueConsumer {
       children: [
         {
           className:
-            'border-4 border-dotted border-white rounded-xl mx-auto w-11/12 h-1/2 absolute bottom-32 left-0 right-0 p-4 overflow-hidden',
+            'border-4 border-dotted border-white rounded-xl mx-auto w-11/12 h-1/4 absolute bottom-40 left-0 right-0 p-4 overflow-hidden',
         },
       ],
     });

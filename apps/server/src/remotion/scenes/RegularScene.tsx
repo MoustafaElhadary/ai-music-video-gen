@@ -8,7 +8,7 @@ import { Text } from '../components/Text';
 import { VideoBlock } from '../components/VideoBlock';
 
 import { z } from 'zod';
-import { Animated, Animation, Move, Rotate, Scale } from '../remotion-animated';
+import { Animated, Animation, Move, Rotate, Scale } from '../animation';
 import { PaginatedSubtitles } from '../Subtitles';
 import { SceneData, SceneDataSchema } from '../types';
 
@@ -171,13 +171,13 @@ export const RegularScene: React.FC<SceneData> = ({
         )}
         {image && <Image src={image.url} mediaStyle={mediaStyle} />}
         {Boolean(text) && <Text text={text} textStyle={textStyle} />}
+        {children &&
+          children.map((child, index) => (
+            <div key={index} className={child.className} />
+          ))}
+        {subtitles && <Subtitles {...subtitles} />}
       </Animated>
-      {children &&
-        children.map((child, index) => (
-          <div key={index} className={child.className} />
-        ))}
       {sound && <Audio src={sound.url} volume={volume} />}
-      {subtitles && <Subtitles {...subtitles} />}
     </>
   );
 };

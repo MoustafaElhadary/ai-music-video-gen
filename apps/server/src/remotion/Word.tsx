@@ -19,7 +19,7 @@ export const Word: React.FC<{
     [item.start, item.start + 10],
     [0.25, 0],
     {
-      easing: Easing.out(Easing.quad),
+      easing: Easing.out((t) => Easing.quad(t)),
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
     },

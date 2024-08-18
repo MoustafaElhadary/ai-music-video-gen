@@ -1,9 +1,60 @@
 import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
 /////////////////////////////////////////
+
+// JSON
+//------------------------------------------------------
+
+export type NullableJsonInput =
+  | Prisma.JsonValue
+  | null
+  | 'JsonNull'
+  | 'DbNull'
+  | Prisma.NullTypes.DbNull
+  | Prisma.NullTypes.JsonNull;
+
+export const transformJsonNull = (v?: NullableJsonInput) => {
+  if (!v || v === 'DbNull') return Prisma.DbNull;
+  if (v === 'JsonNull') return Prisma.JsonNull;
+  return v;
+};
+
+export const JsonValueSchema: z.ZodType<Prisma.JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.literal(null),
+    z.record(z.lazy(() => JsonValueSchema.optional())),
+    z.array(z.lazy(() => JsonValueSchema)),
+  ]),
+);
+
+export type JsonValueType = z.infer<typeof JsonValueSchema>;
+
+export const NullableJsonValue = z
+  .union([JsonValueSchema, z.literal('DbNull'), z.literal('JsonNull')])
+  .nullable()
+  .transform((v) => transformJsonNull(v));
+
+export type NullableJsonValueType = z.infer<typeof NullableJsonValue>;
+
+export const InputJsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(
+  () =>
+    z.union([
+      z.string(),
+      z.number(),
+      z.boolean(),
+      z.object({ toJSON: z.function(z.tuple([]), z.any()) }),
+      z.record(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+      z.array(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+    ]),
+);
+
+export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 
 /////////////////////////////////////////
 // ENUMS
@@ -43,6 +94,7 @@ export const GenerationRequestScalarFieldEnumSchema = z.enum([
   'localVideoPath',
   'finalVideoPath',
   'recipientPhoneNumber',
+  'videoProps',
   'createdAt',
   'updatedAt',
 ]);
@@ -51,15 +103,42 @@ export const VideoImageScalarFieldEnumSchema = z.enum([
   'id',
   'photoId',
   'generationRequestId',
+  'imageType',
   'createdAt',
   'updatedAt',
 ]);
 
 export const SortOrderSchema = z.enum(['asc', 'desc']);
 
+export const NullableJsonNullValueInputSchema = z
+  .enum(['DbNull', 'JsonNull'])
+  .transform((value) =>
+    value === 'JsonNull'
+      ? Prisma.JsonNull
+      : value === 'DbNull'
+        ? Prisma.DbNull
+        : value,
+  );
+
 export const QueryModeSchema = z.enum(['default', 'insensitive']);
 
 export const NullsOrderSchema = z.enum(['first', 'last']);
+
+export const JsonNullValueFilterSchema = z
+  .enum(['DbNull', 'JsonNull', 'AnyNull'])
+  .transform((value) =>
+    value === 'JsonNull'
+      ? Prisma.JsonNull
+      : value === 'DbNull'
+        ? Prisma.JsonNull
+        : value === 'AnyNull'
+          ? Prisma.AnyNull
+          : value,
+  );
+
+export const ImageTypeSchema = z.enum(['USER_UPLOADED', 'AI_GENERATED']);
+
+export type ImageTypeType = `${z.infer<typeof ImageTypeSchema>}`;
 
 export const RequestStatusSchema = z.enum([
   'STARTED',
@@ -126,6 +205,7 @@ export const GenerationRequestSchema = z.object({
   localVideoPath: z.string().nullable(),
   finalVideoPath: z.string().nullable(),
   recipientPhoneNumber: z.string().nullable(),
+  videoProps: JsonValueSchema.nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -137,6 +217,7 @@ export type GenerationRequest = z.infer<typeof GenerationRequestSchema>;
 /////////////////////////////////////////
 
 export const VideoImageSchema = z.object({
+  imageType: ImageTypeSchema,
   id: z.string().cuid(),
   photoId: z.string(),
   generationRequestId: z.string(),
@@ -226,6 +307,7 @@ export const GenerationRequestSelectSchema: z.ZodType<Prisma.GenerationRequestSe
       localVideoPath: z.boolean().optional(),
       finalVideoPath: z.boolean().optional(),
       recipientPhoneNumber: z.boolean().optional(),
+      videoProps: z.boolean().optional(),
       createdAt: z.boolean().optional(),
       updatedAt: z.boolean().optional(),
       videoImages: z
@@ -263,6 +345,7 @@ export const VideoImageSelectSchema: z.ZodType<Prisma.VideoImageSelect> = z
     id: z.boolean().optional(),
     photoId: z.boolean().optional(),
     generationRequestId: z.boolean().optional(),
+    imageType: z.boolean().optional(),
     createdAt: z.boolean().optional(),
     updatedAt: z.boolean().optional(),
     generationRequest: z
@@ -524,6 +607,7 @@ export const GenerationRequestWhereInputSchema: z.ZodType<Prisma.GenerationReque
         .union([z.lazy(() => StringNullableFilterSchema), z.string()])
         .optional()
         .nullable(),
+      videoProps: z.lazy(() => JsonNullableFilterSchema).optional(),
       createdAt: z
         .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
         .optional(),
@@ -599,6 +683,12 @@ export const GenerationRequestOrderByWithRelationInputSchema: z.ZodType<Prisma.G
         ])
         .optional(),
       recipientPhoneNumber: z
+        .union([
+          z.lazy(() => SortOrderSchema),
+          z.lazy(() => SortOrderInputSchema),
+        ])
+        .optional(),
+      videoProps: z
         .union([
           z.lazy(() => SortOrderSchema),
           z.lazy(() => SortOrderInputSchema),
@@ -698,6 +788,7 @@ export const GenerationRequestWhereUniqueInputSchema: z.ZodType<Prisma.Generatio
             .union([z.lazy(() => StringNullableFilterSchema), z.string()])
             .optional()
             .nullable(),
+          videoProps: z.lazy(() => JsonNullableFilterSchema).optional(),
           createdAt: z
             .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
             .optional(),
@@ -776,6 +867,12 @@ export const GenerationRequestOrderByWithAggregationInputSchema: z.ZodType<Prism
         ])
         .optional(),
       recipientPhoneNumber: z
+        .union([
+          z.lazy(() => SortOrderSchema),
+          z.lazy(() => SortOrderInputSchema),
+        ])
+        .optional(),
+      videoProps: z
         .union([
           z.lazy(() => SortOrderSchema),
           z.lazy(() => SortOrderInputSchema),
@@ -918,6 +1015,9 @@ export const GenerationRequestScalarWhereWithAggregatesInputSchema: z.ZodType<Pr
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .lazy(() => JsonNullableWithAggregatesFilterSchema)
+        .optional(),
       createdAt: z
         .union([
           z.lazy(() => DateTimeWithAggregatesFilterSchema),
@@ -959,6 +1059,12 @@ export const VideoImageWhereInputSchema: z.ZodType<Prisma.VideoImageWhereInput> 
       generationRequestId: z
         .union([z.lazy(() => StringFilterSchema), z.string()])
         .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => EnumImageTypeFilterSchema),
+          z.lazy(() => ImageTypeSchema),
+        ])
+        .optional(),
       createdAt: z
         .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
         .optional(),
@@ -980,6 +1086,7 @@ export const VideoImageOrderByWithRelationInputSchema: z.ZodType<Prisma.VideoIma
       id: z.lazy(() => SortOrderSchema).optional(),
       photoId: z.lazy(() => SortOrderSchema).optional(),
       generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      imageType: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
       generationRequest: z
@@ -1019,6 +1126,12 @@ export const VideoImageWhereUniqueInputSchema: z.ZodType<Prisma.VideoImageWhereU
           generationRequestId: z
             .union([z.lazy(() => StringFilterSchema), z.string()])
             .optional(),
+          imageType: z
+            .union([
+              z.lazy(() => EnumImageTypeFilterSchema),
+              z.lazy(() => ImageTypeSchema),
+            ])
+            .optional(),
           createdAt: z
             .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
             .optional(),
@@ -1041,6 +1154,7 @@ export const VideoImageOrderByWithAggregationInputSchema: z.ZodType<Prisma.Video
       id: z.lazy(() => SortOrderSchema).optional(),
       photoId: z.lazy(() => SortOrderSchema).optional(),
       generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      imageType: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
       _count: z
@@ -1078,6 +1192,12 @@ export const VideoImageScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Vi
         .optional(),
       generationRequestId: z
         .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
+        .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => EnumImageTypeWithAggregatesFilterSchema),
+          z.lazy(() => ImageTypeSchema),
+        ])
         .optional(),
       createdAt: z
         .union([
@@ -1313,6 +1433,12 @@ export const GenerationRequestCreateInputSchema = z
     localVideoPath: z.string().optional().nullable(),
     finalVideoPath: z.string().optional().nullable(),
     recipientPhoneNumber: z.string().optional().nullable(),
+    videoProps: z
+      .union([
+        z.lazy(() => NullableJsonNullValueInputSchema),
+        InputJsonValueSchema,
+      ])
+      .optional(),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
     videoImages: z
@@ -1341,6 +1467,12 @@ export const GenerationRequestUncheckedCreateInputSchema: z.ZodType<Prisma.Gener
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
       videoImages: z
@@ -1467,6 +1599,12 @@ export const GenerationRequestUpdateInputSchema: z.ZodType<Prisma.GenerationRequ
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -1602,6 +1740,12 @@ export const GenerationRequestUncheckedUpdateInputSchema: z.ZodType<Prisma.Gener
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -1643,6 +1787,12 @@ export const GenerationRequestCreateManyInputSchema: z.ZodType<Prisma.Generation
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -1763,6 +1913,12 @@ export const GenerationRequestUpdateManyMutationInputSchema: z.ZodType<Prisma.Ge
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -1893,6 +2049,12 @@ export const GenerationRequestUncheckedUpdateManyInputSchema: z.ZodType<Prisma.G
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -1913,6 +2075,7 @@ export const VideoImageCreateInputSchema: z.ZodType<Prisma.VideoImageCreateInput
     .object({
       id: z.string().cuid().optional(),
       photoId: z.string(),
+      imageType: z.lazy(() => ImageTypeSchema).optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
       generationRequest: z.lazy(
@@ -1927,6 +2090,7 @@ export const VideoImageUncheckedCreateInputSchema: z.ZodType<Prisma.VideoImageUn
       id: z.string().cuid().optional(),
       photoId: z.string(),
       generationRequestId: z.string(),
+      imageType: z.lazy(() => ImageTypeSchema).optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -1945,6 +2109,12 @@ export const VideoImageUpdateInputSchema: z.ZodType<Prisma.VideoImageUpdateInput
         .union([
           z.string(),
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
         ])
         .optional(),
       createdAt: z
@@ -1989,6 +2159,12 @@ export const VideoImageUncheckedUpdateInputSchema: z.ZodType<Prisma.VideoImageUn
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
         ])
         .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -2010,6 +2186,7 @@ export const VideoImageCreateManyInputSchema: z.ZodType<Prisma.VideoImageCreateM
       id: z.string().cuid().optional(),
       photoId: z.string(),
       generationRequestId: z.string(),
+      imageType: z.lazy(() => ImageTypeSchema).optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -2028,6 +2205,12 @@ export const VideoImageUpdateManyMutationInputSchema: z.ZodType<Prisma.VideoImag
         .union([
           z.string(),
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
         ])
         .optional(),
       createdAt: z
@@ -2064,6 +2247,12 @@ export const VideoImageUncheckedUpdateManyInputSchema: z.ZodType<Prisma.VideoIma
         .union([
           z.string(),
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
         ])
         .optional(),
       createdAt: z
@@ -2313,6 +2502,24 @@ export const BoolNullableFilterSchema: z.ZodType<Prisma.BoolNullableFilter> = z
   })
   .strict();
 
+export const JsonNullableFilterSchema: z.ZodType<Prisma.JsonNullableFilter> = z
+  .object({
+    equals: InputJsonValueSchema.optional(),
+    path: z.string().array().optional(),
+    string_contains: z.string().optional(),
+    string_starts_with: z.string().optional(),
+    string_ends_with: z.string().optional(),
+    array_contains: InputJsonValueSchema.optional().nullable(),
+    array_starts_with: InputJsonValueSchema.optional().nullable(),
+    array_ends_with: InputJsonValueSchema.optional().nullable(),
+    lt: InputJsonValueSchema.optional(),
+    lte: InputJsonValueSchema.optional(),
+    gt: InputJsonValueSchema.optional(),
+    gte: InputJsonValueSchema.optional(),
+    not: InputJsonValueSchema.optional(),
+  })
+  .strict();
+
 export const VideoImageListRelationFilterSchema: z.ZodType<Prisma.VideoImageListRelationFilter> =
   z
     .object({
@@ -2349,6 +2556,7 @@ export const GenerationRequestCountOrderByAggregateInputSchema: z.ZodType<Prisma
       localVideoPath: z.lazy(() => SortOrderSchema).optional(),
       finalVideoPath: z.lazy(() => SortOrderSchema).optional(),
       recipientPhoneNumber: z.lazy(() => SortOrderSchema).optional(),
+      videoProps: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
     })
@@ -2486,6 +2694,49 @@ export const BoolNullableWithAggregatesFilterSchema: z.ZodType<Prisma.BoolNullab
     })
     .strict();
 
+export const JsonNullableWithAggregatesFilterSchema: z.ZodType<Prisma.JsonNullableWithAggregatesFilter> =
+  z
+    .object({
+      equals: InputJsonValueSchema.optional(),
+      path: z.string().array().optional(),
+      string_contains: z.string().optional(),
+      string_starts_with: z.string().optional(),
+      string_ends_with: z.string().optional(),
+      array_contains: InputJsonValueSchema.optional().nullable(),
+      array_starts_with: InputJsonValueSchema.optional().nullable(),
+      array_ends_with: InputJsonValueSchema.optional().nullable(),
+      lt: InputJsonValueSchema.optional(),
+      lte: InputJsonValueSchema.optional(),
+      gt: InputJsonValueSchema.optional(),
+      gte: InputJsonValueSchema.optional(),
+      not: InputJsonValueSchema.optional(),
+      _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+      _min: z.lazy(() => NestedJsonNullableFilterSchema).optional(),
+      _max: z.lazy(() => NestedJsonNullableFilterSchema).optional(),
+    })
+    .strict();
+
+export const EnumImageTypeFilterSchema: z.ZodType<Prisma.EnumImageTypeFilter> =
+  z
+    .object({
+      equals: z.lazy(() => ImageTypeSchema).optional(),
+      in: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      notIn: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      not: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => NestedEnumImageTypeFilterSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
 export const GenerationRequestRelationFilterSchema: z.ZodType<Prisma.GenerationRequestRelationFilter> =
   z
     .object({
@@ -2500,6 +2751,7 @@ export const VideoImageCountOrderByAggregateInputSchema: z.ZodType<Prisma.VideoI
       id: z.lazy(() => SortOrderSchema).optional(),
       photoId: z.lazy(() => SortOrderSchema).optional(),
       generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      imageType: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
     })
@@ -2511,6 +2763,7 @@ export const VideoImageMaxOrderByAggregateInputSchema: z.ZodType<Prisma.VideoIma
       id: z.lazy(() => SortOrderSchema).optional(),
       photoId: z.lazy(() => SortOrderSchema).optional(),
       generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      imageType: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
     })
@@ -2522,8 +2775,33 @@ export const VideoImageMinOrderByAggregateInputSchema: z.ZodType<Prisma.VideoIma
       id: z.lazy(() => SortOrderSchema).optional(),
       photoId: z.lazy(() => SortOrderSchema).optional(),
       generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      imageType: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
+    })
+    .strict();
+
+export const EnumImageTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumImageTypeWithAggregatesFilter> =
+  z
+    .object({
+      equals: z.lazy(() => ImageTypeSchema).optional(),
+      in: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      notIn: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      not: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => NestedEnumImageTypeWithAggregatesFilterSchema),
+        ])
+        .optional(),
+      _count: z.lazy(() => NestedIntFilterSchema).optional(),
+      _min: z.lazy(() => NestedEnumImageTypeFilterSchema).optional(),
+      _max: z.lazy(() => NestedEnumImageTypeFilterSchema).optional(),
     })
     .strict();
 
@@ -2905,6 +3183,13 @@ export const GenerationRequestCreateNestedOneWithoutVideoImagesInputSchema: z.Zo
     })
     .strict();
 
+export const EnumImageTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumImageTypeFieldUpdateOperationsInput> =
+  z
+    .object({
+      set: z.lazy(() => ImageTypeSchema).optional(),
+    })
+    .strict();
+
 export const GenerationRequestUpdateOneRequiredWithoutVideoImagesNestedInputSchema: z.ZodType<Prisma.GenerationRequestUpdateOneRequiredWithoutVideoImagesNestedInput> =
   z
     .object({
@@ -3212,11 +3497,76 @@ export const NestedBoolNullableWithAggregatesFilterSchema: z.ZodType<Prisma.Nest
     })
     .strict();
 
+export const NestedJsonNullableFilterSchema: z.ZodType<Prisma.NestedJsonNullableFilter> =
+  z
+    .object({
+      equals: InputJsonValueSchema.optional(),
+      path: z.string().array().optional(),
+      string_contains: z.string().optional(),
+      string_starts_with: z.string().optional(),
+      string_ends_with: z.string().optional(),
+      array_contains: InputJsonValueSchema.optional().nullable(),
+      array_starts_with: InputJsonValueSchema.optional().nullable(),
+      array_ends_with: InputJsonValueSchema.optional().nullable(),
+      lt: InputJsonValueSchema.optional(),
+      lte: InputJsonValueSchema.optional(),
+      gt: InputJsonValueSchema.optional(),
+      gte: InputJsonValueSchema.optional(),
+      not: InputJsonValueSchema.optional(),
+    })
+    .strict();
+
+export const NestedEnumImageTypeFilterSchema: z.ZodType<Prisma.NestedEnumImageTypeFilter> =
+  z
+    .object({
+      equals: z.lazy(() => ImageTypeSchema).optional(),
+      in: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      notIn: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      not: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => NestedEnumImageTypeFilterSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const NestedEnumImageTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumImageTypeWithAggregatesFilter> =
+  z
+    .object({
+      equals: z.lazy(() => ImageTypeSchema).optional(),
+      in: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      notIn: z
+        .lazy(() => ImageTypeSchema)
+        .array()
+        .optional(),
+      not: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => NestedEnumImageTypeWithAggregatesFilterSchema),
+        ])
+        .optional(),
+      _count: z.lazy(() => NestedIntFilterSchema).optional(),
+      _min: z.lazy(() => NestedEnumImageTypeFilterSchema).optional(),
+      _max: z.lazy(() => NestedEnumImageTypeFilterSchema).optional(),
+    })
+    .strict();
+
 export const VideoImageCreateWithoutGenerationRequestInputSchema: z.ZodType<Prisma.VideoImageCreateWithoutGenerationRequestInput> =
   z
     .object({
       id: z.string().cuid().optional(),
       photoId: z.string(),
+      imageType: z.lazy(() => ImageTypeSchema).optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -3227,6 +3577,7 @@ export const VideoImageUncheckedCreateWithoutGenerationRequestInputSchema: z.Zod
     .object({
       id: z.string().cuid().optional(),
       photoId: z.string(),
+      imageType: z.lazy(() => ImageTypeSchema).optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -3328,6 +3679,12 @@ export const VideoImageScalarWhereInputSchema: z.ZodType<Prisma.VideoImageScalar
       generationRequestId: z
         .union([z.lazy(() => StringFilterSchema), z.string()])
         .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => EnumImageTypeFilterSchema),
+          z.lazy(() => ImageTypeSchema),
+        ])
+        .optional(),
       createdAt: z
         .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
         .optional(),
@@ -3357,6 +3714,12 @@ export const GenerationRequestCreateWithoutVideoImagesInputSchema: z.ZodType<Pri
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -3382,6 +3745,12 @@ export const GenerationRequestUncheckedCreateWithoutVideoImagesInputSchema: z.Zo
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -3547,6 +3916,12 @@ export const GenerationRequestUpdateWithoutVideoImagesInputSchema: z.ZodType<Pri
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -3677,6 +4052,12 @@ export const GenerationRequestUncheckedUpdateWithoutVideoImagesInputSchema: z.Zo
         ])
         .optional()
         .nullable(),
+      videoProps: z
+        .union([
+          z.lazy(() => NullableJsonNullValueInputSchema),
+          InputJsonValueSchema,
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -3697,6 +4078,7 @@ export const VideoImageCreateManyGenerationRequestInputSchema: z.ZodType<Prisma.
     .object({
       id: z.string().cuid().optional(),
       photoId: z.string(),
+      imageType: z.lazy(() => ImageTypeSchema).optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -3715,6 +4097,12 @@ export const VideoImageUpdateWithoutGenerationRequestInputSchema: z.ZodType<Pris
         .union([
           z.string(),
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
         ])
         .optional(),
       createdAt: z
@@ -3747,6 +4135,12 @@ export const VideoImageUncheckedUpdateWithoutGenerationRequestInputSchema: z.Zod
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
         ])
         .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -3775,6 +4169,12 @@ export const VideoImageUncheckedUpdateManyWithoutGenerationRequestInputSchema: z
         .union([
           z.string(),
           z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      imageType: z
+        .union([
+          z.lazy(() => ImageTypeSchema),
+          z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
         ])
         .optional(),
       createdAt: z

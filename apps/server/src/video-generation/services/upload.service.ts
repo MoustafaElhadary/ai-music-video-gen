@@ -3,7 +3,7 @@ import { RequestStatus } from '@prisma/client';
 import { VIDEOS_FOLDER } from '@server/core/constants';
 import { GenerationRequestService } from '@server/generation-request/generation-request.service';
 import { SupabaseService } from '@server/supabase/supabase.service';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import path from 'path';
 
 @Injectable()
@@ -50,11 +50,14 @@ export class UploadService {
       status: RequestStatus.COMPLETED,
       finalVideoPath: videoUrl,
     });
+
+    // Delete the local video file
+    await fs.unlink(generationRequest.localVideoPath);
   }
 
   private async uploadVideo(videoPath: string): Promise<string | undefined> {
     try {
-      const fileContent = await fs.promises.readFile(videoPath);
+      const fileContent = await fs.readFile(videoPath);
       const filename = path.basename(videoPath);
 
       const data = await this.supabaseService.uploadFile(
@@ -66,7 +69,8 @@ export class UploadService {
         },
       );
 
-      return data?.path;
+      return this.supabaseService.getPublicUrl(VIDEOS_FOLDER, data.path).data
+        .publicUrl;
     } catch (error) {
       this.logger.error('Error uploading video:', error);
       return undefined;
