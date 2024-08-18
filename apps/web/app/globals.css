@@ -83,11 +83,7 @@
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
-  }
-}
-
-body {
-  background-color: #f7edda;
+	.pt-safe {
+		padding-top: env(safe-area-inset-top);
+	}
 }

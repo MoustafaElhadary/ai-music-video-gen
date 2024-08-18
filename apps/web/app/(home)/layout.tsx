@@ -22,7 +22,7 @@ export default function RootLayout({
 	}, []);
 
 	return (
-		<div className="min-h-screen bg-[#f7edda] font-sans">
+		<div className="min-h-screen font-sans">
 			<div
 				className="relative min-h-screen px-4 py-8 sm:px-6 lg:px-8 bg-[length:270px_270px] bg-[0_0]"
 				style={{

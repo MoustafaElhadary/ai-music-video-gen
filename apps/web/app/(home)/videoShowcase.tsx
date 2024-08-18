@@ -44,7 +44,7 @@ const VideoCard: React.FC<VideoCardProps> = ({video, index}) => (
 
 export const VideoShowcase: React.FC = () => (
 	<div className="mt-12 overflow-hidden">
-		<h3 className="text-2xl font-bold mb-4 text-center bg-[#f7edda] py-2 z-10">
+		<h3 className="text-2xl font-bold mb-4 text-center py-2 z-10">
 			Giddy Creations
 		</h3>
 		<div className="flex space-x-6 overflow-x-auto pb-8 scrollbar-hide pl-8">
