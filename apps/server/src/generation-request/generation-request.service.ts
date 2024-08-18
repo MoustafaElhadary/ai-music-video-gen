@@ -92,9 +92,7 @@ export class GenerationRequestService {
     });
   }
 
-  async generationRequests(
-    params: Prisma.GenerationRequestFindManyArgs,
-  ): Promise<GenerationRequest[]> {
+  async generationRequests(params: Prisma.GenerationRequestFindManyArgs) {
     return this.prisma.generationRequest.findMany(params);
   }
 

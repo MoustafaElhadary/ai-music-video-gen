@@ -41,7 +41,7 @@ export default function RootLayout({
 								className="text-3xl font-bold text-blue-700 sm:text-4xl"
 								style={{lineHeight: 1, letterSpacing: '-1px'}}
 							>
-								Get Giddy
+								Giddy
 							</Link>
 							<nav>
 								<SignedOut>
