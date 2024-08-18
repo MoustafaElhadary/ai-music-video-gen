@@ -115,9 +115,15 @@ export class VideoQueueConsumer {
         data: this.videoPropsData(generationRequest),
       });
 
-      // save the input props to the folder
+      // Ensure the output directory exists
+      const outDir = path.resolve('./out');
+      if (!fs.existsSync(outDir)) {
+        fs.mkdirSync(outDir, { recursive: true });
+      }
+
+      // Save the input props to the folder
       fs.writeFileSync(
-        path.resolve(`./out/${id}.json`),
+        path.join(outDir, `${id}.json`),
         JSON.stringify(inputProps),
       );
 

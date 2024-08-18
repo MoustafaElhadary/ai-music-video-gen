@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { GenerationRequestService } from './generation-request/generation-request.service';
 
@@ -14,11 +14,9 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('paid-event')
-  async test(): Promise<string> {
-    await this.generationRequestService.handleSuccessfulPayment(
-      'clzx25s550005416iv92qwl2t', // TODO: remove hardcoded id
-    );
-    return 'test';
+  @Get('retry/:id')
+  async handlePaidEvent(@Param('id') id: string): Promise<string> {
+    await this.generationRequestService.handleSuccessfulPayment(id);
+    return `Added job ${id} back to queue `;
   }
 }
