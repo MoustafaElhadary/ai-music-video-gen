@@ -39,7 +39,7 @@ const UserDetails = ({session}: {session: AuthSession}): JSX.Element | null => {
 						{user.email ?? 'john@doe.com'}
 					</p>
 				</div>
-				<UserButton afterSignOutUrl="/" />
+				<UserButton />
 			</div>
 		</Link>
 	);

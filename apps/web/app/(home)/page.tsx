@@ -21,17 +21,11 @@ const Page: React.FC = () => {
 				<FlipWords words={subjects} className="font-bold" />
 			</span>
 			<div className="mt-8 border-2 border-dashed border-blue-700 p-6 text-blue-700 relative rounded-lg">
-				{/* <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
-							Giddy&apos;s got your back! We&apos;re the AI wizards turning your
-							wildest ideas into mind-blowing music videos. Perfect for
-							surprising your squad, serenading your crush, or just flexing your
-							creative muscles. 🚀🎶
-						</p> */}
 				<div className="mx-auto max-w-md">
 					<VideoGenerationForm />
 					<p className="mt-4 text-center text-lg">
 						<span className="line-through font-bold">$37.00</span>{' '}
-						<span className="font-bold text-green-600">$19.99</span> for early
+						<span className="font-bold text-green-600">$14.99</span> for early
 						access!
 					</p>
 					<p className="mt-2 text-center text-sm text-gray-600">

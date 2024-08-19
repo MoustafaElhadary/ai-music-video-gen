@@ -1,6 +1,6 @@
 'use client';
-import {RequestStatusSchema} from '@server/prisma/generated/zod';
 import type {RequestStatusType} from '@server/prisma/generated/zod';
+import {RequestStatusSchema} from '@server/prisma/generated/zod';
 import {Alert, AlertDescription, AlertTitle} from '@web/components/ui/alert';
 import {Button} from '@web/components/ui/button';
 import {
@@ -17,13 +17,21 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from '@web/components/ui/carousel';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@web/components/ui/collapsible';
 import {Progress} from '@web/components/ui/progress';
 import {Skeleton} from '@web/components/ui/skeleton';
+import {useToast} from '@web/components/ui/use-toast';
 import {trpc} from '@web/lib/trpc/client';
 import {
 	AlertCircle,
 	Camera,
 	CheckCircle2,
+	ChevronDown,
+	ChevronUp,
 	Music,
 	RefreshCw,
 	Sparkles,
@@ -32,7 +40,9 @@ import {
 	Video,
 } from 'lucide-react';
 import {useSearchParams} from 'next/navigation';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import Confetti from 'react-confetti';
+import VideoGenerationForm from '../form/videoGenerationForm';
 
 const RequestStatus = RequestStatusSchema.enum;
 
@@ -62,6 +72,41 @@ const getProgressPercentage = (status: RequestStatusType) => {
 		Math.max(Math.round((index / (statusOrder.length - 1)) * 100), 0),
 		100,
 	);
+};
+
+const humanizeStatus = (status: RequestStatusType): string => {
+	switch (status) {
+		case RequestStatus.STARTED:
+			return 'Started';
+		case RequestStatus.FILLED:
+			return 'Filled';
+		case RequestStatus.PAID:
+			return 'Paid';
+		case RequestStatus.AUDIO_PROCESSING:
+			return 'Audio Processing';
+		case RequestStatus.AUDIO_PROCESSED:
+			return 'Audio Processed';
+		case RequestStatus.SUBTITLE_PROCESSING:
+			return 'Subtitle Processing';
+		case RequestStatus.SUBTITLE_PROCESSED:
+			return 'Subtitle Processed';
+		case RequestStatus.IMAGE_PROCESSING:
+			return 'Image Processing';
+		case RequestStatus.IMAGE_PROCESSED:
+			return 'Image Processed';
+		case RequestStatus.VIDEO_PROCESSING:
+			return 'Video Processing';
+		case RequestStatus.VIDEO_PROCESSED:
+			return 'Video Processed';
+		case RequestStatus.UPLOADING:
+			return 'Uploading';
+		case RequestStatus.UPLOADED:
+			return 'Uploaded';
+		case RequestStatus.COMPLETED:
+			return 'Completed';
+		default:
+			return status as string;
+	}
 };
 
 const getStatusInfo = (status: RequestStatusType) => {
@@ -151,7 +196,7 @@ const StatusStep: React.FC<{
 					className: `h-5 w-5 ${isCompleted || isActive ? 'text-white' : 'text-gray-500'}`,
 				})}
 			</div>
-			<span className="mt-1 text-xs text-center">{label}</span>
+			<span className="mt-1 text-xs text-center">{humanizeStatus(label)}</span>
 		</div>
 	);
 };
@@ -159,12 +204,42 @@ const StatusStep: React.FC<{
 export default function PaymentSuccessPage(): JSX.Element {
 	const searchParams = useSearchParams();
 	const generationId = searchParams.get('generationRequestId') ?? '';
+	const {toast} = useToast();
+	const [showConfetti, setShowConfetti] = useState(false);
 
 	const {data: generationRequest, isLoading: isLoadingRequest} =
 		trpc.generationRequests.getOne.useQuery(
 			{where: {id: generationId}},
-			{enabled: !!generationId},
+			{
+				enabled: !!generationId,
+				refetchInterval: 10000,
+			},
 		);
+
+	useEffect(() => {
+		if (generationRequest) {
+			if (
+				generationRequest.status === 'IMAGE_PROCESSED' &&
+				generationRequest.videoImages.length > 0
+			) {
+				toast({
+					title: 'Images are ready!',
+					description: 'Your AI-generated images are now available.',
+				});
+			}
+			if (
+				generationRequest.status === 'COMPLETED' &&
+				generationRequest.finalVideoPath
+			) {
+				toast({
+					title: 'Video is ready!',
+					description: 'Your AI-generated video is now available.',
+				});
+				setShowConfetti(true);
+			}
+			// Add more status checks and toasts as needed
+		}
+	}, [generationRequest, toast]);
 
 	if (isLoadingRequest) {
 		return <GenerationRequestSkeleton />;
@@ -179,6 +254,7 @@ export default function PaymentSuccessPage(): JSX.Element {
 
 	return (
 		<div className="min-h-screen p-4">
+			{showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
 			<div className="max-w-3xl mx-auto space-y-6">
 				<Card className="shadow-lg">
 					<CardHeader className="text-center">
@@ -187,24 +263,21 @@ export default function PaymentSuccessPage(): JSX.Element {
 						</CardTitle>
 						<CardDescription className="text-gray-600">
 							Your AI-generated video is{' '}
-							{generationRequest.status.toLowerCase()}
+							{humanizeStatus(generationRequest.status).toLowerCase()}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						<Alert className="bg-green-50 border-green-200">
 							<AlertTitle className="flex items-center text-green-700">
 								{React.cloneElement(icon, {className: 'text-green-500 mr-2'})}
-								<span>{generationRequest.status}</span>
+								<span>{humanizeStatus(generationRequest.status)}</span>
 							</AlertTitle>
 							<AlertDescription className="text-green-600">
 								{generationRequest.status !== 'COMPLETED' && message}
 							</AlertDescription>
 						</Alert>
 
-						{getStatusIndex(generationRequest.status) >=
-							getStatusIndex('IMAGE_PROCESSED') &&
-						getStatusIndex(generationRequest.status) <
-							getStatusIndex('VIDEO_PROCESSED') ? (
+						{generationRequest.videoImages.length > 0 && (
 							<Card className="w-4/5 mx-auto">
 								<CardContent className="p-4">
 									<Carousel>
@@ -224,18 +297,20 @@ export default function PaymentSuccessPage(): JSX.Element {
 									</Carousel>
 								</CardContent>
 							</Card>
-						) : generationRequest.status === 'COMPLETED' &&
-						  generationRequest.finalVideoPath ? (
-							<div className="w-4/5 mx-auto">
-								<video controls className="w-full rounded-lg shadow-md">
-									<source
-										src={generationRequest.finalVideoPath}
-										type="video/mp4"
-									/>
-									Your browser does not support the video tag.
-								</video>
-							</div>
-						) : null}
+						)}
+
+						{generationRequest.status === 'COMPLETED' &&
+							generationRequest.finalVideoPath && (
+								<div className="w-4/5 mx-auto">
+									<video controls className="w-full rounded-lg shadow-md">
+										<source
+											src={generationRequest.finalVideoPath}
+											type="video/mp4"
+										/>
+										Your browser does not support the video tag.
+									</video>
+								</div>
+							)}
 
 						<div className="w-4/5 mx-auto space-y-2">
 							<div className="flex justify-between text-sm font-medium">
@@ -270,7 +345,6 @@ export default function PaymentSuccessPage(): JSX.Element {
 								/>
 							))}
 						</div>
-
 						<div className="bg-white p-4 rounded-lg shadow">
 							<h3 className="text-lg font-semibold mb-2 text-blue-700">
 								Video Details
@@ -303,6 +377,20 @@ export default function PaymentSuccessPage(): JSX.Element {
 								<p className="font-semibold text-gray-700">Prompt</p>
 								<p className="text-gray-600">{generationRequest.prompt}</p>
 							</div>
+							{generationRequest.sunoLyrics && (
+								<Collapsible className="mt-4">
+									<CollapsibleTrigger className="flex items-center font-semibold text-blue-700 group">
+										<span>View Lyrics</span>
+										<ChevronDown className="h-4 w-4 ml-2 group-data-[state=open]:hidden" />
+										<ChevronUp className="h-4 w-4 ml-2 group-data-[state=closed]:hidden" />
+									</CollapsibleTrigger>
+									<CollapsibleContent className="mt-2">
+										<p className="text-gray-600 whitespace-pre-wrap">
+											{generationRequest.sunoLyrics}
+										</p>
+									</CollapsibleContent>
+								</Collapsible>
+							)}
 						</div>
 					</CardContent>
 				</Card>
@@ -314,7 +402,7 @@ export default function PaymentSuccessPage(): JSX.Element {
 }
 
 const GenerationRequestSkeleton: React.FC = () => (
-	<div className="min-h-screen bg-gradient-to-br from-blue-100 to-pink-100 p-4">
+	<div className="p-4 mt-10">
 		<div className="max-w-3xl mx-auto space-y-6">
 			<Card className="shadow-lg">
 				<CardHeader className="text-center">
@@ -338,29 +426,39 @@ const GenerationRequestSkeleton: React.FC = () => (
 );
 
 const NoGenerationRequestFound: React.FC = () => {
+	const [showForm, setShowForm] = useState(false);
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-100 to-pink-100 p-4">
+		<div className="p-4 mt-10">
 			<div className="max-w-3xl mx-auto space-y-6">
-				<Card className="shadow-lg">
-					<CardHeader className="text-center">
-						<CardTitle className="text-2xl font-bold text-blue-700">
-							No Generation Request Found
-						</CardTitle>
-						<CardDescription className="text-gray-600">
-							We couldn&apos;t find the generation request you&apos;re looking
-							for.
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<p className="text-center mb-4">
-							Don&apos;t worry! You can start a new video generation or check
-							your previous generations below.
-						</p>
-						<div className="flex justify-center">
-							<Button>Start New Generation</Button>
-						</div>
-					</CardContent>
-				</Card>
+				{showForm ? (
+					<Card className="shadow-lg mt-4">
+						<CardContent>
+							<VideoGenerationForm />
+						</CardContent>
+					</Card>
+				) : (
+					<Card className="shadow-lg">
+						<CardHeader className="text-center">
+							<CardTitle className="text-2xl font-bold text-blue-700">
+								No Generation Found
+							</CardTitle>
+							<CardDescription className="text-gray-600">
+								We couldn&apos;t find the generation you&apos;re looking for.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<p className="text-center mb-4">
+								Don&apos;t worry! You can start a new video generation or check
+								your previous generations below.
+							</p>
+							<div className="flex justify-center">
+								<Button onClick={() => setShowForm(true)}>
+									Start New Generation
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				)}
 
 				<PreviousGenerations />
 			</div>
@@ -414,7 +512,7 @@ const PreviousGenerations: React.FC = () => {
 												: 'bg-blue-100 text-blue-800'
 									}`}
 									>
-										{generation.status}
+										{humanizeStatus(generation.status)}
 									</span>
 									{generation.status === 'FAILED' && (
 										<Button

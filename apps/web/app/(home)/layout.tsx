@@ -52,7 +52,14 @@ export default function RootLayout({
 									</SignInButton>
 								</SignedOut>
 								<SignedIn>
-									<UserButton />
+									<UserButton
+										afterSignOutUrl="/"
+										appearance={{
+											elements: {
+												avatarBox: 'w-10 h-10', // Increase the size of the avatar
+											},
+										}}
+									/>
 								</SignedIn>
 							</nav>
 						</div>
