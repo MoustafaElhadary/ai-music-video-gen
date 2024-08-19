@@ -1,11 +1,11 @@
+import { openai } from '@ai-sdk/openai';
 import { Injectable, Logger } from '@nestjs/common';
 import { RequestStatus } from '@prisma/client';
 import { GenerationRequestService } from '@server/generation-request/generation-request.service';
 import { ReplicateService } from '@server/replicate/replicate.service';
-import { convertToSRT } from '../srt';
-import { z } from 'zod';
+import { convertToSRT } from '@server/video-generation/srt';
 import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 
 @Injectable()
 export class SubtitleService {

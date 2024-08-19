@@ -1,12 +1,13 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { StripeRouter } from './stripe.router';
-import { TrpcService } from '@server/trpc/trpc.service';
+import { StripeController } from './stripe.controller';
 import { GenerationRequestModule } from '@server/generation-request/generation-request.module';
 
 @Module({
-  imports: [GenerationRequestModule],
-  providers: [StripeService, StripeRouter, TrpcService],
+  imports: [forwardRef(() => GenerationRequestModule)],
+  providers: [StripeService, StripeRouter],
   exports: [StripeService, StripeRouter],
+  controllers: [StripeController],
 })
 export class StripeModule {}

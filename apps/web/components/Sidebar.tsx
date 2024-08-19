@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
-import SidebarItems from './SidebarItems';
 import {UserButton} from '@clerk/nextjs';
+import SidebarItems from './SidebarItems';
 
-import {AuthSession, getUserAuth} from '@web/lib/auth/utils';
+import {type AuthSession, getUserAuth} from '@web/lib/auth/utils';
 
 const Sidebar = async (): Promise<JSX.Element | null> => {
 	const session = await getUserAuth();

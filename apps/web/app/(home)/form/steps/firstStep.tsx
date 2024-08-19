@@ -18,8 +18,8 @@ import {useVideoGeneration} from '../videoGenerationContext';
 import {useClerk, useUser} from '@clerk/nextjs';
 import {trpc} from '@web/lib/trpc/client';
 import {toast} from 'sonner';
-import {MAX_CHARS} from '../utils';
 import type {FormValues} from '../utils';
+import {MAX_CHARS} from '../utils';
 
 export const FirstStep = (): JSX.Element => {
 	const {
@@ -33,14 +33,15 @@ export const FirstStep = (): JSX.Element => {
 	const {openSignIn} = useClerk();
 
 	const {mutate: createGenerationRequest, isLoading: isCreating} =
-		// @ts-expect-error TODO: will fix
 		trpc.generationRequests.create.useMutation({
 			onSuccess: (data) => {
 				setCurrentGenerationId(data.id);
 				handleGeneratePrompt(data.id);
 				setCurrentStep(1);
 			},
-			onError: (err) => toast.error(JSON.stringify(err)),
+			onError: (err) => {
+				toast.error(JSON.stringify(err));
+			},
 		});
 
 	const {mutate: updateGenerationRequest, isLoading: isUpdating} =
@@ -48,7 +49,9 @@ export const FirstStep = (): JSX.Element => {
 			onSuccess: () => {
 				setCurrentStep(1);
 			},
-			onError: (err) => toast.error(JSON.stringify(err)),
+			onError: (err) => {
+				toast.error(JSON.stringify(err));
+			},
 		});
 
 	const handleSubmit = (values: FormValues): void => {
@@ -116,7 +119,9 @@ export const FirstStep = (): JSX.Element => {
 									placeholder="Select an occasion"
 									mode="single"
 									{...field}
-									onChange={(value) => field.onChange(value as string)}
+									onChange={(value) => {
+										field.onChange(value as string);
+									}}
 								/>
 							</FormControl>
 							<FormMessage />

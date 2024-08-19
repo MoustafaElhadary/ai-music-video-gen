@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
-import {LucideIcon} from 'lucide-react';
+import type {LucideIcon} from 'lucide-react';
 
 import {cn} from '@web/lib/utils';
 import {defaultLinks, additionalLinks} from '@web/config/nav';

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GenerationRequestService } from '@server/generation-request/generation-request.service';
+import { PrismaService } from '@server/prisma/prisma.service';
 import { TRPCError } from '@trpc/server';
 import Stripe from 'stripe';
 import { z } from 'zod';
-import { GenerationRequestService } from '../generation-request/generation-request.service';
 
 @Injectable()
 export class StripeService {
@@ -12,6 +13,7 @@ export class StripeService {
   constructor(
     private configService: ConfigService,
     private generationRequestService: GenerationRequestService,
+    private prisma: PrismaService,
   ) {
     this.stripe = new Stripe(
       this.configService.get<string>('STRIPE_SECRET_KEY')!,
@@ -98,10 +100,26 @@ export class StripeService {
     }
   }
 
+  async getPaymentInfo(generationRequestId: string) {
+    return this.prisma.stripePaymentInfo.findUnique({
+      where: { generationRequestId },
+    });
+  }
+
   async handleSuccessfulPayment(session: Stripe.Checkout.Session) {
     const generationRequestId = session.metadata?.generationRequestId;
 
     if (generationRequestId) {
+      await this.prisma.stripePaymentInfo.create({
+        data: {
+          generationRequestId,
+          stripePaymentId: session.id,
+          amount: session.amount_total ?? 0,
+          currency: session.currency ?? 'usd',
+          status: session.payment_status,
+        },
+      });
+
       await this.generationRequestService.handleSuccessfulPayment(
         generationRequestId,
       );

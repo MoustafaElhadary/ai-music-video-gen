@@ -12,6 +12,7 @@ import { GenerationRequestService } from '@server/generation-request/generation-
 import type { CompositionId } from '@server/remotion/type-utils';
 import { getCompositionProps } from '@server/remotion/type-utils';
 import { SceneDataSchema } from '@server/remotion/types';
+import { StripeService } from '@server/stripe/stripe.service';
 import { type Job } from 'bull';
 import fs from 'fs';
 import path from 'path';
@@ -20,6 +21,7 @@ import { AudioService } from './services/audio.service';
 import { ImageService } from './services/image.service';
 import { SubtitleService } from './services/subtitle.service';
 import { UploadService } from './services/upload.service';
+import { SupabaseService } from '@server/supabase/supabase.service';
 
 @Processor(VIDEO_QUEUE)
 export class VideoQueueConsumer {
@@ -29,6 +31,8 @@ export class VideoQueueConsumer {
     private imageService: ImageService,
     private subtitleService: SubtitleService,
     private uploadService: UploadService,
+    private stripeService: StripeService,
+    private supabaseService: SupabaseService,
   ) {}
 
   private readonly logger = new Logger(VideoQueueConsumer.name);
@@ -44,6 +48,13 @@ export class VideoQueueConsumer {
       await this.generationRequestService.requestByIdWithImages(id);
     if (!generationRequest) {
       throw new Error('Generation request not found');
+    }
+
+    // Check for successful payment
+    const paymentInfo = await this.stripeService.getPaymentInfo(id);
+
+    if (!paymentInfo || paymentInfo.status !== 'paid') {
+      throw new Error('Payment not successful or not found');
     }
 
     try {
@@ -112,10 +123,13 @@ export class VideoQueueConsumer {
         data: this.videoPropsData(generationRequest),
       });
 
-      // Save the input props to the database
-      await this.generationRequestService.simpleUpdate(id, {
-        videoProps: inputProps,
-      });
+      // Save the input props to Supabase storage
+      const timestamp = new Date().toISOString();
+      await this.supabaseService.saveJsonFile(
+        'video-props',
+        `${id}/${timestamp}.json`,
+        inputProps,
+      );
 
       const composition = await selectComposition({
         serveUrl,

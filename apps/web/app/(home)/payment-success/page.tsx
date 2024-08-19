@@ -390,7 +390,7 @@ const PreviousGenerations: React.FC = () => {
 			<CardContent>
 				{userGenerations && userGenerations.length > 0 ? (
 					<ul className="divide-y divide-gray-200">
-						{userGenerations.map((generation: any) => (
+						{userGenerations.map((generation) => (
 							<li
 								key={generation.id}
 								className="py-3 flex justify-between items-center"

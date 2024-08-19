@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { TrpcService } from '../trpc/trpc.service';
-import { BookService } from './book.service';
-import { z } from 'zod';
 import { Prisma } from '@prisma/client';
+import { TrpcService } from '@server/trpc/trpc.service';
+import { z } from 'zod';
+import { BookService } from './book.service';
 
 @Injectable()
 export class BookRouter {

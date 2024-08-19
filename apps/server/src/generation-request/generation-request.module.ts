@@ -1,22 +1,18 @@
-import { Module } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { ReplicateService } from '../replicate/replicate.service';
-import { SupabaseService } from '../supabase/supabase.service';
-import { TrpcService } from '../trpc/trpc.service';
-import { VideoQueueModule } from '../video-generation/video-queue.module';
+import { BullModule } from '@nestjs/bull';
+import { Module, forwardRef } from '@nestjs/common';
+import { VIDEO_QUEUE } from '@server/core/constants';
+import { StripeModule } from '@server/stripe/stripe.module';
 import { GenerationRequestRouter } from './generation-request.router';
 import { GenerationRequestService } from './generation-request.service';
 
 @Module({
-  imports: [VideoQueueModule],
-  providers: [
-    GenerationRequestService,
-    GenerationRequestRouter,
-    PrismaService,
-    TrpcService,
-    SupabaseService,
-    ReplicateService,
+  imports: [
+    BullModule.registerQueue({
+      name: VIDEO_QUEUE,
+    }),
+    forwardRef(() => StripeModule),
   ],
+  providers: [GenerationRequestService, GenerationRequestRouter],
   exports: [GenerationRequestService, GenerationRequestRouter],
 })
 export class GenerationRequestModule {}

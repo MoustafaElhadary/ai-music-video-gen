@@ -5,8 +5,8 @@ import {
   GenerationRequestFindManyArgsSchema,
   GenerationRequestFindUniqueArgsSchema,
   GenerationRequestUpdateArgsSchema,
-} from '../prisma/generated/zod';
-import { TrpcService } from '../trpc/trpc.service';
+} from '@server/prisma/generated/zod';
+import { TrpcService } from '@server/trpc/trpc.service';
 import { GenerationRequestService } from './generation-request.service';
 
 @Injectable()

@@ -35,13 +35,13 @@ model Book {
 }
 
 model GenerationRequest {
-  id                   String        @id @default(cuid())
+  id                   String             @id @default(cuid())
   userId               String
   occasion             String
   recipientName        String
   prompt               String
   senderName           String
-  status               RequestStatus @default(STARTED)
+  status               RequestStatus      @default(STARTED)
   sunoSongId           String?
   sunoAudioUrl         String?
   srt                  String?
@@ -52,10 +52,10 @@ model GenerationRequest {
   localVideoPath       String?
   finalVideoPath       String?
   recipientPhoneNumber String?
-  videoProps           Json?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
   videoImages          VideoImage[]
+  stripePaymentInfo    StripePaymentInfo?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 }
 
 model VideoImage {
@@ -64,6 +64,18 @@ model VideoImage {
   generationRequest   GenerationRequest @relation(fields: [generationRequestId], references: [id])
   generationRequestId String
   imageType           ImageType         @default(AI_GENERATED)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model StripePaymentInfo {
+  id                  String            @id @default(cuid())
+  generationRequest   GenerationRequest @relation(fields: [generationRequestId], references: [id])
+  generationRequestId String            @unique
+  stripePaymentId     String
+  amount              Int
+  currency            String
+  status              String
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 }

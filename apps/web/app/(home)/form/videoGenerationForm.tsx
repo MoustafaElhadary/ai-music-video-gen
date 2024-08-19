@@ -43,7 +43,9 @@ const VideoGenerationForm = (): React.ReactNode => {
 		const subscription = form.watch((value) =>
 			setStoredFormData(value as FormValues),
 		);
-		return () => subscription.unsubscribe();
+		return () => {
+			subscription.unsubscribe();
+		};
 	}, [form, setStoredFormData]);
 
 	return (

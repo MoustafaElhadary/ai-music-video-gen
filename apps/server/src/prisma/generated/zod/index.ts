@@ -1,60 +1,9 @@
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
 /////////////////////////////////////////
-
-// JSON
-//------------------------------------------------------
-
-export type NullableJsonInput =
-  | Prisma.JsonValue
-  | null
-  | 'JsonNull'
-  | 'DbNull'
-  | Prisma.NullTypes.DbNull
-  | Prisma.NullTypes.JsonNull;
-
-export const transformJsonNull = (v?: NullableJsonInput) => {
-  if (!v || v === 'DbNull') return Prisma.DbNull;
-  if (v === 'JsonNull') return Prisma.JsonNull;
-  return v;
-};
-
-export const JsonValueSchema: z.ZodType<Prisma.JsonValue> = z.lazy(() =>
-  z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.literal(null),
-    z.record(z.lazy(() => JsonValueSchema.optional())),
-    z.array(z.lazy(() => JsonValueSchema)),
-  ]),
-);
-
-export type JsonValueType = z.infer<typeof JsonValueSchema>;
-
-export const NullableJsonValue = z
-  .union([JsonValueSchema, z.literal('DbNull'), z.literal('JsonNull')])
-  .nullable()
-  .transform((v) => transformJsonNull(v));
-
-export type NullableJsonValueType = z.infer<typeof NullableJsonValue>;
-
-export const InputJsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(
-  () =>
-    z.union([
-      z.string(),
-      z.number(),
-      z.boolean(),
-      z.object({ toJSON: z.function(z.tuple([]), z.any()) }),
-      z.record(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
-      z.array(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
-    ]),
-);
-
-export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 
 /////////////////////////////////////////
 // ENUMS
@@ -94,7 +43,6 @@ export const GenerationRequestScalarFieldEnumSchema = z.enum([
   'localVideoPath',
   'finalVideoPath',
   'recipientPhoneNumber',
-  'videoProps',
   'createdAt',
   'updatedAt',
 ]);
@@ -108,33 +56,22 @@ export const VideoImageScalarFieldEnumSchema = z.enum([
   'updatedAt',
 ]);
 
-export const SortOrderSchema = z.enum(['asc', 'desc']);
+export const StripePaymentInfoScalarFieldEnumSchema = z.enum([
+  'id',
+  'generationRequestId',
+  'stripePaymentId',
+  'amount',
+  'currency',
+  'status',
+  'createdAt',
+  'updatedAt',
+]);
 
-export const NullableJsonNullValueInputSchema = z
-  .enum(['DbNull', 'JsonNull'])
-  .transform((value) =>
-    value === 'JsonNull'
-      ? Prisma.JsonNull
-      : value === 'DbNull'
-        ? Prisma.DbNull
-        : value,
-  );
+export const SortOrderSchema = z.enum(['asc', 'desc']);
 
 export const QueryModeSchema = z.enum(['default', 'insensitive']);
 
 export const NullsOrderSchema = z.enum(['first', 'last']);
-
-export const JsonNullValueFilterSchema = z
-  .enum(['DbNull', 'JsonNull', 'AnyNull'])
-  .transform((value) =>
-    value === 'JsonNull'
-      ? Prisma.JsonNull
-      : value === 'DbNull'
-        ? Prisma.JsonNull
-        : value === 'AnyNull'
-          ? Prisma.AnyNull
-          : value,
-  );
 
 export const ImageTypeSchema = z.enum(['USER_UPLOADED', 'AI_GENERATED']);
 
@@ -205,7 +142,6 @@ export const GenerationRequestSchema = z.object({
   localVideoPath: z.string().nullable(),
   finalVideoPath: z.string().nullable(),
   recipientPhoneNumber: z.string().nullable(),
-  videoProps: JsonValueSchema.nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -226,6 +162,23 @@ export const VideoImageSchema = z.object({
 });
 
 export type VideoImage = z.infer<typeof VideoImageSchema>;
+
+/////////////////////////////////////////
+// STRIPE PAYMENT INFO SCHEMA
+/////////////////////////////////////////
+
+export const StripePaymentInfoSchema = z.object({
+  id: z.string().cuid(),
+  generationRequestId: z.string(),
+  stripePaymentId: z.string(),
+  amount: z.number().int(),
+  currency: z.string(),
+  status: z.string(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+
+export type StripePaymentInfo = z.infer<typeof StripePaymentInfoSchema>;
 
 /////////////////////////////////////////
 // SELECT & INCLUDE
@@ -253,6 +206,9 @@ export const GenerationRequestIncludeSchema: z.ZodType<Prisma.GenerationRequestI
     .object({
       videoImages: z
         .union([z.boolean(), z.lazy(() => VideoImageFindManyArgsSchema)])
+        .optional(),
+      stripePaymentInfo: z
+        .union([z.boolean(), z.lazy(() => StripePaymentInfoArgsSchema)])
         .optional(),
       _count: z
         .union([
@@ -307,11 +263,13 @@ export const GenerationRequestSelectSchema: z.ZodType<Prisma.GenerationRequestSe
       localVideoPath: z.boolean().optional(),
       finalVideoPath: z.boolean().optional(),
       recipientPhoneNumber: z.boolean().optional(),
-      videoProps: z.boolean().optional(),
       createdAt: z.boolean().optional(),
       updatedAt: z.boolean().optional(),
       videoImages: z
         .union([z.boolean(), z.lazy(() => VideoImageFindManyArgsSchema)])
+        .optional(),
+      stripePaymentInfo: z
+        .union([z.boolean(), z.lazy(() => StripePaymentInfoArgsSchema)])
         .optional(),
       _count: z
         .union([
@@ -353,6 +311,43 @@ export const VideoImageSelectSchema: z.ZodType<Prisma.VideoImageSelect> = z
       .optional(),
   })
   .strict();
+
+// STRIPE PAYMENT INFO
+//------------------------------------------------------
+
+export const StripePaymentInfoIncludeSchema: z.ZodType<Prisma.StripePaymentInfoInclude> =
+  z
+    .object({
+      generationRequest: z
+        .union([z.boolean(), z.lazy(() => GenerationRequestArgsSchema)])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoArgsSchema: z.ZodType<Prisma.StripePaymentInfoDefaultArgs> =
+  z
+    .object({
+      select: z.lazy(() => StripePaymentInfoSelectSchema).optional(),
+      include: z.lazy(() => StripePaymentInfoIncludeSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoSelectSchema: z.ZodType<Prisma.StripePaymentInfoSelect> =
+  z
+    .object({
+      id: z.boolean().optional(),
+      generationRequestId: z.boolean().optional(),
+      stripePaymentId: z.boolean().optional(),
+      amount: z.boolean().optional(),
+      currency: z.boolean().optional(),
+      status: z.boolean().optional(),
+      createdAt: z.boolean().optional(),
+      updatedAt: z.boolean().optional(),
+      generationRequest: z
+        .union([z.boolean(), z.lazy(() => GenerationRequestArgsSchema)])
+        .optional(),
+    })
+    .strict();
 
 /////////////////////////////////////////
 // INPUT TYPES
@@ -607,7 +602,6 @@ export const GenerationRequestWhereInputSchema: z.ZodType<Prisma.GenerationReque
         .union([z.lazy(() => StringNullableFilterSchema), z.string()])
         .optional()
         .nullable(),
-      videoProps: z.lazy(() => JsonNullableFilterSchema).optional(),
       createdAt: z
         .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
         .optional(),
@@ -615,6 +609,13 @@ export const GenerationRequestWhereInputSchema: z.ZodType<Prisma.GenerationReque
         .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
         .optional(),
       videoImages: z.lazy(() => VideoImageListRelationFilterSchema).optional(),
+      stripePaymentInfo: z
+        .union([
+          z.lazy(() => StripePaymentInfoNullableRelationFilterSchema),
+          z.lazy(() => StripePaymentInfoWhereInputSchema),
+        ])
+        .optional()
+        .nullable(),
     })
     .strict();
 
@@ -688,16 +689,13 @@ export const GenerationRequestOrderByWithRelationInputSchema: z.ZodType<Prisma.G
           z.lazy(() => SortOrderInputSchema),
         ])
         .optional(),
-      videoProps: z
-        .union([
-          z.lazy(() => SortOrderSchema),
-          z.lazy(() => SortOrderInputSchema),
-        ])
-        .optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
       videoImages: z
         .lazy(() => VideoImageOrderByRelationAggregateInputSchema)
+        .optional(),
+      stripePaymentInfo: z
+        .lazy(() => StripePaymentInfoOrderByWithRelationInputSchema)
         .optional(),
     })
     .strict();
@@ -788,7 +786,6 @@ export const GenerationRequestWhereUniqueInputSchema: z.ZodType<Prisma.Generatio
             .union([z.lazy(() => StringNullableFilterSchema), z.string()])
             .optional()
             .nullable(),
-          videoProps: z.lazy(() => JsonNullableFilterSchema).optional(),
           createdAt: z
             .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
             .optional(),
@@ -798,6 +795,13 @@ export const GenerationRequestWhereUniqueInputSchema: z.ZodType<Prisma.Generatio
           videoImages: z
             .lazy(() => VideoImageListRelationFilterSchema)
             .optional(),
+          stripePaymentInfo: z
+            .union([
+              z.lazy(() => StripePaymentInfoNullableRelationFilterSchema),
+              z.lazy(() => StripePaymentInfoWhereInputSchema),
+            ])
+            .optional()
+            .nullable(),
         })
         .strict(),
     );
@@ -867,12 +871,6 @@ export const GenerationRequestOrderByWithAggregationInputSchema: z.ZodType<Prism
         ])
         .optional(),
       recipientPhoneNumber: z
-        .union([
-          z.lazy(() => SortOrderSchema),
-          z.lazy(() => SortOrderInputSchema),
-        ])
-        .optional(),
-      videoProps: z
         .union([
           z.lazy(() => SortOrderSchema),
           z.lazy(() => SortOrderInputSchema),
@@ -1015,9 +1013,6 @@ export const GenerationRequestScalarWhereWithAggregatesInputSchema: z.ZodType<Pr
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .lazy(() => JsonNullableWithAggregatesFilterSchema)
-        .optional(),
       createdAt: z
         .union([
           z.lazy(() => DateTimeWithAggregatesFilterSchema),
@@ -1198,6 +1193,219 @@ export const VideoImageScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Vi
           z.lazy(() => EnumImageTypeWithAggregatesFilterSchema),
           z.lazy(() => ImageTypeSchema),
         ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.lazy(() => DateTimeWithAggregatesFilterSchema),
+          z.coerce.date(),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.lazy(() => DateTimeWithAggregatesFilterSchema),
+          z.coerce.date(),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoWhereInputSchema: z.ZodType<Prisma.StripePaymentInfoWhereInput> =
+  z
+    .object({
+      AND: z
+        .union([
+          z.lazy(() => StripePaymentInfoWhereInputSchema),
+          z.lazy(() => StripePaymentInfoWhereInputSchema).array(),
+        ])
+        .optional(),
+      OR: z
+        .lazy(() => StripePaymentInfoWhereInputSchema)
+        .array()
+        .optional(),
+      NOT: z
+        .union([
+          z.lazy(() => StripePaymentInfoWhereInputSchema),
+          z.lazy(() => StripePaymentInfoWhereInputSchema).array(),
+        ])
+        .optional(),
+      id: z.union([z.lazy(() => StringFilterSchema), z.string()]).optional(),
+      generationRequestId: z
+        .union([z.lazy(() => StringFilterSchema), z.string()])
+        .optional(),
+      stripePaymentId: z
+        .union([z.lazy(() => StringFilterSchema), z.string()])
+        .optional(),
+      amount: z.union([z.lazy(() => IntFilterSchema), z.number()]).optional(),
+      currency: z
+        .union([z.lazy(() => StringFilterSchema), z.string()])
+        .optional(),
+      status: z
+        .union([z.lazy(() => StringFilterSchema), z.string()])
+        .optional(),
+      createdAt: z
+        .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
+        .optional(),
+      updatedAt: z
+        .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
+        .optional(),
+      generationRequest: z
+        .union([
+          z.lazy(() => GenerationRequestRelationFilterSchema),
+          z.lazy(() => GenerationRequestWhereInputSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoOrderByWithRelationInputSchema: z.ZodType<Prisma.StripePaymentInfoOrderByWithRelationInput> =
+  z
+    .object({
+      id: z.lazy(() => SortOrderSchema).optional(),
+      generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      stripePaymentId: z.lazy(() => SortOrderSchema).optional(),
+      amount: z.lazy(() => SortOrderSchema).optional(),
+      currency: z.lazy(() => SortOrderSchema).optional(),
+      status: z.lazy(() => SortOrderSchema).optional(),
+      createdAt: z.lazy(() => SortOrderSchema).optional(),
+      updatedAt: z.lazy(() => SortOrderSchema).optional(),
+      generationRequest: z
+        .lazy(() => GenerationRequestOrderByWithRelationInputSchema)
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoWhereUniqueInputSchema: z.ZodType<Prisma.StripePaymentInfoWhereUniqueInput> =
+  z
+    .union([
+      z.object({
+        id: z.string().cuid(),
+        generationRequestId: z.string(),
+      }),
+      z.object({
+        id: z.string().cuid(),
+      }),
+      z.object({
+        generationRequestId: z.string(),
+      }),
+    ])
+    .and(
+      z
+        .object({
+          id: z.string().cuid().optional(),
+          generationRequestId: z.string().optional(),
+          AND: z
+            .union([
+              z.lazy(() => StripePaymentInfoWhereInputSchema),
+              z.lazy(() => StripePaymentInfoWhereInputSchema).array(),
+            ])
+            .optional(),
+          OR: z
+            .lazy(() => StripePaymentInfoWhereInputSchema)
+            .array()
+            .optional(),
+          NOT: z
+            .union([
+              z.lazy(() => StripePaymentInfoWhereInputSchema),
+              z.lazy(() => StripePaymentInfoWhereInputSchema).array(),
+            ])
+            .optional(),
+          stripePaymentId: z
+            .union([z.lazy(() => StringFilterSchema), z.string()])
+            .optional(),
+          amount: z
+            .union([z.lazy(() => IntFilterSchema), z.number().int()])
+            .optional(),
+          currency: z
+            .union([z.lazy(() => StringFilterSchema), z.string()])
+            .optional(),
+          status: z
+            .union([z.lazy(() => StringFilterSchema), z.string()])
+            .optional(),
+          createdAt: z
+            .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
+            .optional(),
+          updatedAt: z
+            .union([z.lazy(() => DateTimeFilterSchema), z.coerce.date()])
+            .optional(),
+          generationRequest: z
+            .union([
+              z.lazy(() => GenerationRequestRelationFilterSchema),
+              z.lazy(() => GenerationRequestWhereInputSchema),
+            ])
+            .optional(),
+        })
+        .strict(),
+    );
+
+export const StripePaymentInfoOrderByWithAggregationInputSchema: z.ZodType<Prisma.StripePaymentInfoOrderByWithAggregationInput> =
+  z
+    .object({
+      id: z.lazy(() => SortOrderSchema).optional(),
+      generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      stripePaymentId: z.lazy(() => SortOrderSchema).optional(),
+      amount: z.lazy(() => SortOrderSchema).optional(),
+      currency: z.lazy(() => SortOrderSchema).optional(),
+      status: z.lazy(() => SortOrderSchema).optional(),
+      createdAt: z.lazy(() => SortOrderSchema).optional(),
+      updatedAt: z.lazy(() => SortOrderSchema).optional(),
+      _count: z
+        .lazy(() => StripePaymentInfoCountOrderByAggregateInputSchema)
+        .optional(),
+      _avg: z
+        .lazy(() => StripePaymentInfoAvgOrderByAggregateInputSchema)
+        .optional(),
+      _max: z
+        .lazy(() => StripePaymentInfoMaxOrderByAggregateInputSchema)
+        .optional(),
+      _min: z
+        .lazy(() => StripePaymentInfoMinOrderByAggregateInputSchema)
+        .optional(),
+      _sum: z
+        .lazy(() => StripePaymentInfoSumOrderByAggregateInputSchema)
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.StripePaymentInfoScalarWhereWithAggregatesInput> =
+  z
+    .object({
+      AND: z
+        .union([
+          z.lazy(() => StripePaymentInfoScalarWhereWithAggregatesInputSchema),
+          z
+            .lazy(() => StripePaymentInfoScalarWhereWithAggregatesInputSchema)
+            .array(),
+        ])
+        .optional(),
+      OR: z
+        .lazy(() => StripePaymentInfoScalarWhereWithAggregatesInputSchema)
+        .array()
+        .optional(),
+      NOT: z
+        .union([
+          z.lazy(() => StripePaymentInfoScalarWhereWithAggregatesInputSchema),
+          z
+            .lazy(() => StripePaymentInfoScalarWhereWithAggregatesInputSchema)
+            .array(),
+        ])
+        .optional(),
+      id: z
+        .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
+        .optional(),
+      generationRequestId: z
+        .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
+        .optional(),
+      stripePaymentId: z
+        .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
+        .optional(),
+      amount: z
+        .union([z.lazy(() => IntWithAggregatesFilterSchema), z.number()])
+        .optional(),
+      currency: z
+        .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
+        .optional(),
+      status: z
+        .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
         .optional(),
       createdAt: z
         .union([
@@ -1433,16 +1641,16 @@ export const GenerationRequestCreateInputSchema = z
     localVideoPath: z.string().optional().nullable(),
     finalVideoPath: z.string().optional().nullable(),
     recipientPhoneNumber: z.string().optional().nullable(),
-    videoProps: z
-      .union([
-        z.lazy(() => NullableJsonNullValueInputSchema),
-        InputJsonValueSchema,
-      ])
-      .optional(),
     createdAt: z.coerce.date().optional(),
     updatedAt: z.coerce.date().optional(),
     videoImages: z
       .lazy(() => VideoImageCreateNestedManyWithoutGenerationRequestInputSchema)
+      .optional(),
+    stripePaymentInfo: z
+      .lazy(
+        () =>
+          StripePaymentInfoCreateNestedOneWithoutGenerationRequestInputSchema,
+      )
       .optional(),
   })
   .strict();
@@ -1467,18 +1675,18 @@ export const GenerationRequestUncheckedCreateInputSchema: z.ZodType<Prisma.Gener
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
       videoImages: z
         .lazy(
           () =>
             VideoImageUncheckedCreateNestedManyWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoUncheckedCreateNestedOneWithoutGenerationRequestInputSchema,
         )
         .optional(),
     })
@@ -1599,12 +1807,6 @@ export const GenerationRequestUpdateInputSchema: z.ZodType<Prisma.GenerationRequ
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -1620,6 +1822,12 @@ export const GenerationRequestUpdateInputSchema: z.ZodType<Prisma.GenerationRequ
       videoImages: z
         .lazy(
           () => VideoImageUpdateManyWithoutGenerationRequestNestedInputSchema,
+        )
+        .optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoUpdateOneWithoutGenerationRequestNestedInputSchema,
         )
         .optional(),
     })
@@ -1740,12 +1948,6 @@ export const GenerationRequestUncheckedUpdateInputSchema: z.ZodType<Prisma.Gener
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -1762,6 +1964,12 @@ export const GenerationRequestUncheckedUpdateInputSchema: z.ZodType<Prisma.Gener
         .lazy(
           () =>
             VideoImageUncheckedUpdateManyWithoutGenerationRequestNestedInputSchema,
+        )
+        .optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoUncheckedUpdateOneWithoutGenerationRequestNestedInputSchema,
         )
         .optional(),
     })
@@ -1787,12 +1995,6 @@ export const GenerationRequestCreateManyInputSchema: z.ZodType<Prisma.Generation
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
     })
@@ -1913,12 +2115,6 @@ export const GenerationRequestUpdateManyMutationInputSchema: z.ZodType<Prisma.Ge
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -2049,12 +2245,6 @@ export const GenerationRequestUncheckedUpdateManyInputSchema: z.ZodType<Prisma.G
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -2253,6 +2443,261 @@ export const VideoImageUncheckedUpdateManyInputSchema: z.ZodType<Prisma.VideoIma
         .union([
           z.lazy(() => ImageTypeSchema),
           z.lazy(() => EnumImageTypeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateInputSchema: z.ZodType<Prisma.StripePaymentInfoCreateInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      stripePaymentId: z.string(),
+      amount: z.number().int(),
+      currency: z.string(),
+      status: z.string(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+      generationRequest: z.lazy(
+        () =>
+          GenerationRequestCreateNestedOneWithoutStripePaymentInfoInputSchema,
+      ),
+    })
+    .strict();
+
+export const StripePaymentInfoUncheckedCreateInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedCreateInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      generationRequestId: z.string(),
+      stripePaymentId: z.string(),
+      amount: z.number().int(),
+      currency: z.string(),
+      status: z.string(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUpdateInputSchema: z.ZodType<Prisma.StripePaymentInfoUpdateInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      stripePaymentId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      amount: z
+        .union([
+          z.number().int(),
+          z.lazy(() => IntFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      currency: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      generationRequest: z
+        .lazy(
+          () =>
+            GenerationRequestUpdateOneRequiredWithoutStripePaymentInfoNestedInputSchema,
+        )
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUncheckedUpdateInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedUpdateInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      generationRequestId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      stripePaymentId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      amount: z
+        .union([
+          z.number().int(),
+          z.lazy(() => IntFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      currency: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateManyInputSchema: z.ZodType<Prisma.StripePaymentInfoCreateManyInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      generationRequestId: z.string(),
+      stripePaymentId: z.string(),
+      amount: z.number().int(),
+      currency: z.string(),
+      status: z.string(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUpdateManyMutationInputSchema: z.ZodType<Prisma.StripePaymentInfoUpdateManyMutationInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      stripePaymentId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      amount: z
+        .union([
+          z.number().int(),
+          z.lazy(() => IntFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      currency: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUncheckedUpdateManyInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedUpdateManyInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      generationRequestId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      stripePaymentId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      amount: z
+        .union([
+          z.number().int(),
+          z.lazy(() => IntFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      currency: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
         ])
         .optional(),
       createdAt: z
@@ -2502,30 +2947,26 @@ export const BoolNullableFilterSchema: z.ZodType<Prisma.BoolNullableFilter> = z
   })
   .strict();
 
-export const JsonNullableFilterSchema: z.ZodType<Prisma.JsonNullableFilter> = z
-  .object({
-    equals: InputJsonValueSchema.optional(),
-    path: z.string().array().optional(),
-    string_contains: z.string().optional(),
-    string_starts_with: z.string().optional(),
-    string_ends_with: z.string().optional(),
-    array_contains: InputJsonValueSchema.optional().nullable(),
-    array_starts_with: InputJsonValueSchema.optional().nullable(),
-    array_ends_with: InputJsonValueSchema.optional().nullable(),
-    lt: InputJsonValueSchema.optional(),
-    lte: InputJsonValueSchema.optional(),
-    gt: InputJsonValueSchema.optional(),
-    gte: InputJsonValueSchema.optional(),
-    not: InputJsonValueSchema.optional(),
-  })
-  .strict();
-
 export const VideoImageListRelationFilterSchema: z.ZodType<Prisma.VideoImageListRelationFilter> =
   z
     .object({
       every: z.lazy(() => VideoImageWhereInputSchema).optional(),
       some: z.lazy(() => VideoImageWhereInputSchema).optional(),
       none: z.lazy(() => VideoImageWhereInputSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoNullableRelationFilterSchema: z.ZodType<Prisma.StripePaymentInfoNullableRelationFilter> =
+  z
+    .object({
+      is: z
+        .lazy(() => StripePaymentInfoWhereInputSchema)
+        .optional()
+        .nullable(),
+      isNot: z
+        .lazy(() => StripePaymentInfoWhereInputSchema)
+        .optional()
+        .nullable(),
     })
     .strict();
 
@@ -2556,7 +2997,6 @@ export const GenerationRequestCountOrderByAggregateInputSchema: z.ZodType<Prisma
       localVideoPath: z.lazy(() => SortOrderSchema).optional(),
       finalVideoPath: z.lazy(() => SortOrderSchema).optional(),
       recipientPhoneNumber: z.lazy(() => SortOrderSchema).optional(),
-      videoProps: z.lazy(() => SortOrderSchema).optional(),
       createdAt: z.lazy(() => SortOrderSchema).optional(),
       updatedAt: z.lazy(() => SortOrderSchema).optional(),
     })
@@ -2694,28 +3134,6 @@ export const BoolNullableWithAggregatesFilterSchema: z.ZodType<Prisma.BoolNullab
     })
     .strict();
 
-export const JsonNullableWithAggregatesFilterSchema: z.ZodType<Prisma.JsonNullableWithAggregatesFilter> =
-  z
-    .object({
-      equals: InputJsonValueSchema.optional(),
-      path: z.string().array().optional(),
-      string_contains: z.string().optional(),
-      string_starts_with: z.string().optional(),
-      string_ends_with: z.string().optional(),
-      array_contains: InputJsonValueSchema.optional().nullable(),
-      array_starts_with: InputJsonValueSchema.optional().nullable(),
-      array_ends_with: InputJsonValueSchema.optional().nullable(),
-      lt: InputJsonValueSchema.optional(),
-      lte: InputJsonValueSchema.optional(),
-      gt: InputJsonValueSchema.optional(),
-      gte: InputJsonValueSchema.optional(),
-      not: InputJsonValueSchema.optional(),
-      _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-      _min: z.lazy(() => NestedJsonNullableFilterSchema).optional(),
-      _max: z.lazy(() => NestedJsonNullableFilterSchema).optional(),
-    })
-    .strict();
-
 export const EnumImageTypeFilterSchema: z.ZodType<Prisma.EnumImageTypeFilter> =
   z
     .object({
@@ -2805,6 +3223,96 @@ export const EnumImageTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumImage
     })
     .strict();
 
+export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z
+  .object({
+    equals: z.number().optional(),
+    in: z.number().array().optional(),
+    notIn: z.number().array().optional(),
+    lt: z.number().optional(),
+    lte: z.number().optional(),
+    gt: z.number().optional(),
+    gte: z.number().optional(),
+    not: z.union([z.number(), z.lazy(() => NestedIntFilterSchema)]).optional(),
+  })
+  .strict();
+
+export const StripePaymentInfoCountOrderByAggregateInputSchema: z.ZodType<Prisma.StripePaymentInfoCountOrderByAggregateInput> =
+  z
+    .object({
+      id: z.lazy(() => SortOrderSchema).optional(),
+      generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      stripePaymentId: z.lazy(() => SortOrderSchema).optional(),
+      amount: z.lazy(() => SortOrderSchema).optional(),
+      currency: z.lazy(() => SortOrderSchema).optional(),
+      status: z.lazy(() => SortOrderSchema).optional(),
+      createdAt: z.lazy(() => SortOrderSchema).optional(),
+      updatedAt: z.lazy(() => SortOrderSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoAvgOrderByAggregateInputSchema: z.ZodType<Prisma.StripePaymentInfoAvgOrderByAggregateInput> =
+  z
+    .object({
+      amount: z.lazy(() => SortOrderSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoMaxOrderByAggregateInputSchema: z.ZodType<Prisma.StripePaymentInfoMaxOrderByAggregateInput> =
+  z
+    .object({
+      id: z.lazy(() => SortOrderSchema).optional(),
+      generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      stripePaymentId: z.lazy(() => SortOrderSchema).optional(),
+      amount: z.lazy(() => SortOrderSchema).optional(),
+      currency: z.lazy(() => SortOrderSchema).optional(),
+      status: z.lazy(() => SortOrderSchema).optional(),
+      createdAt: z.lazy(() => SortOrderSchema).optional(),
+      updatedAt: z.lazy(() => SortOrderSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoMinOrderByAggregateInputSchema: z.ZodType<Prisma.StripePaymentInfoMinOrderByAggregateInput> =
+  z
+    .object({
+      id: z.lazy(() => SortOrderSchema).optional(),
+      generationRequestId: z.lazy(() => SortOrderSchema).optional(),
+      stripePaymentId: z.lazy(() => SortOrderSchema).optional(),
+      amount: z.lazy(() => SortOrderSchema).optional(),
+      currency: z.lazy(() => SortOrderSchema).optional(),
+      status: z.lazy(() => SortOrderSchema).optional(),
+      createdAt: z.lazy(() => SortOrderSchema).optional(),
+      updatedAt: z.lazy(() => SortOrderSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoSumOrderByAggregateInputSchema: z.ZodType<Prisma.StripePaymentInfoSumOrderByAggregateInput> =
+  z
+    .object({
+      amount: z.lazy(() => SortOrderSchema).optional(),
+    })
+    .strict();
+
+export const IntWithAggregatesFilterSchema: z.ZodType<Prisma.IntWithAggregatesFilter> =
+  z
+    .object({
+      equals: z.number().optional(),
+      in: z.number().array().optional(),
+      notIn: z.number().array().optional(),
+      lt: z.number().optional(),
+      lte: z.number().optional(),
+      gt: z.number().optional(),
+      gte: z.number().optional(),
+      not: z
+        .union([z.number(), z.lazy(() => NestedIntWithAggregatesFilterSchema)])
+        .optional(),
+      _count: z.lazy(() => NestedIntFilterSchema).optional(),
+      _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+      _sum: z.lazy(() => NestedIntFilterSchema).optional(),
+      _min: z.lazy(() => NestedIntFilterSchema).optional(),
+      _max: z.lazy(() => NestedIntFilterSchema).optional(),
+    })
+    .strict();
+
 export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFieldUpdateOperationsInput> =
   z
     .object({
@@ -2875,6 +3383,30 @@ export const VideoImageCreateNestedManyWithoutGenerationRequestInputSchema: z.Zo
     })
     .strict();
 
+export const StripePaymentInfoCreateNestedOneWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoCreateNestedOneWithoutGenerationRequestInput> =
+  z
+    .object({
+      create: z
+        .union([
+          z.lazy(
+            () => StripePaymentInfoCreateWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () =>
+              StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema,
+          ),
+        ])
+        .optional(),
+      connectOrCreate: z
+        .lazy(
+          () =>
+            StripePaymentInfoCreateOrConnectWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+      connect: z.lazy(() => StripePaymentInfoWhereUniqueInputSchema).optional(),
+    })
+    .strict();
+
 export const VideoImageUncheckedCreateNestedManyWithoutGenerationRequestInputSchema: z.ZodType<Prisma.VideoImageUncheckedCreateNestedManyWithoutGenerationRequestInput> =
   z
     .object({
@@ -2917,6 +3449,30 @@ export const VideoImageUncheckedCreateNestedManyWithoutGenerationRequestInputSch
           z.lazy(() => VideoImageWhereUniqueInputSchema).array(),
         ])
         .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUncheckedCreateNestedOneWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedCreateNestedOneWithoutGenerationRequestInput> =
+  z
+    .object({
+      create: z
+        .union([
+          z.lazy(
+            () => StripePaymentInfoCreateWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () =>
+              StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema,
+          ),
+        ])
+        .optional(),
+      connectOrCreate: z
+        .lazy(
+          () =>
+            StripePaymentInfoCreateOrConnectWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+      connect: z.lazy(() => StripePaymentInfoWhereUniqueInputSchema).optional(),
     })
     .strict();
 
@@ -3052,6 +3608,54 @@ export const VideoImageUpdateManyWithoutGenerationRequestNestedInputSchema: z.Zo
     })
     .strict();
 
+export const StripePaymentInfoUpdateOneWithoutGenerationRequestNestedInputSchema: z.ZodType<Prisma.StripePaymentInfoUpdateOneWithoutGenerationRequestNestedInput> =
+  z
+    .object({
+      create: z
+        .union([
+          z.lazy(
+            () => StripePaymentInfoCreateWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () =>
+              StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema,
+          ),
+        ])
+        .optional(),
+      connectOrCreate: z
+        .lazy(
+          () =>
+            StripePaymentInfoCreateOrConnectWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+      upsert: z
+        .lazy(() => StripePaymentInfoUpsertWithoutGenerationRequestInputSchema)
+        .optional(),
+      disconnect: z
+        .union([z.boolean(), z.lazy(() => StripePaymentInfoWhereInputSchema)])
+        .optional(),
+      delete: z
+        .union([z.boolean(), z.lazy(() => StripePaymentInfoWhereInputSchema)])
+        .optional(),
+      connect: z.lazy(() => StripePaymentInfoWhereUniqueInputSchema).optional(),
+      update: z
+        .union([
+          z.lazy(
+            () =>
+              StripePaymentInfoUpdateToOneWithWhereWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () => StripePaymentInfoUpdateWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () =>
+              StripePaymentInfoUncheckedUpdateWithoutGenerationRequestInputSchema,
+          ),
+        ])
+        .optional(),
+    })
+    .strict();
+
 export const VideoImageUncheckedUpdateManyWithoutGenerationRequestNestedInputSchema: z.ZodType<Prisma.VideoImageUncheckedUpdateManyWithoutGenerationRequestNestedInput> =
   z
     .object({
@@ -3163,6 +3767,54 @@ export const VideoImageUncheckedUpdateManyWithoutGenerationRequestNestedInputSch
     })
     .strict();
 
+export const StripePaymentInfoUncheckedUpdateOneWithoutGenerationRequestNestedInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedUpdateOneWithoutGenerationRequestNestedInput> =
+  z
+    .object({
+      create: z
+        .union([
+          z.lazy(
+            () => StripePaymentInfoCreateWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () =>
+              StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema,
+          ),
+        ])
+        .optional(),
+      connectOrCreate: z
+        .lazy(
+          () =>
+            StripePaymentInfoCreateOrConnectWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+      upsert: z
+        .lazy(() => StripePaymentInfoUpsertWithoutGenerationRequestInputSchema)
+        .optional(),
+      disconnect: z
+        .union([z.boolean(), z.lazy(() => StripePaymentInfoWhereInputSchema)])
+        .optional(),
+      delete: z
+        .union([z.boolean(), z.lazy(() => StripePaymentInfoWhereInputSchema)])
+        .optional(),
+      connect: z.lazy(() => StripePaymentInfoWhereUniqueInputSchema).optional(),
+      update: z
+        .union([
+          z.lazy(
+            () =>
+              StripePaymentInfoUpdateToOneWithWhereWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () => StripePaymentInfoUpdateWithoutGenerationRequestInputSchema,
+          ),
+          z.lazy(
+            () =>
+              StripePaymentInfoUncheckedUpdateWithoutGenerationRequestInputSchema,
+          ),
+        ])
+        .optional(),
+    })
+    .strict();
+
 export const GenerationRequestCreateNestedOneWithoutVideoImagesInputSchema: z.ZodType<Prisma.GenerationRequestCreateNestedOneWithoutVideoImagesInput> =
   z
     .object({
@@ -3219,6 +3871,83 @@ export const GenerationRequestUpdateOneRequiredWithoutVideoImagesNestedInputSche
           z.lazy(() => GenerationRequestUpdateWithoutVideoImagesInputSchema),
           z.lazy(
             () => GenerationRequestUncheckedUpdateWithoutVideoImagesInputSchema,
+          ),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const GenerationRequestCreateNestedOneWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestCreateNestedOneWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      create: z
+        .union([
+          z.lazy(
+            () => GenerationRequestCreateWithoutStripePaymentInfoInputSchema,
+          ),
+          z.lazy(
+            () =>
+              GenerationRequestUncheckedCreateWithoutStripePaymentInfoInputSchema,
+          ),
+        ])
+        .optional(),
+      connectOrCreate: z
+        .lazy(
+          () =>
+            GenerationRequestCreateOrConnectWithoutStripePaymentInfoInputSchema,
+        )
+        .optional(),
+      connect: z.lazy(() => GenerationRequestWhereUniqueInputSchema).optional(),
+    })
+    .strict();
+
+export const IntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.IntFieldUpdateOperationsInput> =
+  z
+    .object({
+      set: z.number().optional(),
+      increment: z.number().optional(),
+      decrement: z.number().optional(),
+      multiply: z.number().optional(),
+      divide: z.number().optional(),
+    })
+    .strict();
+
+export const GenerationRequestUpdateOneRequiredWithoutStripePaymentInfoNestedInputSchema: z.ZodType<Prisma.GenerationRequestUpdateOneRequiredWithoutStripePaymentInfoNestedInput> =
+  z
+    .object({
+      create: z
+        .union([
+          z.lazy(
+            () => GenerationRequestCreateWithoutStripePaymentInfoInputSchema,
+          ),
+          z.lazy(
+            () =>
+              GenerationRequestUncheckedCreateWithoutStripePaymentInfoInputSchema,
+          ),
+        ])
+        .optional(),
+      connectOrCreate: z
+        .lazy(
+          () =>
+            GenerationRequestCreateOrConnectWithoutStripePaymentInfoInputSchema,
+        )
+        .optional(),
+      upsert: z
+        .lazy(() => GenerationRequestUpsertWithoutStripePaymentInfoInputSchema)
+        .optional(),
+      connect: z.lazy(() => GenerationRequestWhereUniqueInputSchema).optional(),
+      update: z
+        .union([
+          z.lazy(
+            () =>
+              GenerationRequestUpdateToOneWithWhereWithoutStripePaymentInfoInputSchema,
+          ),
+          z.lazy(
+            () => GenerationRequestUpdateWithoutStripePaymentInfoInputSchema,
+          ),
+          z.lazy(
+            () =>
+              GenerationRequestUncheckedUpdateWithoutStripePaymentInfoInputSchema,
           ),
         ])
         .optional(),
@@ -3497,25 +4226,6 @@ export const NestedBoolNullableWithAggregatesFilterSchema: z.ZodType<Prisma.Nest
     })
     .strict();
 
-export const NestedJsonNullableFilterSchema: z.ZodType<Prisma.NestedJsonNullableFilter> =
-  z
-    .object({
-      equals: InputJsonValueSchema.optional(),
-      path: z.string().array().optional(),
-      string_contains: z.string().optional(),
-      string_starts_with: z.string().optional(),
-      string_ends_with: z.string().optional(),
-      array_contains: InputJsonValueSchema.optional().nullable(),
-      array_starts_with: InputJsonValueSchema.optional().nullable(),
-      array_ends_with: InputJsonValueSchema.optional().nullable(),
-      lt: InputJsonValueSchema.optional(),
-      lte: InputJsonValueSchema.optional(),
-      gt: InputJsonValueSchema.optional(),
-      gte: InputJsonValueSchema.optional(),
-      not: InputJsonValueSchema.optional(),
-    })
-    .strict();
-
 export const NestedEnumImageTypeFilterSchema: z.ZodType<Prisma.NestedEnumImageTypeFilter> =
   z
     .object({
@@ -3561,6 +4271,42 @@ export const NestedEnumImageTypeWithAggregatesFilterSchema: z.ZodType<Prisma.Nes
     })
     .strict();
 
+export const NestedIntWithAggregatesFilterSchema: z.ZodType<Prisma.NestedIntWithAggregatesFilter> =
+  z
+    .object({
+      equals: z.number().optional(),
+      in: z.number().array().optional(),
+      notIn: z.number().array().optional(),
+      lt: z.number().optional(),
+      lte: z.number().optional(),
+      gt: z.number().optional(),
+      gte: z.number().optional(),
+      not: z
+        .union([z.number(), z.lazy(() => NestedIntWithAggregatesFilterSchema)])
+        .optional(),
+      _count: z.lazy(() => NestedIntFilterSchema).optional(),
+      _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+      _sum: z.lazy(() => NestedIntFilterSchema).optional(),
+      _min: z.lazy(() => NestedIntFilterSchema).optional(),
+      _max: z.lazy(() => NestedIntFilterSchema).optional(),
+    })
+    .strict();
+
+export const NestedFloatFilterSchema: z.ZodType<Prisma.NestedFloatFilter> = z
+  .object({
+    equals: z.number().optional(),
+    in: z.number().array().optional(),
+    notIn: z.number().array().optional(),
+    lt: z.number().optional(),
+    lte: z.number().optional(),
+    gt: z.number().optional(),
+    gte: z.number().optional(),
+    not: z
+      .union([z.number(), z.lazy(() => NestedFloatFilterSchema)])
+      .optional(),
+  })
+  .strict();
+
 export const VideoImageCreateWithoutGenerationRequestInputSchema: z.ZodType<Prisma.VideoImageCreateWithoutGenerationRequestInput> =
   z
     .object({
@@ -3604,6 +4350,48 @@ export const VideoImageCreateManyGenerationRequestInputEnvelopeSchema: z.ZodType
         z.lazy(() => VideoImageCreateManyGenerationRequestInputSchema).array(),
       ]),
       skipDuplicates: z.boolean().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoCreateWithoutGenerationRequestInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      stripePaymentId: z.string(),
+      amount: z.number().int(),
+      currency: z.string(),
+      status: z.string(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedCreateWithoutGenerationRequestInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      stripePaymentId: z.string(),
+      amount: z.number().int(),
+      currency: z.string(),
+      status: z.string(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateOrConnectWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoCreateOrConnectWithoutGenerationRequestInput> =
+  z
+    .object({
+      where: z.lazy(() => StripePaymentInfoWhereUniqueInputSchema),
+      create: z.union([
+        z.lazy(
+          () => StripePaymentInfoCreateWithoutGenerationRequestInputSchema,
+        ),
+        z.lazy(
+          () =>
+            StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema,
+        ),
+      ]),
     })
     .strict();
 
@@ -3694,6 +4482,143 @@ export const VideoImageScalarWhereInputSchema: z.ZodType<Prisma.VideoImageScalar
     })
     .strict();
 
+export const StripePaymentInfoUpsertWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoUpsertWithoutGenerationRequestInput> =
+  z
+    .object({
+      update: z.union([
+        z.lazy(
+          () => StripePaymentInfoUpdateWithoutGenerationRequestInputSchema,
+        ),
+        z.lazy(
+          () =>
+            StripePaymentInfoUncheckedUpdateWithoutGenerationRequestInputSchema,
+        ),
+      ]),
+      create: z.union([
+        z.lazy(
+          () => StripePaymentInfoCreateWithoutGenerationRequestInputSchema,
+        ),
+        z.lazy(
+          () =>
+            StripePaymentInfoUncheckedCreateWithoutGenerationRequestInputSchema,
+        ),
+      ]),
+      where: z.lazy(() => StripePaymentInfoWhereInputSchema).optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUpdateToOneWithWhereWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoUpdateToOneWithWhereWithoutGenerationRequestInput> =
+  z
+    .object({
+      where: z.lazy(() => StripePaymentInfoWhereInputSchema).optional(),
+      data: z.union([
+        z.lazy(
+          () => StripePaymentInfoUpdateWithoutGenerationRequestInputSchema,
+        ),
+        z.lazy(
+          () =>
+            StripePaymentInfoUncheckedUpdateWithoutGenerationRequestInputSchema,
+        ),
+      ]),
+    })
+    .strict();
+
+export const StripePaymentInfoUpdateWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoUpdateWithoutGenerationRequestInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      stripePaymentId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      amount: z
+        .union([
+          z.number().int(),
+          z.lazy(() => IntFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      currency: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoUncheckedUpdateWithoutGenerationRequestInputSchema: z.ZodType<Prisma.StripePaymentInfoUncheckedUpdateWithoutGenerationRequestInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      stripePaymentId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      amount: z
+        .union([
+          z.number().int(),
+          z.lazy(() => IntFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      currency: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+    })
+    .strict();
+
 export const GenerationRequestCreateWithoutVideoImagesInputSchema: z.ZodType<Prisma.GenerationRequestCreateWithoutVideoImagesInput> =
   z
     .object({
@@ -3714,14 +4639,14 @@ export const GenerationRequestCreateWithoutVideoImagesInputSchema: z.ZodType<Pri
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoCreateNestedOneWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
     })
     .strict();
 
@@ -3745,14 +4670,14 @@ export const GenerationRequestUncheckedCreateWithoutVideoImagesInputSchema: z.Zo
       localVideoPath: z.string().optional().nullable(),
       finalVideoPath: z.string().optional().nullable(),
       recipientPhoneNumber: z.string().optional().nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z.coerce.date().optional(),
       updatedAt: z.coerce.date().optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoUncheckedCreateNestedOneWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
     })
     .strict();
 
@@ -3916,12 +4841,6 @@ export const GenerationRequestUpdateWithoutVideoImagesInputSchema: z.ZodType<Pri
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -3933,6 +4852,12 @@ export const GenerationRequestUpdateWithoutVideoImagesInputSchema: z.ZodType<Pri
           z.coerce.date(),
           z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
         ])
+        .optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoUpdateOneWithoutGenerationRequestNestedInputSchema,
+        )
         .optional(),
     })
     .strict();
@@ -4052,12 +4977,6 @@ export const GenerationRequestUncheckedUpdateWithoutVideoImagesInputSchema: z.Zo
         ])
         .optional()
         .nullable(),
-      videoProps: z
-        .union([
-          z.lazy(() => NullableJsonNullValueInputSchema),
-          InputJsonValueSchema,
-        ])
-        .optional(),
       createdAt: z
         .union([
           z.coerce.date(),
@@ -4069,6 +4988,401 @@ export const GenerationRequestUncheckedUpdateWithoutVideoImagesInputSchema: z.Zo
           z.coerce.date(),
           z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
         ])
+        .optional(),
+      stripePaymentInfo: z
+        .lazy(
+          () =>
+            StripePaymentInfoUncheckedUpdateOneWithoutGenerationRequestNestedInputSchema,
+        )
+        .optional(),
+    })
+    .strict();
+
+export const GenerationRequestCreateWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestCreateWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      userId: z.string(),
+      occasion: z.string(),
+      recipientName: z.string(),
+      prompt: z.string(),
+      senderName: z.string(),
+      status: z.lazy(() => RequestStatusSchema).optional(),
+      sunoSongId: z.string().optional().nullable(),
+      sunoAudioUrl: z.string().optional().nullable(),
+      srt: z.string().optional().nullable(),
+      isRTL: z.boolean().optional().nullable(),
+      language: z.string().optional().nullable(),
+      duration: z.number().int().optional().nullable(),
+      sunoLyrics: z.string().optional().nullable(),
+      localVideoPath: z.string().optional().nullable(),
+      finalVideoPath: z.string().optional().nullable(),
+      recipientPhoneNumber: z.string().optional().nullable(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+      videoImages: z
+        .lazy(
+          () => VideoImageCreateNestedManyWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+    })
+    .strict();
+
+export const GenerationRequestUncheckedCreateWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestUncheckedCreateWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      id: z.string().cuid().optional(),
+      userId: z.string(),
+      occasion: z.string(),
+      recipientName: z.string(),
+      prompt: z.string(),
+      senderName: z.string(),
+      status: z.lazy(() => RequestStatusSchema).optional(),
+      sunoSongId: z.string().optional().nullable(),
+      sunoAudioUrl: z.string().optional().nullable(),
+      srt: z.string().optional().nullable(),
+      isRTL: z.boolean().optional().nullable(),
+      language: z.string().optional().nullable(),
+      duration: z.number().int().optional().nullable(),
+      sunoLyrics: z.string().optional().nullable(),
+      localVideoPath: z.string().optional().nullable(),
+      finalVideoPath: z.string().optional().nullable(),
+      recipientPhoneNumber: z.string().optional().nullable(),
+      createdAt: z.coerce.date().optional(),
+      updatedAt: z.coerce.date().optional(),
+      videoImages: z
+        .lazy(
+          () =>
+            VideoImageUncheckedCreateNestedManyWithoutGenerationRequestInputSchema,
+        )
+        .optional(),
+    })
+    .strict();
+
+export const GenerationRequestCreateOrConnectWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestCreateOrConnectWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      where: z.lazy(() => GenerationRequestWhereUniqueInputSchema),
+      create: z.union([
+        z.lazy(
+          () => GenerationRequestCreateWithoutStripePaymentInfoInputSchema,
+        ),
+        z.lazy(
+          () =>
+            GenerationRequestUncheckedCreateWithoutStripePaymentInfoInputSchema,
+        ),
+      ]),
+    })
+    .strict();
+
+export const GenerationRequestUpsertWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestUpsertWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      update: z.union([
+        z.lazy(
+          () => GenerationRequestUpdateWithoutStripePaymentInfoInputSchema,
+        ),
+        z.lazy(
+          () =>
+            GenerationRequestUncheckedUpdateWithoutStripePaymentInfoInputSchema,
+        ),
+      ]),
+      create: z.union([
+        z.lazy(
+          () => GenerationRequestCreateWithoutStripePaymentInfoInputSchema,
+        ),
+        z.lazy(
+          () =>
+            GenerationRequestUncheckedCreateWithoutStripePaymentInfoInputSchema,
+        ),
+      ]),
+      where: z.lazy(() => GenerationRequestWhereInputSchema).optional(),
+    })
+    .strict();
+
+export const GenerationRequestUpdateToOneWithWhereWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestUpdateToOneWithWhereWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      where: z.lazy(() => GenerationRequestWhereInputSchema).optional(),
+      data: z.union([
+        z.lazy(
+          () => GenerationRequestUpdateWithoutStripePaymentInfoInputSchema,
+        ),
+        z.lazy(
+          () =>
+            GenerationRequestUncheckedUpdateWithoutStripePaymentInfoInputSchema,
+        ),
+      ]),
+    })
+    .strict();
+
+export const GenerationRequestUpdateWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestUpdateWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      userId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      occasion: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      recipientName: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      prompt: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      senderName: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.lazy(() => RequestStatusSchema),
+          z.lazy(() => EnumRequestStatusFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      sunoSongId: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      sunoAudioUrl: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      srt: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      isRTL: z
+        .union([
+          z.boolean(),
+          z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      language: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      duration: z
+        .union([
+          z.number().int(),
+          z.lazy(() => NullableIntFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      sunoLyrics: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      localVideoPath: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      finalVideoPath: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      recipientPhoneNumber: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      videoImages: z
+        .lazy(
+          () => VideoImageUpdateManyWithoutGenerationRequestNestedInputSchema,
+        )
+        .optional(),
+    })
+    .strict();
+
+export const GenerationRequestUncheckedUpdateWithoutStripePaymentInfoInputSchema: z.ZodType<Prisma.GenerationRequestUncheckedUpdateWithoutStripePaymentInfoInput> =
+  z
+    .object({
+      id: z
+        .union([
+          z.string().cuid(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      userId: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      occasion: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      recipientName: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      prompt: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      senderName: z
+        .union([
+          z.string(),
+          z.lazy(() => StringFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      status: z
+        .union([
+          z.lazy(() => RequestStatusSchema),
+          z.lazy(() => EnumRequestStatusFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      sunoSongId: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      sunoAudioUrl: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      srt: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      isRTL: z
+        .union([
+          z.boolean(),
+          z.lazy(() => NullableBoolFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      language: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      duration: z
+        .union([
+          z.number().int(),
+          z.lazy(() => NullableIntFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      sunoLyrics: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      localVideoPath: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      finalVideoPath: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      recipientPhoneNumber: z
+        .union([
+          z.string(),
+          z.lazy(() => NullableStringFieldUpdateOperationsInputSchema),
+        ])
+        .optional()
+        .nullable(),
+      createdAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      updatedAt: z
+        .union([
+          z.coerce.date(),
+          z.lazy(() => DateTimeFieldUpdateOperationsInputSchema),
+        ])
+        .optional(),
+      videoImages: z
+        .lazy(
+          () =>
+            VideoImageUncheckedUpdateManyWithoutGenerationRequestNestedInputSchema,
+        )
         .optional(),
     })
     .strict();
@@ -4546,6 +5860,129 @@ export const VideoImageFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.VideoImageF
     })
     .strict();
 
+export const StripePaymentInfoFindFirstArgsSchema: z.ZodType<Prisma.StripePaymentInfoFindFirstArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereInputSchema.optional(),
+      orderBy: z
+        .union([
+          StripePaymentInfoOrderByWithRelationInputSchema.array(),
+          StripePaymentInfoOrderByWithRelationInputSchema,
+        ])
+        .optional(),
+      cursor: StripePaymentInfoWhereUniqueInputSchema.optional(),
+      take: z.number().optional(),
+      skip: z.number().optional(),
+      distinct: z
+        .union([
+          StripePaymentInfoScalarFieldEnumSchema,
+          StripePaymentInfoScalarFieldEnumSchema.array(),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoFindFirstOrThrowArgsSchema: z.ZodType<Prisma.StripePaymentInfoFindFirstOrThrowArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereInputSchema.optional(),
+      orderBy: z
+        .union([
+          StripePaymentInfoOrderByWithRelationInputSchema.array(),
+          StripePaymentInfoOrderByWithRelationInputSchema,
+        ])
+        .optional(),
+      cursor: StripePaymentInfoWhereUniqueInputSchema.optional(),
+      take: z.number().optional(),
+      skip: z.number().optional(),
+      distinct: z
+        .union([
+          StripePaymentInfoScalarFieldEnumSchema,
+          StripePaymentInfoScalarFieldEnumSchema.array(),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoFindManyArgsSchema: z.ZodType<Prisma.StripePaymentInfoFindManyArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereInputSchema.optional(),
+      orderBy: z
+        .union([
+          StripePaymentInfoOrderByWithRelationInputSchema.array(),
+          StripePaymentInfoOrderByWithRelationInputSchema,
+        ])
+        .optional(),
+      cursor: StripePaymentInfoWhereUniqueInputSchema.optional(),
+      take: z.number().optional(),
+      skip: z.number().optional(),
+      distinct: z
+        .union([
+          StripePaymentInfoScalarFieldEnumSchema,
+          StripePaymentInfoScalarFieldEnumSchema.array(),
+        ])
+        .optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoAggregateArgsSchema: z.ZodType<Prisma.StripePaymentInfoAggregateArgs> =
+  z
+    .object({
+      where: StripePaymentInfoWhereInputSchema.optional(),
+      orderBy: z
+        .union([
+          StripePaymentInfoOrderByWithRelationInputSchema.array(),
+          StripePaymentInfoOrderByWithRelationInputSchema,
+        ])
+        .optional(),
+      cursor: StripePaymentInfoWhereUniqueInputSchema.optional(),
+      take: z.number().optional(),
+      skip: z.number().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoGroupByArgsSchema: z.ZodType<Prisma.StripePaymentInfoGroupByArgs> =
+  z
+    .object({
+      where: StripePaymentInfoWhereInputSchema.optional(),
+      orderBy: z
+        .union([
+          StripePaymentInfoOrderByWithAggregationInputSchema.array(),
+          StripePaymentInfoOrderByWithAggregationInputSchema,
+        ])
+        .optional(),
+      by: StripePaymentInfoScalarFieldEnumSchema.array(),
+      having: StripePaymentInfoScalarWhereWithAggregatesInputSchema.optional(),
+      take: z.number().optional(),
+      skip: z.number().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoFindUniqueArgsSchema: z.ZodType<Prisma.StripePaymentInfoFindUniqueArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereUniqueInputSchema,
+    })
+    .strict();
+
+export const StripePaymentInfoFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.StripePaymentInfoFindUniqueOrThrowArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereUniqueInputSchema,
+    })
+    .strict();
+
 export const BookCreateArgsSchema: z.ZodType<Prisma.BookCreateArgs> = z
   .object({
     select: BookSelectSchema.optional(),
@@ -4793,5 +6230,96 @@ export const VideoImageDeleteManyArgsSchema: z.ZodType<Prisma.VideoImageDeleteMa
   z
     .object({
       where: VideoImageWhereInputSchema.optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateArgsSchema: z.ZodType<Prisma.StripePaymentInfoCreateArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      data: z.union([
+        StripePaymentInfoCreateInputSchema,
+        StripePaymentInfoUncheckedCreateInputSchema,
+      ]),
+    })
+    .strict();
+
+export const StripePaymentInfoUpsertArgsSchema: z.ZodType<Prisma.StripePaymentInfoUpsertArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereUniqueInputSchema,
+      create: z.union([
+        StripePaymentInfoCreateInputSchema,
+        StripePaymentInfoUncheckedCreateInputSchema,
+      ]),
+      update: z.union([
+        StripePaymentInfoUpdateInputSchema,
+        StripePaymentInfoUncheckedUpdateInputSchema,
+      ]),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateManyArgsSchema: z.ZodType<Prisma.StripePaymentInfoCreateManyArgs> =
+  z
+    .object({
+      data: z.union([
+        StripePaymentInfoCreateManyInputSchema,
+        StripePaymentInfoCreateManyInputSchema.array(),
+      ]),
+      skipDuplicates: z.boolean().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoCreateManyAndReturnArgsSchema: z.ZodType<Prisma.StripePaymentInfoCreateManyAndReturnArgs> =
+  z
+    .object({
+      data: z.union([
+        StripePaymentInfoCreateManyInputSchema,
+        StripePaymentInfoCreateManyInputSchema.array(),
+      ]),
+      skipDuplicates: z.boolean().optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoDeleteArgsSchema: z.ZodType<Prisma.StripePaymentInfoDeleteArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      where: StripePaymentInfoWhereUniqueInputSchema,
+    })
+    .strict();
+
+export const StripePaymentInfoUpdateArgsSchema: z.ZodType<Prisma.StripePaymentInfoUpdateArgs> =
+  z
+    .object({
+      select: StripePaymentInfoSelectSchema.optional(),
+      include: StripePaymentInfoIncludeSchema.optional(),
+      data: z.union([
+        StripePaymentInfoUpdateInputSchema,
+        StripePaymentInfoUncheckedUpdateInputSchema,
+      ]),
+      where: StripePaymentInfoWhereUniqueInputSchema,
+    })
+    .strict();
+
+export const StripePaymentInfoUpdateManyArgsSchema: z.ZodType<Prisma.StripePaymentInfoUpdateManyArgs> =
+  z
+    .object({
+      data: z.union([
+        StripePaymentInfoUpdateManyMutationInputSchema,
+        StripePaymentInfoUncheckedUpdateManyInputSchema,
+      ]),
+      where: StripePaymentInfoWhereInputSchema.optional(),
+    })
+    .strict();
+
+export const StripePaymentInfoDeleteManyArgsSchema: z.ZodType<Prisma.StripePaymentInfoDeleteManyArgs> =
+  z
+    .object({
+      where: StripePaymentInfoWhereInputSchema.optional(),
     })
     .strict();

@@ -15,7 +15,9 @@ import {toast} from 'sonner';
 export const AIPromptStep = (): React.ReactNode => {
 	const {mutate: updateGenerationRequest} =
 		trpc.generationRequests.update.useMutation({
-			onError: (err) => toast.error(JSON.stringify(err)),
+			onError: (err) => {
+				toast.error(JSON.stringify(err));
+			},
 		});
 
 	const {
